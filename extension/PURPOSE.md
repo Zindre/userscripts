@@ -6,7 +6,7 @@ News should tell you what happened. Many news sites are built to do something el
 
 1. **The news, straight.** A headline should say what the article is about. When a teaser is bait, we show the article's own headline and lead instead. The publisher's real headline and lead are already in the page metadata.
 2. **No deliberate distraction.** Ads, autoplay video, pop-ups, animation and "you won't believe" hooks are designed to pull attention away from what you came for. For many people, including autistic people and others who are sensitive to sensory and attention load, not being distracted on purpose is a matter of access, not taste. In plain view none of it reaches the screen.
-3. **The reader decides.** Every site can be read at the level you choose, from untouched to fully plain. You choose which sections and topics you see and in what order. That includes leaving out football, reality shows, or a broadcaster's promotion of its own programmes.
+3. **The reader decides.** Every site can be read at the level you choose, from untouched to fully plain. You choose which sections and topics you see and in what order. That includes leaving out football, reality shows, or a broadcaster's promotion of its own programmes. The front page's own sense of importance is kept, but as a quiet mark rather than shouting type, and you can sort by it or ignore it.
 4. **Journalism should be paid for.** We never bypass paywalls. Paid articles are marked and open on the publisher's site as usual. Publishers deserve income, but it is up to them to find models that don't depend on distracting ads and clickbait. We don't think readers owe them their attention on those terms.
 5. **Transparent.** Every rewritten headline keeps the original one step away: a tooltip, the Show original headlines switch (Alt+Shift+U), or Vanilla level. Nothing is invented. Text comes from the publisher's own page.
 6. **Private.** No accounts, no tracking, no servers of our own. Settings and the article cache stay in your browser. The only requests go to the news sites themselves, for pages you could open anyway.
@@ -31,7 +31,7 @@ Levels are set per site, with a default for all others. Article pages are left a
 
 ## Direction
 
-- **Topic filters:** leave out subjects across sections, such as football, reality TV, celebrity, or a channel's own shows and sports rights. Today you can hide whole sections; topics are next.
+- **Topic filters:** Sport, Reality TV, Celebrities, Royals and Crime can already be switched off for all sites. Next: topics of your own (a keyword or a show), and a broadcaster's promotion of its own programmes and sports rights.
 - **Calmer by default:** no images in plain view, or quiet ones only if the reader asks. Respect "reduce motion" everywhere.
 - **Several sites in one plain view:** your chosen sections from the sites you read, in one place, without the noise.
 - **Summaries on the device:** when the lead isn't enough, a short neutral summary made by the browser's or phone's own on-device model, never sent to a server.

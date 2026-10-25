@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.12.0
+// @version      1.13.0
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -288,7 +288,7 @@
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const q = sel => doc.querySelector(sel);
     const meta = (sel) => norm(q(sel)?.getAttribute('content'));
-    let ldTitle = '', ldDesc = '', ldImage = '';
+    let ldTitle = '', ldDesc = '', ldImage = '', ldSection = '', ldKeywords = '';
     const imageOf = v => typeof v === 'string' ? v : Array.isArray(v) ? imageOf(v[0]) : (v && (v.url || v.contentUrl)) || '';
     for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
       try {
@@ -297,6 +297,7 @@
         for (const it of items) {
           if (!it || !/Article|NewsArticle|Report/i.test(String(it['@type']))) continue;
           ldTitle = ldTitle || norm(it.headline); ldDesc = ldDesc || norm(it.description); ldImage = ldImage || imageOf(it.image);
+          ldSection = ldSection || [].concat(it.articleSection || []).join(', '); ldKeywords = ldKeywords || [].concat(it.keywords || []).join(', ');
         }
       } catch {}
     }
@@ -310,8 +311,12 @@
     const self = meta('meta[property="og:url"]') || norm(q('link[rel="canonical"]')?.getAttribute('href'));
     let image = meta('meta[property="og:image"]') || meta('meta[name="twitter:image"]') || ldImage;
     try { image = image ? new URL(image, url).href : ''; } catch { image = ''; }
+    // The publisher's own labels, used by the topic filter: section and keywords.
+    const sec = meta('meta[property="article:section"]') || norm(ldSection);
+    const tags = [...doc.querySelectorAll('meta[property="article:tag"]')].map(m => norm(m.getAttribute('content')))
+      .concat((meta('meta[name="keywords"]') || ldKeywords).split(',').map(norm)).filter(Boolean).slice(0, 20);
     // og:title often carries a section or site suffix (Bild: "… | News").
-    return { title: norm(title).replace(/\s+\|\s+[^|]{2,25}$/, ''), desc: norm(desc), self, image };
+    return { title: norm(title).replace(/\s+\|\s+[^|]{2,25}$/, ''), desc: norm(desc), self, image, sec, tags };
   }
 
   // Site-wide boilerplate ("Fædrelandsvennen - Få siste nytt fra …") shows up as the title or
@@ -366,7 +371,7 @@
       if (!site && finalUrl) { try { if (!genericArticlePath(new URL(finalUrl).pathname)) return null; } catch {} } // redirected to login/landing
       const m = extractMeta(r.responseText, url);
       if (m.self && domainOf(m.self) && domainOf(m.self) !== domainOf(url)) return null;
-      cache[key] = { title: m.title, desc: m.desc, image: m.image, t: Date.now() }; cacheDirty = true; saveCache();
+      cache[key] = { title: m.title, desc: m.desc, image: m.image, sec: m.sec, tags: m.tags, t: Date.now() }; cacheDirty = true; saveCache();
       return cache[key];
     } catch (e) {
       cache[key] = { title: '', desc: '', t: Date.now(), err: 1 }; cacheDirty = true; saveCache();
@@ -614,6 +619,8 @@
             if (tip && tip.toLowerCase() !== orig.toLowerCase()) { job.el.title = tip; job.el.classList.add('cb-inline'); }
             return;
           }
+          const topic = job.a && mutedTopicOf(job.url, orig, meta);
+          if (topic) { muteTeaser(job.a, topic); return; }
           jobs.set(job.el, { orig, url: job.url, key: job.url.replace(/[?#].*$/, '') });
           const { text, lead } = choose(orig, cleanMeta(meta, job.url));
           apply(job.el, orig, text, lead);
@@ -643,7 +650,7 @@
   function scanOne(a) {
     {
       seen.add(a);
-      if (skipLink(a)) return;
+      if (skipLink(a) || a.closest('.cb-related-hidden')) return;
       const url = isArticleLink(a);
       if (!url) return;
       const el = headlineEl(a);
@@ -656,10 +663,58 @@
         if (CFG.inlineLinks === 'tooltip' && CFG.fetch) { el.dataset.cbInline = '1'; queue.push({ el, url, orig, inline: true }); io.observe(el); }
         return;
       }
+      const topic = mutedTopicOf(url, orig);
+      if (topic) { muteTeaser(a, topic); return; } // never fetched: the reader doesn't want it
       // instant local pass, then queue the fetch
       apply(el, orig, applyRules(orig));
-      if (CFG.fetch) { queue.push({ el, url, orig: textOf(el) }); io.observe(el); }
+      if (CFG.fetch) { queue.push({ el, a, url, orig: textOf(el) }); io.observe(el); }
     }
+  }
+
+  // ───────────────────────────── Topics the reader never wants ─────────────────────────────
+  // Chosen once for all sites (mutedTopics). An article belongs to a topic when its URL has the
+  // topic's section (/sport/, /rampelys/), when the publisher's own section or keywords say so
+  // (article:section, JSON-LD articleSection/keywords), or for sport and reality when the title
+  // names a league or a show. Plain view leaves these articles out; on the site itself their
+  // teasers are faded out and made inert, so the layout stays and the bait stops pulling.
+  const TOPICS = {
+    sport: { label: 'Sport',
+      path: /^(?:sport|sporten|sports|sportbladet|sportmix|fotball|football|soccer|fussball|fußball|eliteserien|premier-league|champions-league|bundesliga|vintersport|alpint|langrenn|skiskyting|motorsport|formel-1|tennis|golf|handball|haandball|ishockey|hockey|nfl|nba|nhl|mlb|cricket|rugby|boksing|boxing|mma|ufc|sykling|cycling|friidrett|athletics|esport|tv-sporten)$/,
+      label_re: /\b(?:sport\w*|fotball|football|soccer|fußball|fussball|tennis|golf|ishockey|hockey|langrenn|skiskyting|alpint|formel 1|motorsport|sykling|cycling|boksing|boxing|håndball|handball|friidrett|athletics)\b/i,
+      title: /\b(?:eliteserien|obos-ligaen|toppserien|premier league|champions league|europa league|conference league|bundesliga|la liga|serie a|allsvenskan|superligaen|ballon d'or|skiskyting|langrenn)\b/i },
+    reality: { label: 'Reality TV',
+      path: /^(?:reality|realityserier|skal-vi-danse|farmen|farmen-kjendis|paradise-hotel|love-island|big-brother|kompani-lauritzen|ex-on-the-beach|bachelor|bachelorette|71-grader-nord|hver-gang-vi-motes|the-voice|idol|masterchef|lets-dance|dschungelcamp|robinson)$/,
+      label_re: /\b(?:reality|realityserie\w*|skal vi danse|farmen|paradise hotel|love island)\b/i,
+      title: /\b(?:skal vi danse|farmen|paradise hotel|love island|big brother|kompani lauritzen|ex on the beach|bachelor(?:ette)?|71° nord|hver gang vi møtes|the voice|masterchef|let's dance|strictly come dancing|i'm a celebrity|dschungelcamp|bauer sucht frau|germany's next topmodel|robinsonekspedisjonen|robinson|survivor|farmen kjendis)\b/i },
+    celebrity: { label: 'Celebrities',
+      path: /^(?:kjendis|kjendiser|rampelys|noje|nöje|underholdning|showbiz|celebrity|celebrities|unterhaltung|leute|promis?|stars|danske-kendte|kendte|tv-and-showbiz|tvshowbiz)$/,
+      label_re: /\b(?:kjendis\w*|celebrit\w*|showbiz|underholdning|nöje|unterhaltung|promi\w*|leute|kendte)\b/i },
+    royals: { label: 'Royals',
+      path: /^(?:kongelige|kongehuset|royal|royals|royal-family|royale|kungligt|kungahuset|adel)$/,
+      label_re: /\b(?:kongelig\w*|kongehus\w*|royal\w*|kunglig\w*|kungahus\w*)\b/i },
+    crime: { label: 'Crime',
+      path: /^(?:krim|crime|true-crime|kriminalitet|krimi|blaulicht|brott)$/,
+      label_re: /\b(?:krim|crime|true crime|kriminalitet|blaulicht|brott)\b/i },
+  };
+  let muted = new Set();
+  function mutedTopicOf(url, teaser, meta) {
+    if (!muted.size) return '';
+    let segs = [];
+    try { segs = new URL(url).pathname.toLowerCase().split('/').filter(Boolean).slice(0, -1); } catch {}
+    const labels = [meta?.sec, ...(meta?.tags || [])].filter(Boolean).join(' | ');
+    const words = [teaser, meta?.title].filter(Boolean).join(' | ');
+    for (const id of muted) {
+      const t = TOPICS[id];
+      if (t && (segs.some(sg => t.path.test(sg)) || (labels && t.label_re.test(labels)) || (t.title && t.title.test(words)))) return id;
+    }
+    return '';
+  }
+  // Fade a teaser of a muted topic: its own <article> when that holds just this teaser, else the link.
+  function muteTeaser(a, topic) {
+    const art = a.closest('article');
+    const card = art && art.querySelectorAll('a[href]').length <= 4 ? art : a;
+    card.classList.add('cb-muted'); card.dataset.cbTopic = topic;
+    card.inert = true; card.setAttribute('aria-hidden', 'true');
   }
 
   // ───────────────────────────── Reading levels ─────────────────────────────
@@ -690,8 +745,8 @@
   // level). Paywalls stay: paid articles are marked and open on the site as usual.
   const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
   const T = NB
-    ? { latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned' }
-    : { latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down' };
+    ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned' }
+    : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down' };
   const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
   // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
   const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -765,6 +820,28 @@
     return '';
   }
 
+  // How loudly the front page presents a teaser: the largest font size in its headline, the area of
+  // its card and how high up it sits. Measured before plain view hides the page.
+  function prominence(a, el) {
+    let fs = 0;
+    for (const x of [el, ...el.querySelectorAll('*')].slice(0, 30)) fs = Math.max(fs, parseFloat(getComputedStyle(x).fontSize) || 0);
+    const r = (a.closest('article') || a).getBoundingClientRect();
+    return { fs, area: r.width * r.height, y: r.top + scrollY };
+  }
+  // Score = headline size (half), how high up (35 %) and card size (15 %; feature boxes are large but
+  // not necessarily important), each relative to the page.
+  // Tier 3 = the top ~8 % (top stories), tier 2 = the next ~22 %, tier 1 = the rest.
+  function rankItems(items) {
+    const median = xs => { const v = xs.filter(x => x > 0).sort((a, b) => a - b); return v[Math.floor(v.length / 2)] || 1; };
+    const mFs = median(items.map(it => it.m.fs)), mArea = median(items.map(it => it.m.area));
+    [...items].sort((a, b) => a.m.y - b.m.y).forEach((it, i) => { it.posRank = i; });
+    for (const it of items)
+      it.score = 0.5 * ((it.m.fs || mFs) / mFs) + 0.15 * Math.sqrt((it.m.area || mArea) / mArea) + 0.35 * (1 - it.posRank / items.length);
+    const top = Math.max(1, Math.round(items.length * 0.08)), high = Math.round(items.length * 0.3);
+    [...items].sort((a, b) => b.score - a.score).forEach((it, i) => { it.tier = i < top ? 3 : i < high ? 2 : 1; });
+    return items;
+  }
+
   function frontPageItems() {
     const items = new Map();
     for (const a of document.querySelectorAll('a[href]')) {
@@ -772,10 +849,11 @@
       const url = isArticleLink(a); if (!url || isAd(a) || AD_SECTION.test(sectionOf(url))) continue;
       const key = url.replace(/[?#].*$/, ''), el = headlineEl(a), teaser = el ? textOf(el) : '';
       const it = items.get(key);
-      if (it) { it.teaser ||= teaser; it.paid ||= isPaid(a); it.img ||= teaserImage(a); }
-      else items.set(key, { url, key, teaser, paid: isPaid(a), section: sectionOf(url), img: teaserImage(a) });
+      const m = el ? prominence(a, el) : { fs: 0, area: 0, y: Infinity };
+      if (it) { it.teaser ||= teaser; it.paid ||= isPaid(a); it.img ||= teaserImage(a); if (m.fs * Math.sqrt(m.area) > it.m.fs * Math.sqrt(it.m.area)) it.m = { ...m, y: Math.min(m.y, it.m.y) }; }
+      else items.set(key, { url, key, teaser, paid: isPaid(a), section: sectionOf(url), img: teaserImage(a), m });
     }
-    return [...items.values()].filter(it => it.teaser.length >= CFG.minTeaserLen && !isGame(it.url, it.teaser));
+    return [...items.values()].filter(it => it.teaser.length >= CFG.minTeaserLen && !isGame(it.url, it.teaser) && !mutedTopicOf(it.url, it.teaser));
   }
 
   async function feedItems() {
@@ -790,7 +868,7 @@
         const url = get('link')?.getAttribute('href') || norm(get('link')?.textContent);
         const feedImg = get('enclosure')?.getAttribute('url') || it.getElementsByTagNameNS('*', 'thumbnail')[0]?.getAttribute('url') || it.getElementsByTagNameNS('*', 'content')[0]?.getAttribute('url') || norm(get('image')?.textContent);
         return { url, key: (url || '').replace(/[?#].*$/, ''), teaser: text(get('title')?.textContent), desc: text((get('description') || get('summary'))?.textContent), img: /^https?:/.test(feedImg || '') ? feedImg : '', section: 'latest' };
-      }).filter(it => { try { return it.teaser && registrable(new URL(it.url).hostname) === registrable(host) && !isGame(it.url, it.teaser); } catch { return false; } });
+      }).filter(it => { try { return it.teaser && registrable(new URL(it.url).hostname) === registrable(host) && !isGame(it.url, it.teaser) && !mutedTopicOf(it.url, it.teaser); } catch { return false; } });
     } catch { return []; }
   }
 
@@ -811,7 +889,11 @@
     section{padding-top:20px;scroll-margin-top:110px}
     h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 2px}
     ol{list-style:none;margin:0;padding:0}
-    li{padding:12px 0;border-bottom:1px solid var(--line)}
+    li{padding:12px 0 12px 12px;border-bottom:1px solid var(--line)}
+    li[data-tier="3"]{box-shadow:inset 3px 0 0 var(--accent)}
+    li[data-tier="2"]{box-shadow:inset 3px 0 0 var(--muted)}
+    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+    .sec-label{display:inline-block;margin-left:6px;font-size:12px;color:var(--muted);vertical-align:2px}
     li a{color:var(--fg);text-decoration:none;font-weight:600;font-size:18px;line-height:1.3}
     li a:visited{color:var(--muted)}
     li a:hover{text-decoration:underline}
@@ -832,11 +914,123 @@
     .sheet li button{padding:2px 9px}
     .sheet > button{width:100%;padding:8px;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}`;
 
+  // ───────────────────────────── Calm article pages ─────────────────────────────
+  // On article pages at the plain levels, blocks of teasers for other articles ("Les også",
+  // "Mer fra", related, recommended) are hidden. Their articles are offered once after the article,
+  // collapsed, as a plain list; leads are fetched only when the reader opens it. A teaser block is
+  // the largest ancestor of a teaser link that holds no prose and no <h1>, so the article itself
+  // and links in its running text are never touched.
+  const hasProse = el => [...el.querySelectorAll('p')].some(p => norm(p.textContent).length > 150);
+  function articleBodyEl() {
+    let best = null, most = 0;
+    for (const el of document.querySelectorAll('article, main, [itemprop="articleBody"], [class*="article-body" i], [class*="articlebody" i]')) {
+      const n = [...el.querySelectorAll('p')].filter(p => norm(p.textContent).length > 80).length;
+      if (n > most) { most = n; best = el; }
+    }
+    return most >= 3 ? best : null;
+  }
+  const RELATED_CSS = `
+    :host{all:initial;display:block;margin:24px 0;color:var(--fg);font:16px/1.45 -apple-system,system-ui,sans-serif;
+      --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a}
+    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+    *{box-sizing:border-box;animation:none!important;transition:none!important}
+    details{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+    summary{cursor:pointer;color:var(--muted);font-weight:600}
+    summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    ol{list-style:none;margin:8px 0 0;padding:0}
+    li{padding:10px 0;border-top:1px solid var(--line)}
+    li a{color:var(--fg);text-decoration:none;font-weight:600;font-size:17px;line-height:1.3}
+    li a:visited{color:var(--muted)} li a:hover{text-decoration:underline}
+    li p{margin:4px 0 0;color:var(--muted);font-size:15px}
+    li.pic{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:12px;align-items:start}
+    .pic-img{width:96px;height:64px;border-radius:6px;object-fit:cover;background:var(--line);display:block}
+    .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}`;
+  // Runs at load and again when the page adds blocks later (the Guardian loads "More on this
+  // story" as you scroll); new articles join the same list.
+  let related = null;
+  function calmArticle(withImages) {
+    const body = related?.body || articleBodyEl();
+    if (!body) return false;
+    if (!related) {
+      const st = document.createElement('style');
+      st.textContent = '.cb-related-hidden{display:none!important}';
+      document.head.appendChild(st);
+      related = { body, withImages, items: new Map(), sh: null, ol: null, fetched: false };
+    }
+    const fresh = [];
+    for (const a of document.querySelectorAll('a[href]')) {
+      if (a.closest('.cb-related-hidden') || skipLink(a) || isInline(a) || body.querySelector('h1')?.contains(a)) continue;
+      const url = isArticleLink(a), el = url && headlineEl(a);
+      if (!el) continue;
+      let b = a;
+      while (b.parentElement && b.parentElement !== document.body && !hasProse(b.parentElement) && !b.parentElement.querySelector('h1')) b = b.parentElement;
+      if (hasProse(b) || b.querySelector('h1')) continue;
+      b.classList.add('cb-related-hidden');
+      const key = url.replace(/[?#].*$/, ''), teaser = textOf(el);
+      if (!related.items.has(key) && teaser.length >= CFG.minTeaserLen && !isAd(a) && !isGame(url, teaser) && !mutedTopicOf(url, teaser)) {
+        const it = { url, key, teaser, img: teaserImage(a), paid: isPaid(a) };
+        related.items.set(key, it); fresh.push(it);
+      }
+    }
+    if (fresh.length) addRelated(fresh);
+    return true;
+  }
+  function relatedFill(it, li) {
+    const m = cache[it.key];
+    if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { li.remove(); return; }
+    const { text, lead } = choose(it.teaser, m && !m.err ? cleanMeta(m, it.url) : null);
+    li.querySelector('a').textContent = text;
+    const p = li.querySelector('p'); p.textContent = lead; p.hidden = !lead;
+    const im = li.querySelector('.pic-img'), src = im && (it.img || (m && !m.err && m.image) || '');
+    if (src && im.getAttribute('src') !== src) im.src = src;
+  }
+  // Leads are fetched only once the reader opens the list, and for articles added after that.
+  async function relatedFetch(rows) {
+    const todo = rows.filter(([it]) => !cache[it.key]);
+    const worker = async () => { for (let r; (r = todo.shift());) { await getMeta(r[0].url); relatedFill(...r); } };
+    await Promise.all(Array.from({ length: CFG.concurrency }, worker));
+  }
+  function addRelated(items) {
+    if (!related.sh) {
+      const host = document.createElement('div');
+      host.id = 'declickbait-related';
+      related.sh = host.attachShadow({ mode: 'open' });
+      related.sh.innerHTML = `<style>${RELATED_CSS}</style><details><summary></summary><ol></ol></details>`;
+      related.ol = related.sh.querySelector('ol');
+      related.body.insertAdjacentElement('afterend', host);
+      related.sh.querySelector('details').addEventListener('toggle', e => {
+        if (!e.target.open || related.fetched) return;
+        related.fetched = true;
+        relatedFetch([...related.ol.children].map(li => [related.items.get(li.dataset.key), li]));
+      });
+    }
+    const rows = [];
+    for (const it of items) {
+      const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
+      a.href = it.url; li.dataset.key = it.key;
+      const text = related.withImages ? document.createElement('div') : li;
+      text.append(a);
+      if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
+      text.append(p);
+      if (related.withImages) {
+        const im = document.createElement('img');
+        im.className = 'pic-img'; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
+        im.addEventListener('error', () => im.removeAttribute('src'));
+        li.className = 'pic'; li.append(text, im);
+      }
+      related.ol.append(li); rows.push([it, li]); relatedFill(it, li);
+    }
+    related.sh.querySelector('summary').textContent = `${T.related} (${related.ol.children.length})`;
+    if (related.fetched) relatedFetch(rows);
+  }
+
   let plainHost = null, plainCount = 0;
   async function plainView(withImages) {
     let items = frontPageItems();
     for (let i = 0; i < 3 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
     if (items.length < 8) return false; // nothing to lay out: the caller falls back to the synopsis level
+    rankItems(items);
+    let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
     const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
     readSectionNames();
 
@@ -852,7 +1046,7 @@
     plainHost.id = 'declickbait-plain';
     const sh = plainHost.attachShadow({ mode: 'open' });
     sh.innerHTML = `<style>${PLAIN_CSS}</style>
-      <div class="wrap"><header><div class="top"><h1></h1><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
+      <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
       <main></main><footer></footer></div>
       <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
     sh.querySelector('h1').textContent = pageMeta.site || host;
@@ -867,6 +1061,7 @@
     const main = sh.querySelector('main'), nav = sh.querySelector('nav'), rows = new Map(), want = [];
     function fill(it, li) {
       const m = cache[it.key];
+      if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
       const meta = m && !m.err ? cleanMeta(m, it.url) : it.desc ? { title: '', desc: it.desc } : null;
       const { text, lead } = choose(it.teaser, meta);
       const a = li.querySelector('a'), p = li.querySelector('p');
@@ -876,6 +1071,13 @@
       const im = li.querySelector('.pic-img');
       const src = im && (it.img || (m && !m.err && m.image) || '');
       if (src && im.getAttribute('src') !== src) im.src = src;
+    }
+    // An article whose metadata reveals a muted topic leaves the page, and its section too once empty.
+    function dropRow(key, li) {
+      const sec = li.closest('section');
+      li.remove(); rows.delete(key); plainCount = rows.size;
+      if (sec && !sec.querySelector('li')) { nav.querySelector(`[data-sec="${sec.id}"]`)?.remove(); sec.remove(); }
+      sh.querySelector('footer').textContent = `${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`;
     }
     const seenRows = new IntersectionObserver(es => {
       for (const e of es) if (e.isIntersecting) { const i = want.indexOf(e.target.dataset.key); if (i > 0) want.unshift(...want.splice(i, 1)); }
@@ -889,34 +1091,56 @@
         getMeta(it.url).finally(() => { running--; const li = rows.get(key); if (li) fill(it, li); pumpPlain(); });
       }
     }
+    function row(it, withSection) {
+      const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
+      a.href = it.url; li.dataset.key = it.key;
+      if (it.tier > 1) {
+        // The front page's own sense of importance, as a quiet bar instead of big type.
+        li.dataset.tier = it.tier;
+        const sr = document.createElement('span'); sr.className = 'sr'; sr.textContent = (it.tier === 3 ? T.top : T.important) + ': ';
+        li.append(sr);
+      }
+      const text = withImages ? document.createElement('div') : li;
+      text.append(a);
+      if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
+      if (withSection) { const sl = document.createElement('span'); sl.className = 'sec-label'; sl.textContent = sectionLabel(it.section); text.append(sl); }
+      text.append(p);
+      if (withImages) {
+        // Every row gets the same frame, with or without a picture, so the list stays even.
+        const im = document.createElement('img');
+        im.className = 'pic-img'; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
+        im.addEventListener('error', () => im.removeAttribute('src'));
+        li.className = 'pic'; li.append(text, im);
+      }
+      rows.set(it.key, li);
+      fill(it, li);
+      if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
+      return li;
+    }
     function render() {
       const y = plainHost.scrollTop;
       main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect();
-      for (const id of order()) {
+      sh.querySelector('[data-act="sort"]').textContent = sortMode === 'importance' ? T.siteOrder : T.byImportance;
+      if (sortMode === 'importance') {
+        // One list across the visible sections, loudest on the front page first; feed-only items last.
+        const ol = document.createElement('ol'), seenKeys = new Set();
+        const all = order().filter(id => !layout.hidden.includes(id)).flatMap(id => sections.get(id))
+          .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key)).sort((a, b) => (b.score || 0) - (a.score || 0));
+        for (const it of all) if (!rows.has(it.key)) ol.append(row(it, true));
+        const sec = document.createElement('section'), h2 = document.createElement('h2');
+        sec.id = 's-importance'; h2.textContent = T.byImportance;
+        sec.append(h2, ol); main.append(sec);
+      }
+      else for (const id of order()) {
         if (layout.hidden.includes(id)) continue;
         const ol = document.createElement('ol');
         for (const it of sections.get(id)) {
           if (rows.has(it.key)) continue; // an article in two sections is shown once
-          const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
-          a.href = it.url; li.dataset.key = it.key;
-          const text = withImages ? document.createElement('div') : li;
-          text.append(a);
-          if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
-          text.append(p);
-          if (withImages) {
-            // Every row gets the same frame, with or without a picture, so the list stays even.
-            const im = document.createElement('img');
-            im.className = 'pic-img'; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
-            im.addEventListener('error', () => im.removeAttribute('src'));
-            li.className = 'pic'; li.append(text, im);
-          }
-          ol.append(li); rows.set(it.key, li);
-          fill(it, li);
-          if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
+          ol.append(row(it, false));
         }
         if (!ol.childElementCount) continue;
         const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
-        sec.id = 's-' + id; h2.textContent = chip.textContent = sectionLabel(id);
+        sec.id = 's-' + id; chip.dataset.sec = sec.id; h2.textContent = chip.textContent = sectionLabel(id);
         chip.addEventListener('click', () => sec.scrollIntoView());
         sec.append(h2, ol); main.append(sec); nav.append(chip);
       }
@@ -950,6 +1174,7 @@
     sh.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.act === 'sections') openEditor();
+      else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
       else if (b.dataset.act === 'done') saveEditor();
       else if (b.dataset.act === 'original') { try { sessionStorage.setItem('declickbait-original', host); } catch {} location.reload(); }
       else if (b.dataset.move) {
@@ -997,6 +1222,8 @@
       <div class="row"><div class="lbl">Reading level on ${host}</div>
         ${LEVELS.map(l => `<button data-level="${l}" class="${level === l ? 'on' : ''}">${LEVEL_NAMES[l]}</button>`).join('')}
         <button data-act="defaultLevel">${level === defaultLevel ? '✓ Default for all sites' : 'Use this level on all sites'}</button></div>
+      <div class="row"><div class="lbl">Never show me (all sites)</div>
+        ${Object.entries(TOPICS).map(([id, t]) => `<button data-topic="${id}" class="${muted.has(id) ? 'on' : ''}">${t.label}</button>`).join('')}</div>
       <div class="row"><div class="lbl">Headline style</div>
         <button data-mode="rewrite" class="${CFG.display === 'rewrite' ? 'on' : ''}">Rewrite headlines</button>
         <button data-mode="reveal" class="${CFG.display === 'reveal' ? 'on' : ''}">Keep headlines, reveal on hover/tap</button>
@@ -1014,6 +1241,7 @@
       else if (b.dataset.unset) { await settingsAction('unset', b.dataset.unset.split(' ')); listSites(); }
       else if (b.dataset.mode) settingsAction('display', b.dataset.mode);
       else if (b.dataset.level) settingsAction('level', b.dataset.level);
+      else if (b.dataset.topic) { const next = new Set(muted); next.has(b.dataset.topic) ? next.delete(b.dataset.topic) : next.add(b.dataset.topic); settingsAction('topics', [...next]); }
       else if (b.dataset.act === 'defaultLevel') { await settingsAction('defaultLevel', level); b.textContent = '✓ Default for all sites'; }
       else await settingsAction(b.dataset.act);
     });
@@ -1037,12 +1265,14 @@
       location.reload();
     }
     else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
+    else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
     else if (act === 'generic') { await gm.set('genericSites', !CFG.genericSites); location.reload(); }
   }
   async function settingsState() {
     const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
     return { host, off: panelOff, level, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
-      genericSites: CFG.genericSites, showOriginal, rewritten: plainHost ? plainCount : rewritten.size,
+      genericSites: CFG.genericSites, showOriginal, mutedTopics: [...muted],
+      topics: Object.fromEntries(Object.entries(TOPICS).map(([id, t]) => [id, t.label])), rewritten: plainHost ? plainCount : rewritten.size,
       disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
   }
   // Other hosts you have switched off or on by hand, so you can undo them from any page.
@@ -1106,6 +1336,7 @@
     if (level === 'vanilla') off = true;
     panelOff = off;
     CFG.includeLead = level !== 'headlines';
+    muted = new Set(((await gm.get('mutedTopics', [])) || []).filter(id => TOPICS[id]));
     CFG.display = await gm.get('display', CFG.display);
     let original = false; // the plain view's "Original" button: show the site as published, once
     try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
@@ -1129,14 +1360,22 @@
       st.textContent = '.cb-rewritten{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.75);padding-left:.25em}.cb-stack{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.35);padding-left:.25em}.cb-hint{background-image:repeating-linear-gradient(to bottom,rgba(40,160,90,.75) 0 5px,transparent 5px 9px);background-size:3px 100%;background-position:left top;background-repeat:no-repeat;padding-left:.25em}.cb-rewritten,.cb-rewritten *{white-space:normal!important;overflow-wrap:break-word;line-height:1.15}.cb-inline{text-decoration:underline dotted rgba(40,160,90,.9);text-underline-offset:.15em}.cb-btn{display:inline-block;margin-left:.35em;padding:0 .4em;font-size:.6em;line-height:1.6;vertical-align:middle;border-radius:.3em;background:rgba(40,160,90,.18);color:rgb(40,160,90);cursor:pointer;user-select:none;-webkit-user-select:none}.cb-reveal{display:block;margin:.3em 0;padding:.4em .6em;border-left:3px solid rgba(40,160,90,.75);background:rgba(40,160,90,.08);font-weight:normal;font-size:clamp(14px,.75em,20px);line-height:1.35;white-space:normal}.cb-reveal b{font-weight:600}.cb-reveal[hidden],.cb-lead[hidden]{display:none!important}.cb-lead{display:block;margin-top:.35em;font-weight:normal;font-size:clamp(14px,.6em,20px);line-height:1.3;opacity:.85}';
       document.head.appendChild(st);
     }
-    if ((level === 'plain' || level === 'pictures') && !original && !onArticlePage() && await plainView(level === 'pictures')) return;
+    if (muted.size) {
+      const st = document.createElement('style');
+      st.textContent = '.cb-muted{opacity:.08!important;filter:grayscale(1) blur(2px)!important;pointer-events:none!important}.cb-muted *{animation:none!important;transition:none!important}';
+      document.head.appendChild(st);
+    }
+    if ((level === 'plain' || level === 'pictures') && !original) {
+      if (!onArticlePage()) { if (await plainView(level === 'pictures')) return; }
+      else calmArticle(level === 'pictures');
+    }
     scan();
     let t;
     let last = 0;
     new MutationObserver(() => {
       if (document.hidden) return;
       clearTimeout(t);
-      t = setTimeout(() => { last = Date.now(); scan(); }, Math.max(400, 1500 - (Date.now() - last)));
+      t = setTimeout(() => { last = Date.now(); if (related) calmArticle(related.withImages); scan(); }, Math.max(400, 1500 - (Date.now() - last)));
     }).observe(document.body, { childList: true, subtree: true });
     document.addEventListener('keydown', e => {
       const h = CFG.hotkey;

@@ -64,6 +64,16 @@ function show(s) {
   $('orig').checked = s.showOriginal;
   $('generic').checked = s.genericSites;
 
+  // Topics the reader never wants, for all sites. Built from the script's own list.
+  const topics = $('topics');
+  topics.replaceChildren();
+  for (const [id, label] of Object.entries(s.topics || {})) {
+    const l = document.createElement('label'), cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = id; cb.checked = s.mutedTopics.includes(id);
+    cb.addEventListener('change', () => actAndReload('topics', [...topics.querySelectorAll('input:checked')].map(x => x.value)));
+    l.append(cb, label); topics.append(l);
+  }
+
   const box = $('changed');
   box.replaceChildren();
   for (const [list, label] of [['disabledHosts', 'Disabled on'], ['enabledHosts', 'Enabled on']]) {

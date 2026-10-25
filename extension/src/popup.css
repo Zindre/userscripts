@@ -45,6 +45,11 @@ button:disabled { opacity: .5; cursor: default; }
 .chip { display: inline-flex; align-items: center; margin: 2px 4px 2px 0; padding: 1px 2px 1px 8px; border: 1px solid var(--line); border-radius: 12px; font-size: 12px; }
 .chip button { width: auto; border: 0; background: none; padding: 0 6px; color: var(--muted); }
 
+.note { font-weight: normal; text-transform: none; letter-spacing: 0; }
+.topics { display: flex; flex-wrap: wrap; gap: 4px; }
+.topics label { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 14px; cursor: pointer; font-size: 12px; }
+.topics label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.topics input { margin: 0; accent-color: var(--accent); }
 footer { margin-top: 12px; color: var(--muted); font-size: 11px; }
 body.busy { cursor: progress; }
 button.link { width: auto; border: 0; background: none; padding: 6px 0 0; color: var(--accent); font-size: 12px; }
