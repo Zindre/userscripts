@@ -46,10 +46,17 @@ button:disabled { opacity: .5; cursor: default; }
 .chip button { width: auto; border: 0; background: none; padding: 0 6px; color: var(--muted); }
 
 .note { font-weight: normal; text-transform: none; letter-spacing: 0; }
-.topics { display: flex; flex-wrap: wrap; gap: 4px; }
-.topics label { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 14px; cursor: pointer; font-size: 12px; }
-.topics label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
-.topics input { margin: 0; accent-color: var(--accent); }
+.topic-tree { display: grid; gap: 2px; }
+.topic-row { display: flex; align-items: center; gap: 6px; }
+.topic-row label { flex: 1; display: flex; align-items: center; gap: 6px; padding: 4px 0; cursor: pointer; }
+.topic-row label:has(input:checked) { font-weight: 600; }
+.topic-tree input { margin: 0; accent-color: var(--accent); }
+.topic-row button.more { width: auto; border: 0; background: none; padding: 2px 6px; color: var(--muted); font-size: 12px; }
+.topic-children { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0 6px 22px; }
+.topic-children[hidden] { display: none; }
+.topic-children label { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 14px; cursor: pointer; font-size: 12px; }
+.topic-children label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.topic-children label:has(input:disabled) { opacity: .7; cursor: default; }
 footer { margin-top: 12px; color: var(--muted); font-size: 11px; }
 body.busy { cursor: progress; }
 button.link { width: auto; border: 0; background: none; padding: 6px 0 0; color: var(--accent); font-size: 12px; }

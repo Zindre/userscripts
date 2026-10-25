@@ -14,14 +14,17 @@ async function main() {
   if (level === 'vanilla') off = true;
   hostOff = off;
   CFG.includeLead = level !== 'headlines';
-  muted = new Set(((await gm.get('mutedTopics', [])) || []).filter(id => TOPICS[id]));
+  setMuted((await gm.get('mutedTopics', [])) || []);
   CFG.display = await gm.get('display', CFG.display);
   let original = false; // the plain view's "Original" button: show the site as published, once
   try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
   // The extension's popup talks to settingsAction/settingsState; the userscript build has its own panel.
   if (EXT) GM.exposeSettings(async ({ act, arg } = {}) => { if (act) await settingsAction(act, arg); return settingsState(); });
   else if (typeof startPanel === 'function') startPanel(off, disabled);
-  if (off) return; // settings still open here, so the site can be switched back on
+  // The extension may have covered the page before it was drawn (gm-shim.js); plain view lifts the
+  // cover itself once it is up, every other path lifts it here.
+  const uncover = () => document.getElementById('nothis-cover')?.remove();
+  if (off) { uncover(); return; } // settings still open here, so the site can be switched back on
   await loadCache();
   if (CFG.marker) {
     const st = document.createElement('style');
@@ -33,10 +36,14 @@ async function main() {
     st.textContent = '.cb-muted{opacity:.08!important;filter:grayscale(1) blur(2px)!important;pointer-events:none!important}.cb-muted *{animation:none!important;transition:none!important}';
     document.head.appendChild(st);
   }
-  if ((level === 'plain' || level === 'pictures') && !original) {
+  // Plain view takes over a page, so it needs the same evidence as rewriting: a listed site, one
+  // the reader enabled, or a page that scores as a publication (never a shop).
+  const news = site || hostEnabled || isPublication();
+  if ((level === 'plain' || level === 'pictures') && !original && news) {
     if (!onArticlePage()) { if (await plainView(level === 'pictures')) return; }
     else calmArticle(level === 'pictures');
   }
+  uncover();
   scan();
   let t;
   let last = 0;

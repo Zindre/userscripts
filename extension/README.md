@@ -25,7 +25,7 @@ The engine is one program split into files by concern under `src/engine/`. The f
 | `settings.js` | Reading and changing settings, for the popup and the panel |
 | `boot.js` | `main()`: reads the settings and starts the right mode |
 
-The engine talks to the browser through a small GM API. In the extension, `src/gm-shim.js` provides it:
+The engine talks to the browser through a small GM API. In the extension, `src/gm-shim.js` provides it. It runs before the page is drawn (`document_start`), the engine once the page has loaded (`document_idle`); on sites that get plain view it also covers the page so the original never flashes:
 
 - **Storage:** `GM.getValue` and `GM.setValue` are backed by `storage.local`.
 - **Fetching:** `GM.xmlHttpRequest` is answered by a fetch in `src/background.js`. In Manifest V3, only the background can read cross-site pages.

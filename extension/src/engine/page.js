@@ -11,6 +11,7 @@ function isArticleLink(a) {
   const h = href.hostname.replace(/^www\./, '');
   const target = SITES.find(s => s.host.test(h));
   if (target) { if (!target.article.test(href.pathname)) return false; }
+  else if (newsHost(h)) { if (!genericArticlePath(href.pathname)) return false; }
   else if (site || registrable(h) !== registrable(host) || !genericArticlePath(href.pathname)) return false;
   if (href.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '')) return false;
   return href.href;

@@ -64,14 +64,39 @@ function show(s) {
   $('orig').checked = s.showOriginal;
   $('generic').checked = s.genericSites;
 
-  // Topics the reader never wants, for all sites. Built from the script's own list.
-  const topics = $('topics');
+  // Topics the reader never wants, for all sites: main topics with their subtopics, from the
+  // script's own tree. A muted main topic covers its subtopics, so they show as on and locked.
+  const topics = $('topics'), muted = new Set(s.mutedTopics);
   topics.replaceChildren();
-  for (const [id, label] of Object.entries(s.topics || {})) {
+  const save = () => actAndReload('topics', [...topics.querySelectorAll('input:checked:not(:disabled)')].map(x => x.value));
+  const topicBox = (id, label) => {
     const l = document.createElement('label'), cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.value = id; cb.checked = s.mutedTopics.includes(id);
-    cb.addEventListener('change', () => actAndReload('topics', [...topics.querySelectorAll('input:checked')].map(x => x.value)));
-    l.append(cb, label); topics.append(l);
+    cb.type = 'checkbox'; cb.value = id; cb.checked = muted.has(id);
+    cb.addEventListener('change', save);
+    l.append(cb, label);
+    return [l, cb];
+  };
+  for (const g of s.topics || []) {
+    const row = document.createElement('div'), [gl, gcb] = topicBox(g.id, g.label);
+    row.className = 'topic-row'; row.append(gl);
+    if (g.children.length) {
+      const kids = document.createElement('div'), more = document.createElement('button');
+      kids.className = 'topic-children';
+      const some = g.children.filter(c => muted.has(c.id)).length;
+      kids.hidden = !some;
+      more.type = 'button'; more.className = 'more';
+      more.textContent = (some ? `${some} of ${g.children.length}` : `${g.children.length}`) + (kids.hidden ? ' ▸' : ' ▾');
+      more.setAttribute('aria-label', `Subtopics of ${g.label}`);
+      more.addEventListener('click', () => { kids.hidden = !kids.hidden; more.textContent = more.textContent.replace(/[▸▾]$/, kids.hidden ? '▸' : '▾'); });
+      for (const c of g.children) {
+        const [cl, ccb] = topicBox(c.id, c.label);
+        if (gcb.checked) { ccb.checked = true; ccb.disabled = true; }
+        kids.append(cl);
+      }
+      gcb.indeterminate = !gcb.checked && some > 0;
+      row.append(more);
+      topics.append(row, kids);
+    } else topics.append(row);
   }
 
   const box = $('changed');

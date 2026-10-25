@@ -25,6 +25,9 @@ function openPanel() {
     button{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px;border:1px solid #d5d5d5;border-radius:6px;background:#f7f7f7;font:inherit;cursor:pointer;color:#111}
     button:hover{background:#eef7f1;border-color:#28a05a} button.on{background:#e3f4ea;border-color:#28a05a;font-weight:600}
     .small{font-size:11px;color:#888;margin-top:8px}
+    details summary{list-style:none} details summary::-webkit-details-marker{display:none}
+    details summary button::after{content:' ▸';color:#888} details[open] summary button::after{content:' ▾'}
+    button.sub{margin-left:14px;width:calc(100% - 14px);padding:4px 8px;font-size:12px} button:disabled{opacity:.6;cursor:default}
   </style>
   <div class="box" hidden>
     <h1>Declickbait<button class="x" data-act="close" aria-label="Close">✕</button></h1>
@@ -32,7 +35,8 @@ function openPanel() {
       ${LEVELS.map(l => `<button data-level="${l}" class="${level === l ? 'on' : ''}">${LEVEL_NAMES[l]}</button>`).join('')}
       <button data-act="defaultLevel">${level === defaultLevel ? '✓ Default for all sites' : 'Use this level on all sites'}</button></div>
     <div class="row"><div class="lbl">Never show me (all sites)</div>
-      ${Object.entries(TOPICS).map(([id, t]) => `<button data-topic="${id}" class="${muted.has(id) ? 'on' : ''}">${t.label}</button>`).join('')}</div>
+      ${TOPIC_TREE.map(g => `<details${g.children.some(c => muted.has(c.id)) ? ' open' : ''}><summary><button data-topic="${g.id}" class="${muted.has(g.id) ? 'on' : ''}">${g.label}</button></summary>
+        ${g.children.map(c => `<button data-topic="${c.id}" class="sub ${muted.has(c.id) || muted.has(g.id) ? 'on' : ''}"${muted.has(g.id) ? ' disabled' : ''}>${c.label}</button>`).join('')}</details>`).join('')}</div>
     <div class="row"><div class="lbl">Headline style</div>
       <button data-mode="rewrite" class="${CFG.display === 'rewrite' ? 'on' : ''}">Rewrite headlines</button>
       <button data-mode="reveal" class="${CFG.display === 'reveal' ? 'on' : ''}">Keep headlines, reveal on hover/tap</button>

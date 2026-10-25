@@ -31,7 +31,7 @@ Levels are set per site, with a default for all others. Article pages are left a
 
 ## Direction
 
-- **Topic filters:** Sport, Reality TV, Celebrities, Royals and Crime can already be switched off for all sites. Next: topics of your own (a keyword or a show), and a broadcaster's promotion of its own programmes and sports rights.
+- **Topic filters:** a tree of topics (Sport, Entertainment, Lifestyle, Crime and accidents, Death notices and obituaries, Opinion, Politics, Business, Tech and science, Weather, with subtopics) can already be switched off for all sites. Next: topics of your own (a keyword or a show), and a broadcaster's promotion of its own programmes and sports rights.
 - **Calmer by default:** no images in plain view, or quiet ones only if the reader asks. Respect "reduce motion" everywhere.
 - **Several sites in one plain view:** your chosen sections from the sites you read, in one place, without the noise.
 - **Summaries on the device:** when the lead isn't enough, a short neutral summary made by the browser's or phone's own on-device model, never sent to a server.

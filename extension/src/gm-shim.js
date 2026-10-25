@@ -26,4 +26,21 @@
     settingsHandler(msg).then(s => sendResponse(s && { ...s, fetches }), e => sendResponse({ error: String(e) }));
     return true; // respond asynchronously
   });
+
+  // This file runs before the page is drawn (document_start), the engine only once it has loaded.
+  // On a site where plain view took over before, or that the reader set to a plain level, cover the
+  // page with a calm background so the original never flashes. The engine lifts the cover
+  // (#nothis-cover) as soon as plain view is up, or when it decides against it; after 6 s it goes anyway.
+  const host = location.hostname.replace(/^www\./, '');
+  try { if (sessionStorage.getItem('declickbait-original') === host) return; } catch {} // "Original" was pressed
+  api.storage.local.get(['level', 'siteLevels', 'disabledHosts', 'plainHosts']).then(s => {
+    const chosen = (s.siteLevels || {})[host], level = chosen || s.level;
+    if ((level !== 'plain' && level !== 'pictures') || (s.disabledHosts || []).includes(host)) return;
+    if (!chosen && !(s.plainHosts || []).includes(host)) return; // only sites known to get plain view
+    const cover = document.createElement('style');
+    cover.id = 'nothis-cover';
+    cover.textContent = 'html{background:#fbfbf9!important}html>body{visibility:hidden!important}@media (prefers-color-scheme: dark){html{background:#1a1b1a!important}}';
+    (document.head || document.documentElement).appendChild(cover);
+    setTimeout(() => cover.remove(), 6000);
+  });
 })();

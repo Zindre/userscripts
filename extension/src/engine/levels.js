@@ -13,7 +13,7 @@ let level = 'synopsis', defaultLevel = 'synopsis';
 // counts as an article when its URL looks like one, or when og:type says so deeper than one section.
 function onArticlePage() {
   const path = location.pathname;
-  if (site ? site.article.test(path) : genericArticlePath(path)) return true;
+  if (site?.article ? site.article.test(path) : genericArticlePath(path)) return true;
   const og = document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '';
   return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2;
 }

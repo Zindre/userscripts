@@ -203,6 +203,9 @@ async function plainView(withImages) {
     <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
   sh.querySelector('h1').textContent = pageMeta.site || host;
   document.documentElement.appendChild(plainHost);
+  document.getElementById('nothis-cover')?.remove();
+  // Remember the site, so next time the extension covers it before the original is drawn.
+  gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
 
   const sections = new Map(), byKey = new Map();
   const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
@@ -266,6 +269,7 @@ async function plainView(withImages) {
     }
     rows.set(it.key, li);
     fill(it, li);
+    if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
     if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
     return li;
   }
@@ -278,7 +282,7 @@ async function plainView(withImages) {
       const ol = document.createElement('ol'), seenKeys = new Set();
       const all = order().filter(id => !layout.hidden.includes(id)).flatMap(id => sections.get(id))
         .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key)).sort((a, b) => (b.score || 0) - (a.score || 0));
-      for (const it of all) if (!rows.has(it.key)) ol.append(row(it, true));
+      for (const it of all) if (!rows.has(it.key)) { const li = row(it, true); if (li) ol.append(li); }
       const sec = document.createElement('section'), h2 = document.createElement('h2');
       sec.id = 's-importance'; h2.textContent = T.byImportance;
       sec.append(h2, ol); main.append(sec);
@@ -288,7 +292,7 @@ async function plainView(withImages) {
       const ol = document.createElement('ol');
       for (const it of sections.get(id)) {
         if (rows.has(it.key)) continue; // an article in two sections is shown once
-        ol.append(row(it, false));
+        const li = row(it, false); if (li) ol.append(li);
       }
       if (!ol.childElementCount) continue;
       const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');

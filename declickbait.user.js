@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.13.0
+// @version      1.14.0
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -110,13 +110,24 @@
     { host: /(^|\.)buzzfeed\.com$/,    article: /^\/[a-z0-9_]+\/[a-z0-9]+(-[a-z0-9]+){2,}/ },
     { host: /(^|\.)businessinsider\.com$/, article: /^\/[a-z0-9]+(-[a-z0-9]+){3,}/ },
     { host: /(^|\.)apnews\.com$/,      article: /\/article\// },
+    { host: /(^|\.)abcnews\.(?:go\.)?com$/, article: /\/story$|\/wireStory\/[a-z0-9-]+-\d{6,}$/ }, // abcnews.go.com links to abcnews.com: /US/slug/story?id=123, /US/wireStory/slug-123
     { host: /(^|\.)reuters\.com$/,     article: /-\d{4}-\d{2}-\d{2}\/?$/ },
   ];
+  // Well-known news sites whose front pages carry few machine-readable news signals (no feed link,
+  // no <article>, no news JSON-LD), so the publication check can't see them. They count as news
+  // sites and use the generic article detection below. Strings match the host and its subdomains.
+  const NEWS_HOSTS = ['klassekampen.no', 'adressa.no', 'fvn.no', 'nordlys.no', 'dagsavisen.no', 'morgenbladet.no', 'bt.dk', 'berlingske.dk', 'politiken.dk', 'jyllands-posten.dk', 'svd.se', 'dn.se', 'gp.se', 'sydsvenskan.se',
+    'metro.co.uk', 'standard.co.uk', 'inews.co.uk', 'express.co.uk', 'news.sky.com', 'ft.com', 'thetimes.com', 'nbcnews.com', 'cbsnews.com', 'abcnews.go.com', 'usatoday.com', 'latimes.com', 'npr.org', 'politico.com', 'axios.com',
+    'theatlantic.com', 'time.com', 'cnbc.com', 'newsweek.com', 'cbc.ca', 'theglobeandmail.com', 'abc.net.au', 'smh.com.au', 'news.com.au', 'nzherald.co.nz', 'hindustantimes.com', 'timesofindia.indiatimes.com', 'ndtv.com',
+    'sueddeutsche.de', 'faz.net', 'zeit.de', 'focus.de', 'tagesschau.de', 'krone.at', '20min.ch', 'lemonde.fr', 'lefigaro.fr', 'leparisien.fr', 'liberation.fr', 'francetvinfo.fr', 'elpais.com', 'elmundo.es', 'marca.com',
+    '20minutos.es', 'corriere.it', 'repubblica.it', 'ilfattoquotidiano.it', 'nu.nl', 'telegraaf.nl'];
+  const newsHost = h => NEWS_HOSTS.some(n => h === n || h.endsWith('.' + n));
   // Unlisted hosts. A path is article-like when it has a numeric id segment, an Amedia-style id
   // (/slug/s/80-8-27129, ~80 Norwegian local papers), or a slug of 4+ tokens of which at least 3
   // are real words. UUIDs and hex ids (web apps: /consoles/93552fcc-f6f1-4566-…) never count.
   const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-  const NOT_ARTICLE = /^\/(?:author|authors|profile|people|forfatter|journalist|tag|tags|topic|topics|tema-side|category|categories|kategori|search|suche|sok|søk)\//i;
+  // Never articles: author, tag and search pages, and shops (WooCommerce /produkt/, Shopify /products/ and /collections/).
+  const NOT_ARTICLE = /^\/(?:author|authors|profile|people|forfatter|journalist|tag|tags|topic|topics|tema-side|category|categories|kategori|search|suche|sok|søk|produkt|produkter|produktkategori|product|products|product-category|collections|shop|butikk|nettbutikk|store|cart|checkout|handlekurv|kasse)\//i;
   function genericArticlePath(path) {
     if (UUID.test(path) || NOT_ARTICLE.test(path)) return false;
     if (/\/[a-z]{1,2}\/\d{1,3}-\d{1,3}-\d{4,}$/i.test(path)) return true;
@@ -126,9 +137,13 @@
     const tokens = last.split('-');
     return tokens.length >= 4 && tokens.filter(w => /^[a-z]{3,}$/i.test(w) && !/^[0-9a-f]+$/i.test(w)).length >= 3;
   }
-  // Generic mode only runs on pages that look like a publication, never on web apps or shops.
-  // Score: RSS/Atom feed 1, 5+ <article> 1 (20+: 2), news JSON-LD 2, article/frontpage og:type 1. Needs 2.
-  // Shops (WooCommerce, Shopify, cart/checkout/product pages) are always out.
+  // Generic mode only runs on pages that look like a news publication, never on web apps, shops,
+  // price guides or wikis. Score: RSS/Atom feed 1, 5+ <article> elements 1 (20+: 2), article/frontpage og:type 1, news JSON-LD (NewsArticle, NewsMediaOrganization, …) 2,
+  // other article JSON-LD (Article, BlogPosting, …) 1, news words in the site's title or description 1.
+  // Needs 2.
+  // Shops (WooCommerce, Shopify, cart/checkout/product pages, product JSON-LD, pages full of prices,
+  // such as price guides) and wikis (MediaWiki) are always out.
+  const NEWS_WORDS = /\b(?:nyheter|nyheder|nyhet\w*|avis\w*|tidende|tidning\w*|news|newspaper|headlines|breaking|nachrichten|zeitung|aktuell\w*|actualit\w*|journal|noticias|notizie|nieuws|uutiset|uutis\w*)\b/i;
   let publication = false;
   function isPublication() {
     if (publication) return true;
@@ -138,13 +153,20 @@
     const shop = /\b(woocommerce|shopify|cart|checkout|product|shop)\b/i.test(body) || /^product/i.test(ogType) ||
       !!q('script[src*="shopify"], link[href*="cdn.shopify.com"], form[action*="/cart"], [class*="add-to-cart"], [class*="add_to_cart"], [name="add-to-cart"]') ||
       /\/(cart|checkout|basket|handlekurv|kasse|product|products|produkt|shop|store)(\/|$)/i.test(location.pathname);
-    if (shop) return false;
-    const articles = document.querySelectorAll('article').length;
+    const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(sc => sc.textContent).join(' ');
+    const priced = /"@type"\s*:\s*"(?:Product|ProductGroup)"/.test(ld) || // not Offer: news sites offer subscriptions and apps
+      document.querySelectorAll('[itemprop="price"], [class*="price" i]:not([class*="prize" i])').length >= 10;
+    const wiki = /\bmediawiki\b/.test(body) || !!q('meta[name="generator"][content^="MediaWiki"]') || /^\/wiki\//.test(location.pathname);
+    if (shop || priced || wiki) return false;
     let score = 0;
     if (q('link[rel="alternate"][type*="rss"], link[rel="alternate"][type*="atom"]')) score += 1;
+    const articles = document.querySelectorAll('article').length;
     if (articles >= 20) score += 2; else if (articles >= 5) score += 1;
     if (/^(article|frontpage|blog)$/i.test(ogType)) score += 1;
-    if ([...document.querySelectorAll('script[type="application/ld+json"]')].some(sc => /"@type"\s*:\s*"(?:NewsArticle|NewsMediaOrganization|ItemList|CollectionPage|Blog|BlogPosting|Article|LiveBlogPosting)"/.test(sc.textContent))) score += 2;
+    if (/"@type"\s*:\s*"(?:NewsArticle|NewsMediaOrganization|ReportageNewsArticle|AnalysisNewsArticle|LiveBlogPosting)"/.test(ld)) score += 2;
+    else if (/"@type"\s*:\s*"(?:Article|BlogPosting|Blog|CollectionPage|ItemList)"/.test(ld)) score += 1;
+    const about = [document.title, q('meta[property="og:site_name"]')?.content, q('meta[name="description"]')?.content].join(' ');
+    if (NEWS_WORDS.test(about)) score += 1;
     publication = score >= 2;
     return publication;
   }
@@ -195,7 +217,8 @@
   // This host, its entry in SITES, storage and fetching through the GM API (a userscript manager, or
   // gm-shim.js in the extension).
   const host = location.hostname.replace(/^www\./, '');
-  const site = SITES.find(s => s.host.test(host));
+  // A known news site: its SITES entry, or a generic entry (article: null) for NEWS_HOSTS.
+  const site = SITES.find(s => s.host.test(host)) || (newsHost(host) ? { host: null, article: null } : undefined);
   if (!site && !CFG.genericSites) return;
 
   const gm = {
@@ -428,6 +451,7 @@
     const h = href.hostname.replace(/^www\./, '');
     const target = SITES.find(s => s.host.test(h));
     if (target) { if (!target.article.test(href.pathname)) return false; }
+    else if (newsHost(h)) { if (!genericArticlePath(href.pathname)) return false; }
     else if (site || registrable(h) !== registrable(host) || !genericArticlePath(href.pathname)) return false;
     if (href.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '')) return false;
     return href.href;
@@ -677,40 +701,110 @@
   }
 
   // ───────────────────────────── Topics the reader never wants ─────────────────────────────
-  // Chosen once for all sites (mutedTopics). An article belongs to a topic when its URL has the
-  // topic's section (/sport/, /rampelys/), when the publisher's own section or keywords say so
-  // (article:section, JSON-LD articleSection/keywords), or for sport and reality when the title
-  // names a league or a show. Plain view leaves these articles out; on the site itself their
-  // teasers are faded out and made inert, so the layout stays and the bait stops pulling.
+  // Chosen once for all sites (mutedTopics). Topics form a tree: main topics (Sport, Entertainment,
+  // Lifestyle, …) with subtopics (Football, Reality TV, Food, …). Muting a main topic mutes its
+  // subtopics too; a subtopic can also be muted on its own. An article belongs to a topic when its
+  // URL has the topic's section (path: /sport/, /rampelys/), when the publisher's own section or
+  // keywords say so (labels: article:section, JSON-LD articleSection/keywords), or, where names are
+  // unambiguous, when the title names a league or a show (title). Plain view leaves these articles
+  // out; on the site itself their teasers are faded out and made inert, so the layout stays and the
+  // bait stops pulling. Ids are stored, so keep them when relabelling.
   const TOPICS = {
     sport: { label: 'Sport',
-      path: /^(?:sport|sporten|sports|sportbladet|sportmix|fotball|football|soccer|fussball|fußball|eliteserien|premier-league|champions-league|bundesliga|vintersport|alpint|langrenn|skiskyting|motorsport|formel-1|tennis|golf|handball|haandball|ishockey|hockey|nfl|nba|nhl|mlb|cricket|rugby|boksing|boxing|mma|ufc|sykling|cycling|friidrett|athletics|esport|tv-sporten)$/,
-      label_re: /\b(?:sport\w*|fotball|football|soccer|fußball|fussball|tennis|golf|ishockey|hockey|langrenn|skiskyting|alpint|formel 1|motorsport|sykling|cycling|boksing|boxing|håndball|handball|friidrett|athletics)\b/i,
-      title: /\b(?:eliteserien|obos-ligaen|toppserien|premier league|champions league|europa league|conference league|bundesliga|la liga|serie a|allsvenskan|superligaen|ballon d'or|skiskyting|langrenn)\b/i },
-    reality: { label: 'Reality TV',
+      path: /^(?:sport|sporten|sports|sportbladet|sportmix|tv-sporten|sportsnytt|sportnyheter)$/,
+      labels: /\b(?:sport\w*|idrett\w*)\b/i },
+    football: { parent: 'sport', label: 'Football',
+      path: /^(?:fotball|football|soccer|fussball|fußball|eliteserien|obos-ligaen|toppserien|premier-league|champions-league|bundesliga|allsvenskan|superligaen)$/,
+      labels: /\b(?:fotball|football|soccer|fußball|fussball)\b/i,
+      title: /\b(?:eliteserien|obos-ligaen|toppserien|premier league|champions league|europa league|conference league|bundesliga|la liga|serie a|allsvenskan|superligaen|ballon d'or)\b/i },
+    winter: { parent: 'sport', label: 'Winter sports',
+      path: /^(?:vintersport|alpint|langrenn|skiskyting|skihopp|hopp|kombinert|skoyter|skøyter|wintersport)$/,
+      labels: /\b(?:vintersport|langrenn|skiskyting|alpint|skihopp|skøyter|wintersport)\b/i,
+      title: /\b(?:langrenn|skiskyting|skihopp|verdenscupen i (?:langrenn|skiskyting|alpint))\b/i },
+    motorsport: { parent: 'sport', label: 'Motorsport',
+      path: /^(?:motorsport|formel-1|formula-1|f1|rally|motogp)$/,
+      labels: /\b(?:motorsport|formel 1|formula 1|rally|motogp)\b/i,
+      title: /\b(?:formel 1|formula 1|motogp)\b/i },
+    tennis: { parent: 'sport', label: 'Tennis', path: /^tennis$/, labels: /\btennis\b/i },
+    golf: { parent: 'sport', label: 'Golf', path: /^golf$/, labels: /\bgolf\b/i },
+    cycling: { parent: 'sport', label: 'Cycling', path: /^(?:sykling|cycling|radsport|tour-de-france)$/, labels: /\b(?:sykling|cycling|radsport)\b/i, title: /\btour de france\b/i },
+    handball: { parent: 'sport', label: 'Handball', path: /^(?:handball|haandball|håndball|handbold)$/, labels: /\b(?:håndball|handball|handbold)\b/i },
+    icehockey: { parent: 'sport', label: 'Ice hockey', path: /^(?:ishockey|hockey|nhl|eishockey)$/, labels: /\b(?:ishockey|ice hockey|eishockey|nhl)\b/i },
+    combat: { parent: 'sport', label: 'Boxing and MMA', path: /^(?:boksing|boxing|boxen|mma|ufc|kampsport)$/, labels: /\b(?:boksing|boxing|boxen|mma|ufc|kampsport)\b/i },
+    athletics: { parent: 'sport', label: 'Athletics', path: /^(?:friidrett|athletics|leichtathletik|friidraett)$/, labels: /\b(?:friidrett|athletics|leichtathletik)\b/i },
+    ussports: { parent: 'sport', label: 'US sports', path: /^(?:nfl|nba|mlb|nhl|us-sport)$/, labels: /\b(?:nfl|nba|mlb|super bowl)\b/i, title: /\b(?:nfl|nba|super bowl)\b/i },
+    esports: { parent: 'sport', label: 'Esports', path: /^(?:esport|esports|e-sport)$/, labels: /\be-?sports?\b/i },
+
+    entertainment: { label: 'Entertainment',
+      path: /^(?:underholdning|unterhaltung|entertainment|showbiz|noje|nöje|tv-and-showbiz|tvshowbiz)$/,
+      labels: /\b(?:underholdning|entertainment|unterhaltung|showbiz|nöje)\b/i },
+    reality: { parent: 'entertainment', label: 'Reality TV',
       path: /^(?:reality|realityserier|skal-vi-danse|farmen|farmen-kjendis|paradise-hotel|love-island|big-brother|kompani-lauritzen|ex-on-the-beach|bachelor|bachelorette|71-grader-nord|hver-gang-vi-motes|the-voice|idol|masterchef|lets-dance|dschungelcamp|robinson)$/,
-      label_re: /\b(?:reality|realityserie\w*|skal vi danse|farmen|paradise hotel|love island)\b/i,
+      labels: /\b(?:reality|realityserie\w*|skal vi danse|farmen|paradise hotel|love island)\b/i,
       title: /\b(?:skal vi danse|farmen|paradise hotel|love island|big brother|kompani lauritzen|ex on the beach|bachelor(?:ette)?|71° nord|hver gang vi møtes|the voice|masterchef|let's dance|strictly come dancing|i'm a celebrity|dschungelcamp|bauer sucht frau|germany's next topmodel|robinsonekspedisjonen|robinson|survivor|farmen kjendis)\b/i },
-    celebrity: { label: 'Celebrities',
-      path: /^(?:kjendis|kjendiser|rampelys|noje|nöje|underholdning|showbiz|celebrity|celebrities|unterhaltung|leute|promis?|stars|danske-kendte|kendte|tv-and-showbiz|tvshowbiz)$/,
-      label_re: /\b(?:kjendis\w*|celebrit\w*|showbiz|underholdning|nöje|unterhaltung|promi\w*|leute|kendte)\b/i },
-    royals: { label: 'Royals',
+    celebrity: { parent: 'entertainment', label: 'Celebrities',
+      path: /^(?:kjendis|kjendiser|rampelys|celebrity|celebrities|leute|promis?|stars|danske-kendte|kendte)$/,
+      labels: /\b(?:kjendis\w*|celebrit\w*|promi\w*|leute|kendte)\b/i },
+    royals: { parent: 'entertainment', label: 'Royals',
       path: /^(?:kongelige|kongehuset|royal|royals|royal-family|royale|kungligt|kungahuset|adel)$/,
-      label_re: /\b(?:kongelig\w*|kongehus\w*|royal\w*|kunglig\w*|kungahus\w*)\b/i },
-    crime: { label: 'Crime',
+      labels: /\b(?:kongelig\w*|kongehus\w*|royal\w*|kunglig\w*|kungahus\w*)\b/i },
+    tvseries: { parent: 'entertainment', label: 'TV and series',
+      path: /^(?:tv|tv-og-serier|serier|tv-serier|streaming|tv-guide)$/,
+      labels: /\b(?:tv-serie\w*|tv-program\w*|strømming|streaming)\b/i },
+    film: { parent: 'entertainment', label: 'Film', path: /^(?:film|kino|movies|cinema)$/, labels: /\b(?:film|kino|movies?|cinema)\b/i },
+    music: { parent: 'entertainment', label: 'Music', path: /^(?:musikk|music|musik|konsert)$/, labels: /\b(?:musikk|music|musik)\b/i },
+    gaming: { parent: 'entertainment', label: 'Gaming', path: /^(?:gaming|dataspill|videospill|games|spill-og-gaming)$/, labels: /\b(?:gaming|dataspill|videospill|video games)\b/i },
+
+    incidents: { label: 'Crime and accidents' },
+    crime: { parent: 'incidents', label: 'Crime',
       path: /^(?:krim|crime|true-crime|kriminalitet|krimi|blaulicht|brott)$/,
-      label_re: /\b(?:krim|crime|true crime|kriminalitet|blaulicht|brott)\b/i },
+      labels: /\b(?:krim|crime|true crime|kriminalitet|blaulicht|brott)\b/i },
+    accidents: { parent: 'incidents', label: 'Accidents', path: /^(?:ulykker|ulykke|accidents|unfall|olyckor)$/, labels: /\b(?:ulykke\w*|trafikkulykke\w*|unfall|olycka\w*)\b/i },
+    obituaries: { label: 'Death notices and obituaries',
+      path: /^(?:dodsannonser|dødsannonser|doedsannonser|minnesider|minneside|minneord|nekrologer|nekrolog|obituaries|obituary|dodsannonser|dödsannonser|dodsfald|todesanzeigen|traueranzeigen|trauer)$/,
+      labels: /\b(?:d[øo]dsannonse\w*|doedsannonse\w*|minneord|nekrolog\w*|obituar(?:y|ies)|dödsannons\w*|todesanzeige\w*|traueranzeige\w*)\b/i,
+      title: /\b(?:d[øo]dsannonse\w*|doedsannonse\w*|dödsannons\w*|minneord|minnesider?|nekrolog\w*|obituar(?:y|ies)|todesanzeige\w*|traueranzeige\w*)\b/i },
+
+    lifestyle: { label: 'Lifestyle', path: /^(?:livsstil|lifestyle|leben|living|life-and-style|life)$/, labels: /\b(?:livsstil|lifestyle)\b/i },
+    health: { parent: 'lifestyle', label: 'Health and fitness', path: /^(?:helse|health|gesundheit|trening|fitness|halsa|hälsa)$/, labels: /\b(?:helse|health|gesundheit|trening|fitness|hälsa)\b/i },
+    food: { parent: 'lifestyle', label: 'Food and drink', path: /^(?:mat|food|oppskrifter|recipes|mat-og-drikke|essen|drikke|vin|wine)$/, labels: /\b(?:mat|oppskrift\w*|food|recipes?|vin|wine)\b/i },
+    travel: { parent: 'lifestyle', label: 'Travel', path: /^(?:reise|travel|reisen|resor)$/, labels: /\b(?:reise\w*|travel)\b/i },
+    home: { parent: 'lifestyle', label: 'Home and property', path: /^(?:bolig|interior|interiør|interior-og-design|hjem|home|bolig-og-interior|wohnen|property|eiendom)$/, labels: /\b(?:bolig|interiør|eiendom|property|wohnen)\b/i },
+    cars: { parent: 'lifestyle', label: 'Cars', path: /^(?:motor|bil|biler|cars|auto|bil-og-motor|broom|elbil)$/, labels: /\b(?:bil|biler|cars?|auto|elbil)\b/i },
+    fashion: { parent: 'lifestyle', label: 'Fashion and beauty', path: /^(?:mote|skjonnhet|skjønnhet|fashion|beauty|style|mode|mote-og-skjonnhet)$/, labels: /\b(?:mote|skjønnhet|fashion|beauty)\b/i },
+    relationships: { parent: 'lifestyle', label: 'Sex and relationships', path: /^(?:sex-og-samliv|samliv|relationships|parforhold|sex|dating)$/, labels: /\b(?:sex|samliv|parforhold|dating|relationships?)\b/i },
+    consumer: { parent: 'lifestyle', label: 'Consumer and shopping', path: /^(?:forbruker|shopping|tilbud|deals)$/, labels: /\b(?:forbruker|shopping)\b/i },
+
+    opinion: { label: 'Opinion and commentary',
+      path: /^(?:meninger|debatt|kommentar|kommentarer|kronikk|leder|opinion|comment|commentisfree|ledare|debat|meinung|kommentare|synspunkter|voices|ideas)$/,
+      labels: /\b(?:meninger|debatt|kommentar\w*|kronikk|leder|opinion|meinung|synspunkt\w*)\b/i },
+    politics: { label: 'Politics', path: /^(?:politikk|politics|politik|valg|election|elections)$/, labels: /\b(?:politikk|politics|politik|valg\w*|elections?)\b/i },
+    business: { label: 'Business and money',
+      path: /^(?:okonomi|økonomi|business|money|penger|privatokonomi|privatøkonomi|naeringsliv|næringsliv|wirtschaft|finans|finance|markets|markeder|aktier|bors-og-finans)$/,
+      labels: /\b(?:økonomi|business|finans|finance|næringsliv|privatøkonomi|wirtschaft|markets)\b/i },
+    tech: { label: 'Tech and science', path: /^(?:teknologi|tech|technology|digital|vitenskap|science|wissen|forskning)$/, labels: /\b(?:teknologi|tech\w*|vitenskap|science|forskning|wissenschaft)\b/i },
+    weather: { label: 'Weather', path: /^(?:vaer|vær|weather|wetter|vaersaker|værsaker)$/, labels: /\b(?:vær|weather|wetter|uvær)\b/i },
   };
+  // Main topics with their subtopics, in TOPICS order: for the popup and the panel.
+  const TOPIC_TREE = Object.entries(TOPICS).filter(([, t]) => !t.parent)
+    .map(([id, t]) => ({ id, label: t.label, children: Object.entries(TOPICS).filter(([, c]) => c.parent === id).map(([cid, c]) => ({ id: cid, label: c.label })) }));
+
   let muted = new Set();
+  // The topics to match: each muted topic, and all subtopics of a muted main topic.
+  let mutedNodes = [];
+  function setMuted(ids) {
+    muted = new Set(ids.filter(id => TOPICS[id]));
+    const ids2 = new Set([...muted].flatMap(id => [id, ...Object.keys(TOPICS).filter(c => TOPICS[c].parent === id)]));
+    mutedNodes = [...ids2].map(id => [id, TOPICS[id]]);
+  }
   function mutedTopicOf(url, teaser, meta) {
-    if (!muted.size) return '';
+    if (!mutedNodes.length) return '';
     let segs = [];
     try { segs = new URL(url).pathname.toLowerCase().split('/').filter(Boolean).slice(0, -1); } catch {}
     const labels = [meta?.sec, ...(meta?.tags || [])].filter(Boolean).join(' | ');
     const words = [teaser, meta?.title].filter(Boolean).join(' | ');
-    for (const id of muted) {
-      const t = TOPICS[id];
-      if (t && (segs.some(sg => t.path.test(sg)) || (labels && t.label_re.test(labels)) || (t.title && t.title.test(words)))) return id;
+    for (const [id, t] of mutedNodes) {
+      if ((t.path && segs.some(sg => t.path.test(sg))) || (t.labels && labels && t.labels.test(labels)) || (t.title && t.title.test(words))) return id;
     }
     return '';
   }
@@ -737,7 +831,7 @@
   // counts as an article when its URL looks like one, or when og:type says so deeper than one section.
   function onArticlePage() {
     const path = location.pathname;
-    if (site ? site.article.test(path) : genericArticlePath(path)) return true;
+    if (site?.article ? site.article.test(path) : genericArticlePath(path)) return true;
     const og = document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '';
     return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2;
   }
@@ -947,6 +1041,9 @@
       <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
     sh.querySelector('h1').textContent = pageMeta.site || host;
     document.documentElement.appendChild(plainHost);
+    document.getElementById('nothis-cover')?.remove();
+    // Remember the site, so next time the extension covers it before the original is drawn.
+    gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
 
     const sections = new Map(), byKey = new Map();
     const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
@@ -1010,6 +1107,7 @@
       }
       rows.set(it.key, li);
       fill(it, li);
+      if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
       if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
       return li;
     }
@@ -1022,7 +1120,7 @@
         const ol = document.createElement('ol'), seenKeys = new Set();
         const all = order().filter(id => !layout.hidden.includes(id)).flatMap(id => sections.get(id))
           .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key)).sort((a, b) => (b.score || 0) - (a.score || 0));
-        for (const it of all) if (!rows.has(it.key)) ol.append(row(it, true));
+        for (const it of all) if (!rows.has(it.key)) { const li = row(it, true); if (li) ol.append(li); }
         const sec = document.createElement('section'), h2 = document.createElement('h2');
         sec.id = 's-importance'; h2.textContent = T.byImportance;
         sec.append(h2, ol); main.append(sec);
@@ -1032,7 +1130,7 @@
         const ol = document.createElement('ol');
         for (const it of sections.get(id)) {
           if (rows.has(it.key)) continue; // an article in two sections is shown once
-          ol.append(row(it, false));
+          const li = row(it, false); if (li) ol.append(li);
         }
         if (!ol.childElementCount) continue;
         const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
@@ -1226,7 +1324,7 @@
     const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
     return { host, off: hostOff, level, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
       genericSites: CFG.genericSites, showOriginal, mutedTopics: [...muted],
-      topics: Object.fromEntries(Object.entries(TOPICS).map(([id, t]) => [id, t.label])), rewritten: plainHost ? plainCount : rewritten.size,
+      topics: TOPIC_TREE, rewritten: plainHost ? plainCount : rewritten.size,
       disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
   }
 
@@ -1257,6 +1355,9 @@
       button{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px;border:1px solid #d5d5d5;border-radius:6px;background:#f7f7f7;font:inherit;cursor:pointer;color:#111}
       button:hover{background:#eef7f1;border-color:#28a05a} button.on{background:#e3f4ea;border-color:#28a05a;font-weight:600}
       .small{font-size:11px;color:#888;margin-top:8px}
+      details summary{list-style:none} details summary::-webkit-details-marker{display:none}
+      details summary button::after{content:' ▸';color:#888} details[open] summary button::after{content:' ▾'}
+      button.sub{margin-left:14px;width:calc(100% - 14px);padding:4px 8px;font-size:12px} button:disabled{opacity:.6;cursor:default}
     </style>
     <div class="box" hidden>
       <h1>Declickbait<button class="x" data-act="close" aria-label="Close">✕</button></h1>
@@ -1264,7 +1365,8 @@
         ${LEVELS.map(l => `<button data-level="${l}" class="${level === l ? 'on' : ''}">${LEVEL_NAMES[l]}</button>`).join('')}
         <button data-act="defaultLevel">${level === defaultLevel ? '✓ Default for all sites' : 'Use this level on all sites'}</button></div>
       <div class="row"><div class="lbl">Never show me (all sites)</div>
-        ${Object.entries(TOPICS).map(([id, t]) => `<button data-topic="${id}" class="${muted.has(id) ? 'on' : ''}">${t.label}</button>`).join('')}</div>
+        ${TOPIC_TREE.map(g => `<details${g.children.some(c => muted.has(c.id)) ? ' open' : ''}><summary><button data-topic="${g.id}" class="${muted.has(g.id) ? 'on' : ''}">${g.label}</button></summary>
+          ${g.children.map(c => `<button data-topic="${c.id}" class="sub ${muted.has(c.id) || muted.has(g.id) ? 'on' : ''}"${muted.has(g.id) ? ' disabled' : ''}>${c.label}</button>`).join('')}</details>`).join('')}</div>
       <div class="row"><div class="lbl">Headline style</div>
         <button data-mode="rewrite" class="${CFG.display === 'rewrite' ? 'on' : ''}">Rewrite headlines</button>
         <button data-mode="reveal" class="${CFG.display === 'reveal' ? 'on' : ''}">Keep headlines, reveal on hover/tap</button>
@@ -1369,14 +1471,17 @@
     if (level === 'vanilla') off = true;
     hostOff = off;
     CFG.includeLead = level !== 'headlines';
-    muted = new Set(((await gm.get('mutedTopics', [])) || []).filter(id => TOPICS[id]));
+    setMuted((await gm.get('mutedTopics', [])) || []);
     CFG.display = await gm.get('display', CFG.display);
     let original = false; // the plain view's "Original" button: show the site as published, once
     try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
     // The extension's popup talks to settingsAction/settingsState; the userscript build has its own panel.
     if (EXT) GM.exposeSettings(async ({ act, arg } = {}) => { if (act) await settingsAction(act, arg); return settingsState(); });
     else if (typeof startPanel === 'function') startPanel(off, disabled);
-    if (off) return; // settings still open here, so the site can be switched back on
+    // The extension may have covered the page before it was drawn (gm-shim.js); plain view lifts the
+    // cover itself once it is up, every other path lifts it here.
+    const uncover = () => document.getElementById('nothis-cover')?.remove();
+    if (off) { uncover(); return; } // settings still open here, so the site can be switched back on
     await loadCache();
     if (CFG.marker) {
       const st = document.createElement('style');
@@ -1388,10 +1493,14 @@
       st.textContent = '.cb-muted{opacity:.08!important;filter:grayscale(1) blur(2px)!important;pointer-events:none!important}.cb-muted *{animation:none!important;transition:none!important}';
       document.head.appendChild(st);
     }
-    if ((level === 'plain' || level === 'pictures') && !original) {
+    // Plain view takes over a page, so it needs the same evidence as rewriting: a listed site, one
+    // the reader enabled, or a page that scores as a publication (never a shop).
+    const news = site || hostEnabled || isPublication();
+    if ((level === 'plain' || level === 'pictures') && !original && news) {
       if (!onArticlePage()) { if (await plainView(level === 'pictures')) return; }
       else calmArticle(level === 'pictures');
     }
+    uncover();
     scan();
     let t;
     let last = 0;

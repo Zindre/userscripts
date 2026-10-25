@@ -61,7 +61,9 @@ const base = {
   action: { default_title: 'NoThis', default_popup: 'popup.html', default_icon: icons([16, 19, 32, 38, 48]) },
   permissions: ['storage'],
   host_permissions: sites,
-  content_scripts: [{ matches: sites, js: ['gm-shim.js', 'nothis.js'], run_at: 'document_idle' }],
+  // gm-shim.js runs before the page is drawn (it covers plain-view sites against a flash of the
+  // original); the engine runs once the page has loaded. Both share the content script's scope.
+  content_scripts: [{ matches: sites, js: ['gm-shim.js'], run_at: 'document_start' }, { matches: sites, js: ['nothis.js'], run_at: 'document_idle' }],
 };
 
 const targets = {
