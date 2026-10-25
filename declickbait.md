@@ -9,7 +9,30 @@ Safari userscript (for [Userscripts.app](https://github.com/quoid/userscripts), 
 3. **`auto` mode** picks the article headline if it scores less "baity" than the teaser, otherwise the description (truncated at a sentence boundary), otherwise the rules-cleaned teaser.
 4. **Lead** (ingress) is shown under the headline in smaller, normal-weight text, unless it just repeats the headline.
 
-Rewritten headlines get a thin green bar on the left; hover shows the original. **Alt+Shift+U** (or the Userscripts menu command) toggles all headlines between original and rewritten. The menu command **"Declickbait: toggle lead (ingress)"** turns the lead on/off and remembers the choice.
+**Reading levels.** Choose one per site in the settings panel, and make any of them the default for all other sites:
+
+| Level | What you see |
+|---|---|
+| Vanilla | The site as published. The script does nothing there. |
+| Clear headlines | Clickbait teasers replaced with the article's own headline. |
+| Clear headlines + synopsis | The same, plus the article's lead under each headline. This is the default. |
+| Plain view with images | As plain view, with one image per article on the right. Every image is cropped to the same size, and articles without one get a quiet grey frame, so the list stays even. The image is the teaser's own, else the article's share image. |
+| Plain view | The site's front page swapped for a calm page: its articles grouped by section, headline and lead only. The site's own page is hidden, so ads, autoplay video, pop-ups and animation never show. A **Latest** section comes from the site's RSS feed. **Sections** lets you hide and reorder sections, remembered per site. **Original** shows the site as published, once. Paid articles are marked "Subscription" and open on the site as usual. Article pages are left alone and get clear headlines + synopsis. |
+
+**Headline style** applies to the two clear-headline levels. `rewrite` (default) replaces the teaser text. `reveal` leaves every headline as it is: hovering shows the article's headline and lead as a tooltip, and a small green ▸ button after the headline opens the same text underneath on click or tap, which is what you use on a phone. `stack` also leaves the teaser on top but always shows the article's headline in bold and the lead right below it, so you see the bait and the answer together. `CFG.display` sets the default.
+
+Why it works this way: see [extension/PURPOSE.md](extension/PURPOSE.md).
+
+**Opening the settings panel.** The script adds no buttons to the page. You open the panel when you need it. All of these work on sites you have disabled too, so you can turn them back on:
+
+- **Phone or tablet:** tap twice with two fingers, like a double tap but with two fingers side by side. Do it on an empty spot rather than on a link. Pinching and two-finger scrolling don't count.
+- **Keyboard:** **Alt+Shift+D** opens the panel, and pressing it again closes it.
+- **Address bar:** add `#declickbait` to the end of the address and press Enter. Or save `javascript:void(location.hash='declickbait')` as a bookmark in Favorites. On iPhone, tap the address bar and then that favourite.
+- **Tampermonkey and Violentmonkey:** use **Declickbait: settings…** in the script menu, where the other actions are menu commands too. The Userscripts app on Safari has no script menu.
+
+Close the panel with ✕ or Esc. It also lists the other sites you have disabled or enabled, and ✕ next to one undoes it.
+
+The green bar on the left tells you what hover will show: a solid bar marks a rewritten headline whose tooltip is the original; a dashed bar marks an untouched headline in reveal mode whose tooltip is the expanded version. **Alt+Shift+U** (or the settings panel) toggles all headlines between original and rewritten; in reveal mode it opens or closes every reveal box, in stack mode it hides or shows every block.
 
 ## Install
 
@@ -23,12 +46,14 @@ Everything is at the top of the file:
 
 - `CFG.mode`: `auto` | `title` | `description`
 - `CFG.fetch`: set `false` for rules-only (no requests)
-- `CFG.includeLead`: show the article lead under the headline (default on; the menu toggle overrides and persists)
+- `CFG.inlineLinks`: links inside running text (article bodies, "Les også:" lines) are never rewritten. `tooltip` (default) keeps the text and shows the article's headline and lead on hover, marked with a dotted underline; `rewrite` treats them like teasers; `off` leaves them alone.
 - `CFG.fitLines`: on tiles with fitted headline sizes (VG) the new text is sized to about this many lines
 - `CFG.minTeaserLen`: shortest teaser to touch (default 8)
-- `CFG.genericSites`: run on unlisted hosts using a generic article-URL heuristic
-- `CFG.excludeHosts`: hosts the script never touches. The menu command **Declickbait: disable on \<host\>** does the same at runtime and remembers it.
-- `SITES`: per-host article URL patterns. Included: VG, E24, BT, Aftenposten, BA, Dagbladet, NRK, TV 2, Nettavisen, DN (Norway); Aftonbladet, Expressen, SVT (Sweden); DR, Ekstra Bladet (Denmark); Bild, Spiegel, Welt (Germany); BBC, Guardian, Daily Mail, The Sun, Mirror, Independent, Telegraph (UK); CNN, NYT, Washington Post, NY Post, Fox News, HuffPost, BuzzFeed, Business Insider, AP, Reuters (US). Anything else goes through the generic heuristic when `CFG.genericSites` is on.
+- `CFG.genericSites`: run on unlisted hosts using a generic article-URL heuristic. It only activates on pages that score as a publication (two of: RSS/Atom feed, several `<article>` elements, news JSON-LD, article/frontpage `og:type`), and never on shops or cart/checkout/product pages. Set it to `false`, or use **Unlisted sites: only when enabled here** in the panel, and unlisted sites stay untouched until you choose a reading level for them there. UUIDs and id-like paths never count as article links.
+- `CFG.excludeHosts`: hosts the script never touches. Choosing **Vanilla** for a site in the settings panel does the same at runtime and remembers it.
+- `CFG.panelHotkey`: shortcut that opens and closes the panel (Alt+Shift+D); `CFG.panelGesture`: two-finger double tap opens it on touch screens.
+- `SITES`: per-host article URL patterns. Included: VG, E24, BT, Aftenposten, BA, Dagbladet, NRK, TV 2, Nettavisen, DN (Norway); Aftonbladet, Expressen, SVT (Sweden); DR, Ekstra Bladet (Denmark); Bild, Spiegel, Welt (Germany); BBC, Guardian, Daily Mail, The Sun, Mirror, Independent, Telegraph (UK); CNN, NYT, Washington Post, NY Post, Fox News, HuffPost, BuzzFeed, Business Insider, AP, Reuters (US). Amedia's local papers (Nordlys, Romerikes Blad, Fædrelandsvennen and some 80 others) share BA's URL format and work through the generic heuristic. Anything else goes through the generic heuristic when `CFG.genericSites` is on.
+- `LABELS`: badge and section labels stripped from the start of every teaser and fetched title ("Premium, ", "VG+, ", "Kommentar: "). Add a site's `strip` array in `SITES` for labels that only one host uses.
 - `RULES`: ordered regex rewrites; `ACRONYMS`: caps words left untouched
 
 ## Limits

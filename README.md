@@ -8,6 +8,9 @@ Browser userscripts by Sindre Sørensen. They run in [Userscripts](https://githu
 | [readable-fonts.user.js](readable-fonts.user.js) | Replaces body text fonts with Atkinson Hyperlegible Next on every site. Code stays monospace. |
 | [bandcamp-volume.user.js](bandcamp-volume.user.js) | Adds a volume slider and seek bar to Bandcamp, with the volume remembered per site. |
 | [google-yt-thumbs.user.js](google-yt-thumbs.user.js) | Sends clicks on YouTube thumbnails in Google results straight to the YouTube watch page instead of Google's inline player. |
+| [yt-summary.user.js](yt-summary.user.js) | Adds a **Summarize** button to YouTube videos. It opens Claude or Gemini (your pick, remembered) in a new tab and sends a summary request. Claude gets the transcript; Gemini gets the link, since it can watch YouTube itself. It uses your normal logged-in chat, so you need no API key. Auto-summarize every video can be turned on from the userscript menu. |
+| [tiktok-no-loop.user.js](tiktok-no-loop.user.js) | Stops TikTok videos from looping on tiktok.com. When a video ends it stays paused instead of playing again and again, which is handy if you fall asleep watching. Tap the video to watch it again. Works on iPhone with the Userscripts app. |
+| [tiktok-no-app-prompt.user.js](tiktok-no-app-prompt.user.js) | Hides the "Get the full app experience / Open TikTok" dialog and the "Open app" button on the mobile tiktok.com feed, and stops TikTok from sending you to the App Store after a few videos. When TikTok would do that, the page reloads with new videos instead. It only reloads right after you swipe, never on its own. Needs Safari 26 or newer for the App Store part. |
 
 ## Declickbait: how it works, and why it does not use AI
 
@@ -31,11 +34,11 @@ Every script carries `@updateURL` and `@downloadURL` pointing at this repository
 
 Declickbait changes the pages you read and makes network requests on your behalf. Know what that means before you turn it on.
 
-- **It can break pages.** The script rewrites headline elements on any site whose links look like articles. Sites change their markup without notice, and a rewrite that worked yesterday can push a layout out of shape today, hide a headline, or make a teaser unclickable. If a site misbehaves, use the menu command **Declickbait: disable on this site**. That choice is remembered.
+- **It can break pages.** The script rewrites headline elements on any site whose links look like articles. Sites change their markup without notice, and a rewrite that worked yesterday can push a layout out of shape today, hide a headline, or make a teaser unclickable. If a site misbehaves, open the settings panel (two-finger double tap on a phone, Alt+Shift+D on a computer, or add `#declickbait` to the address) and choose **Vanilla** for that site. That choice is remembered.
 - **It fetches article pages in the background.** For each teaser it loads the linked article once, with at most three requests at a time, and caches the result for twelve hours. That costs bandwidth on mobile, shows up in the site's server logs as page views you never made, and on metered paywalls it may count against your monthly free articles.
 - **Some sites will refuse.** Bot protection, rate limiting or consent walls can block the background requests. The script then falls back to its local cleanup rules only, and you may see very few rewrites on that site.
 - **The rewrite is only as honest as the site's own metadata.** The script trusts the article's title and description tags. If those are themselves clickbait, so is the result.
-- **It runs everywhere by default.** The `@match` is all sites. Add hosts to `CFG.excludeHosts`, use the per-site menu command, or narrow the match in your manager's settings if you prefer an allowlist.
+- **It runs everywhere by default.** The `@match` is all sites. Add hosts to `CFG.excludeHosts`, disable sites from the settings panel, or narrow the match in your manager's settings if you prefer an allowlist.
 - **No data leaves your browser.** There is no telemetry, no API key and no third-party service. The cache lives in your userscript manager's storage.
 
 You use these scripts at your own risk. They are provided as-is under the MIT license, without any warranty. The author is not affiliated with any of the sites the scripts run on.
@@ -52,4 +55,4 @@ Bug reports and site patterns are welcome as issues or pull requests. For Declic
 
 ### Norsk
 
-Userscripts for Safari (Userscripts-appen på Mac og iPhone), Tampermonkey og Violentmonkey. Declickbait bytter ut klikkagn-titler på VG, Dagbladet, NRK, E24, Aftenposten og mange utenlandske forsider med artikkelens egen tittel og ingress. Les avsnittet «Please read before installing Declickbait» over før du installerer. Kort oppsummert: scriptet kan ødelegge layout på enkelte sider, det henter artikkelsider i bakgrunnen, og du kan slå det av per nettsted fra menyen.
+Userscripts for Safari (Userscripts-appen på Mac og iPhone), Tampermonkey og Violentmonkey. Declickbait bytter ut klikkagn-titler på VG, Dagbladet, NRK, E24, Aftenposten og mange utenlandske forsider med artikkelens egen tittel og ingress. Les avsnittet «Please read before installing Declickbait» over før du installerer. Kort oppsummert: scriptet kan ødelegge layout på enkelte sider, det henter artikkelsider i bakgrunnen, og du kan slå det av per nettsted fra innstillingsknappen (den grønne D-en nederst til høyre).

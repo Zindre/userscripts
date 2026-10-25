@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.3.0
+// @version      1.12.0
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -29,29 +29,53 @@
     // 'title'       → always the article's own headline
     // 'description' → always the article's lead/description
     mode: 'auto',
+    // 'rewrite' → replace the teaser text.
+    // 'reveal'  → leave headlines as they are: hover shows the article headline + lead as a tooltip, and a
+    //             small green button after the headline opens the same text underneath on click or tap.
+    // 'stack'   → leave the teaser on top, always show the article headline (bold) and lead underneath.
+    // The menu command cycles through the three and remembers the choice.
+    display: 'rewrite',
     fetch: true,             // fetch article pages for metadata (false = rules only)
-    genericSites: true,      // run on hosts not listed in SITES (article-URL heuristic)
-    excludeHosts: [],        // never run here, e.g. ['example.com']; the menu command "disable on this site" adds to a persisted list
+    genericSites: true,      // run on hosts not listed in SITES when the page looks like a publication; false = only when you enable a site in the panel
+    // Never run here. Strings match the host and its subdomains; regexes match the full host.
+    // Search engines and web apps have no teasers to fix, and their pages churn constantly.
+    excludeHosts: [/(^|\.)google\.[a-z.]+$/, 'bing.com', 'duckduckgo.com', 'youtube.com', 'youtu.be', 'facebook.com', 'instagram.com', 'x.com', 'twitter.com', 'reddit.com', 'github.com', 'mail.proton.me', 'outlook.live.com', 'office.com'],
+    scanChunk: 150,          // anchors processed per slice before yielding to the page (keeps heavy pages responsive)
     maxFetchesPerPage: 60,
     concurrency: 3,
     cacheTtlMs: 12 * 3600e3,
     cacheMax: 2500,
     maxLen: 170,             // truncate descriptions at sentence boundary below this
     fitLines: 2.5,           // for tiles with fitted headline sizes (VG): size the new text to about this many lines
-    includeLead: true,       // show the article lead under the headline (smaller, normal weight); menu command toggles + remembers
+    includeLead: true,       // show the article lead under the headline; set from the reading level (see LEVELS)
     minTeaserLen: 8,
-    marker: true,            // subtle left bar on rewritten headlines; hover shows the original
+    marker: true,            // green left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
+    plainSkipGames: true,    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
+    inlineLinks: 'tooltip',  // links inside running text (article body, "Les også: …"): 'tooltip' keeps the text and
+                             // shows headline + lead on hover; 'rewrite' treats them like teasers; 'off' ignores them
     hotkey: { key: 'U', alt: true, shift: true }, // Alt+Shift+U toggles original/rewritten
+    panelHotkey: { key: 'D', alt: true, shift: true }, // Alt+Shift+D opens/closes the settings panel (also on disabled sites)
+    panelGesture: true,      // two-finger double tap opens the settings panel on touch screens
   };
 
-  // Per-site config. `article` matches URLs worth fetching. `skip` = container selectors to ignore.
+  // ───────────────────────────── Special cases ─────────────────────────────
+  // Labels that sites glue onto teaser text (paywall badges, section names, screen-reader
+  // prefixes). Removed from the start of every teaser and fetched title before anything else.
+  // Add one regex per label; keep them anchored with ^ so ordinary words are never touched.
+  const LABELS = [
+    /^(?:[A-ZÆØÅÄÖ0-9]{1,12}\+|Premium|Plus|Pluss|Abo|Weltplus Artikel|Spiegel\+|Bild ?Plus|Exklusiv|Exclusive)\s*[,:–—-]?\s+/i,
+    /^(?:Kommentar|Leder|Debatt|Analyse|Meninger|Kronikk|Opinion|Analysis|Comment|Review|Anmeldelse|Ledare|Krönika|Debat)\s*[,:]\s+/i,
+  ];
+
+  // Per-site config. `article` matches URLs worth fetching. Optional `strip`: extra regexes
+  // removed from that site's teasers only (same idea as LABELS, but local to one host).
   const SITES = [
     { host: /(^|\.)vg\.no$/,          article: /\/i\/[A-Za-z0-9]{5,}/ },
     { host: /(^|\.)e24\.no$/,         article: /\/i\/[A-Za-z0-9]{5,}/ },
     { host: /(^|\.)bt\.no$/,          article: /\/i\/[A-Za-z0-9]{5,}/ },
     { host: /(^|\.)aftenposten\.no$/, article: /\/i\/[A-Za-z0-9]{5,}/ },
-    { host: /(^|\.)ba\.no$/,          article: /\/[a-z0-9-]+\/[a-z]\/[A-Za-z0-9]{5,}/ },
-    { host: /(^|\.)dagbladet\.no$/,   article: /\/\d{7,}\/?$/ },
+    { host: /(^|\.)ba\.no$/,          article: /\/[a-z]{1,2}\/\d{1,3}-\d{1,3}-\d{4,}$/ }, // Amedia: /slug/s/80-8-27129
+    { host: /(^|\.)dagbladet\.no$/,   article: /\/\d{7,}\/?$|\/video\/[^/]+\/[A-Za-z0-9]{6,}\/?$/ },
     { host: /(^|\.)nrk\.no$/,         article: /-1\.\d{7,}$|\/artikkel\/[^\/]*\d{6,}$/ },
     { host: /(^|\.)tv2\.no$/,         article: /\/\d{7,}\/?$/ },
     { host: /(^|\.)nettavisen\.no$/,  article: /\/\d{6,}|\/[a-z-]{6,}\/[a-z0-9-]{10,}/ },
@@ -62,9 +86,12 @@
     { host: /(^|\.)svt\.se$/,          article: /^\/nyheter\/(?!video\/)[a-z-]+\/[a-z0-9]+(-[a-z0-9]+){2,}/ },
     { host: /(^|\.)dr\.dk$/,           article: /^\/(?:nyheder|sporten)\/.+\/[a-z0-9]+(-[a-z0-9]+){2,}/ },
     { host: /(^|\.)ekstrabladet\.dk$/, article: /\/article\d{6,}\.ece|\/\d{7,}$/ },
+    // Finland
+    { host: /(^|\.)yle\.fi$/,          article: /\/a\/\d{2,}-\d{5,}/ },
+    { host: /(^|\.)hs\.fi$/,           article: /\/art-\d{10,}\.html/ },
     { host: /(^|\.)bild\.de$/,         article: /-[0-9a-f]{20,}$|\/[a-z0-9]+(-[a-z0-9]+){3,}/ },
     { host: /(^|\.)spiegel\.de$/,      article: /-a-[0-9a-f-]{20,}$|^\/[a-z]+\/(?:[a-z]+\/)?[a-z0-9]+(-[a-z0-9]+){3,}/ },
-    { host: /(^|\.)welt\.de$/,         article: /\/(?:article|plus)[0-9a-f]{16,}\// },
+    { host: /(^|\.)welt\.de$/,         article: /\/(?:article|plus)[0-9a-f]{16,}\//, strip: [/^[A-Za-zäöü]+ - (?=.{15})/] },
     // UK / US
     { host: /(^|\.)bbc\.(com|co\.uk)$/, article: /\/(news|sport)\/[a-z0-9-]*\d{6,}|\/articles\/[a-z0-9]{10,}/ },
     { host: /(^|\.)theguardian\.com$/, article: /\/\d{4}\/[a-z]{3}\/\d{2}\// },
@@ -84,10 +111,51 @@
     { host: /(^|\.)apnews\.com$/,      article: /\/article\// },
     { host: /(^|\.)reuters\.com$/,     article: /-\d{4}-\d{2}-\d{2}\/?$/ },
   ];
-  // Unlisted hosts: numeric id, or a slug of 4+ words (optionally .html), on the same registrable domain.
-  const GENERIC_ARTICLE = /(\/\d{5,}(\/|$|[?#]))|(\/[a-z0-9]+(-[a-z0-9]+){3,}(\.html?)?\/?($|[?#]))/i;
+  // Unlisted hosts. A path is article-like when it has a numeric id segment, an Amedia-style id
+  // (/slug/s/80-8-27129, ~80 Norwegian local papers), or a slug of 4+ tokens of which at least 3
+  // are real words. UUIDs and hex ids (web apps: /consoles/93552fcc-f6f1-4566-…) never count.
+  const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const NOT_ARTICLE = /^\/(?:author|authors|profile|people|forfatter|journalist|tag|tags|topic|topics|tema-side|category|categories|kategori|search|suche|sok|søk)\//i;
+  function genericArticlePath(path) {
+    if (UUID.test(path) || NOT_ARTICLE.test(path)) return false;
+    if (/\/[a-z]{1,2}\/\d{1,3}-\d{1,3}-\d{4,}$/i.test(path)) return true;
+    const segs = path.split('/').filter(Boolean);
+    if (segs.some(sg => /^\d{5,}$/.test(sg))) return true;
+    const last = (segs[segs.length - 1] || '').replace(/\.html?$/i, '');
+    const tokens = last.split('-');
+    return tokens.length >= 4 && tokens.filter(w => /^[a-z]{3,}$/i.test(w) && !/^[0-9a-f]+$/i.test(w)).length >= 3;
+  }
+  // Generic mode only runs on pages that look like a publication, never on web apps or shops.
+  // Score: RSS/Atom feed 1, 5+ <article> 1 (20+: 2), news JSON-LD 2, article/frontpage og:type 1. Needs 2.
+  // Shops (WooCommerce, Shopify, cart/checkout/product pages) are always out.
+  let publication = false;
+  function isPublication() {
+    if (publication) return true;
+    const q = sel => document.querySelector(sel);
+    const body = document.body?.className || '';
+    const ogType = q('meta[property="og:type"]')?.getAttribute('content') || '';
+    const shop = /\b(woocommerce|shopify|cart|checkout|product|shop)\b/i.test(body) || /^product/i.test(ogType) ||
+      !!q('script[src*="shopify"], link[href*="cdn.shopify.com"], form[action*="/cart"], [class*="add-to-cart"], [class*="add_to_cart"], [name="add-to-cart"]') ||
+      /\/(cart|checkout|basket|handlekurv|kasse|product|products|produkt|shop|store)(\/|$)/i.test(location.pathname);
+    if (shop) return false;
+    const articles = document.querySelectorAll('article').length;
+    let score = 0;
+    if (q('link[rel="alternate"][type*="rss"], link[rel="alternate"][type*="atom"]')) score += 1;
+    if (articles >= 20) score += 2; else if (articles >= 5) score += 1;
+    if (/^(article|frontpage|blog)$/i.test(ogType)) score += 1;
+    if ([...document.querySelectorAll('script[type="application/ld+json"]')].some(sc => /"@type"\s*:\s*"(?:NewsArticle|NewsMediaOrganization|ItemList|CollectionPage|Blog|BlogPosting|Article|LiveBlogPosting)"/.test(sc.textContent))) score += 2;
+    publication = score >= 2;
+    return publication;
+  }
   const registrable = h => { const p = h.split('.'); return (p.length > 2 && /^(co|com|org|net|gov|ac|edu)$/.test(p[p.length - 2]) && p[p.length - 1].length === 2 ? p.slice(-3) : p.slice(-2)).join('.'); };
-  const SKIP_CONTAINERS = 'nav, header, footer, [role="navigation"], [role="banner"], [role="contentinfo"], [aria-hidden="true"]';
+  const SKIP_CONTAINERS = 'nav, header, footer, [role="navigation"], [role="banner"], [role="contentinfo"]';
+  // aria-hidden marks duplicated carousel teasers (skip), but consent dialogs also hide the whole
+  // page behind them with it (keep: the teasers are real, just covered for now).
+  function skipLink(a) {
+    if (a.closest(SKIP_CONTAINERS)) return true;
+    const hidden = a.closest('[aria-hidden="true"]');
+    return !!hidden && hidden.querySelectorAll('a[href]').length < 40;
+  }
 
   // Local rewrite rules, applied in order. Edit freely.
   const RULES = [
@@ -97,10 +165,10 @@
     [/\s*[:–—-]\s*(?:det skjedde|se hva som skjedde|det som skjedde|resultatet|svaret overrasker|det er ikke det du tror|what happened next|the result|the answer|and it'?s not what you think|you'?ll be surprised|here'?s what happened|you need to see|the internet is|fans are losing it|everyone is saying|was dann passierte|das ergebnis|sie werden nicht glauben|det som hände|se resultatet|du kommer inte tro|se hvad der skete|det skete|du vil ikke tro)[^.]*$/i, ''],
     // parenthetical / bracketed teasers  "(VIDEO)" "[BILDER]" "(PHOTOS)"
     [/\s*[([](?:video|bilder|foto|se video|watch|photos?|pictures|gallery|pics|bildergalerie|bilder|billeder)[)\]]\s*/gi, ' '],
+    // all-caps kicker before a lead: "BRÅK: Både president …"
+    [/^[A-ZÆØÅÄÖÜ]{3,}:\s+(?=\S)/, ''],
     // stray entities in metadata ("&nbsp;")
     [/&(?:nbsp|#160);/g, ' '],
-    // paywall/brand badges read into the text: "VG+, ..." "E24+ ..."
-    [/^[A-ZÆØÅ0-9]{1,4}\+\s*[,:]?\s*/, ''],
     // doubled quote dashes: "Navn: - - Sitat"
     [/(\s|:)[-–—]\s+[-–—]\s/g, '$1– '],
     // punctuation
@@ -115,6 +183,9 @@
   // Caps words kept as-is when un-shouting. Add your own.
   const ACRONYMS = new Set(['I', 'A', 'US', 'UK', 'EU', 'UN', 'FN', 'TV', 'AI', 'KI', 'PM', 'MP', 'MPs', 'CEO', 'NHS', 'FBI', 'CIA', 'NFL', 'NBA', 'MLB', 'NHL', 'NCAA', 'GOP', 'ISIS', 'IMF', 'WHO', 'NYC', 'LA', 'DC', 'NY', 'BBC', 'CNN', 'ABC', 'NBC', 'CBS', 'ESPN', 'HBO', 'ITV', 'NATO', 'UEFA', 'FIFA', 'NASA', 'COVID', 'OPEC', 'ASEAN', 'UNICEF', 'NASDAQ', 'GDPR', 'IKEA', 'BMW', 'VW', 'DNA', 'IQ', 'GPS', 'PDF', 'PC', 'iOS', 'MIT', 'UCLA', 'NOKAS', 'FHI', 'NHO', 'NRK', 'NAV', 'SSB', 'PST', 'USA', 'LO', 'UDI', 'UNE', 'NORAD', 'EM', 'VM', 'OL', 'SVT', 'SD', 'DR', 'DF', 'SF', 'AfD', 'CDU', 'CSU', 'SPD', 'FDP', 'DFB', 'ARD', 'ZDF', 'RTL', 'F1', 'MMA', 'UFC', 'WWE']);
 
+  // Words that point at the news instead of saying it ("Vance taler – så skjer dette", "Derfor gjør hun det").
+  const VAGUE_REFS = /\b(?:dette|disse|denne|slik|sånn|her er|derfor|grunnen|svaret|årsaken|hemmeligheten|this|these|here's|here is|that's why|the reason|the answer|the secret|what happened|dies|diese|darum|deshalb|der grund|so geht|detta|dessa|därför|så här|anledningen|grunden|sådan)\b/i;
+  const VAGUE_END = /\b(?:dette|disse|denne|slik|sånn|det|this|these|that|it|dies|das|detta|dessa)[.!?…]*$/i;
   const VAGUE_OPENERS = /^(?:dette|denne|disse|derfor|slik|her|nå|hun|han|de|det|sånn|this|these|that|those|why|how|here|she|he|they|it|das|dies|diese|dieser|deshalb|darum|so|hier|er|sie|warum|wie|detta|därför|så här|hon|varför|hur|sådan|hvorfor|hvordan)\b/i;
   const TRIGGERS = /\b(?:sjokk|sjokkert|rystet|ryster|avslør\w*|hemmelig\w*|utrolig|knalltøff|grep|reager\w*|raser|slakter|hyller|tabbe|advar\w*|bryter tausheten|shock\w*|stunn\w*|reveal\w*|secret|insane|unbelievable|jaw-dropping|slam\w*|blast\w*|rip\w* into|breaks silence|bombshell|brutal|savage|destroy\w*|meltdown|explosive|chilling|heartbreaking|hilarious|mind-blowing|game-changer|nightmare|horrifying|terrifying|devastating|outrag\w*|fury|furious|erupts?|goes viral|obsessed|must-see|epic fail|bizarre|weird|genius|crazy|schock\w*|skandal|krass|unfassbar|irre|wahnsinn|enthüllt|geheim\w*|eklat|wirbel|zoff|knallhart|chock\w*|hemlig\w*|rasar|sågar|hyllar|otrolig\w*|larm\w*|chok\w*|afslør\w*|sabler|hylder|skandale|kaos)\b/i;
 
@@ -122,7 +193,6 @@
   const host = location.hostname.replace(/^www\./, '');
   const site = SITES.find(s => s.host.test(host));
   if (!site && !CFG.genericSites) return;
-  const articleRe = site ? site.article : GENERIC_ARTICLE;
 
   const gm = {
     async get(k, d) { try { return typeof GM !== 'undefined' && GM.getValue ? await GM.getValue(k, d) : d; } catch { return d; } },
@@ -132,8 +202,10 @@
       GM.xmlHttpRequest({ method: 'GET', timeout: 12000, onload: res, onerror: rej, ontimeout: rej, ...opts });
     }); },
   };
+  // Running inside the browser extension (extension/): its toolbar popup replaces the in-page panel.
+  const EXT = typeof GM !== 'undefined' && typeof GM.exposeSettings === 'function';
 
-  const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+  const norm = s => (s || '').replace(/[\u00AD\u200B\u2060\uFEFF]/g, '').replace(/\s+/g, ' ').trim(); // drop soft hyphens / zero-width joiners
 
   function fixCase(s) {
     const CAPS = /^[A-ZÆØÅÄÖÜ]{3,}$/, ANYCAPS = /^[A-ZÆØÅÄÖÜ]+$/;
@@ -153,8 +225,14 @@
     }).join(' ');
   }
 
+  function stripLabels(s) {
+    let out = norm(s), prev;
+    do { prev = out; for (const re of LABELS.concat(site?.strip || [])) out = out.replace(re, ''); } while (out !== prev && out);
+    return out || norm(s);
+  }
+
   function applyRules(s) {
-    let out = norm(s);
+    let out = stripLabels(s);
     for (const [re, rep] of RULES) out = out.replace(re, rep);
     out = fixCase(norm(out));
     if (out && /^[a-zæøå]/.test(out)) out = out[0].toUpperCase() + out.slice(1);
@@ -165,6 +243,8 @@
     if (!s) return 99;
     let n = 0;
     if (VAGUE_OPENERS.test(s)) n += 2;
+    if (VAGUE_REFS.test(s)) n += 2;
+    if (VAGUE_END.test(s)) n += 2; // ends by pointing: "... så skjer dette"
     if (/[?:…]$|\.\.\.$/.test(s)) n += 2;
     if (/!/.test(s)) n += 1;
     if (/^[«"“].*[»"”]$/.test(s)) n += 2;               // quote-only teaser
@@ -183,9 +263,10 @@
   }
 
   // ───────────────────────────── Cache ─────────────────────────────
+  const CACHE_KEY = 'cache_v2'; // bumped in 1.7.3: entries stored before the cross-site guard may be polluted
   let cache = null, cacheDirty = false;
   async function loadCache() {
-    cache = (await gm.get('cache', {})) || {};
+    cache = (await gm.get(CACHE_KEY, {})) || {};
     const now = Date.now();
     for (const k in cache) if (now - cache[k].t > CFG.cacheTtlMs) { delete cache[k]; cacheDirty = true; }
   }
@@ -193,9 +274,12 @@
     if (!cacheDirty) return;
     clearTimeout(timer);
     timer = setTimeout(async () => {
+      const stored = (await gm.get(CACHE_KEY, {})) || {};   // other tabs may have added entries meanwhile
+      const now = Date.now();
+      for (const k in stored) if (!(k in cache) && now - stored[k].t <= CFG.cacheTtlMs) cache[k] = stored[k];
       const keys = Object.keys(cache);
       if (keys.length > CFG.cacheMax) keys.sort((a, b) => cache[a].t - cache[b].t).slice(0, keys.length - CFG.cacheMax).forEach(k => delete cache[k]);
-      await gm.set('cache', cache); cacheDirty = false;
+      await gm.set(CACHE_KEY, cache); cacheDirty = false;
     }, 1500);
   }; })();
 
@@ -204,22 +288,66 @@
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const q = sel => doc.querySelector(sel);
     const meta = (sel) => norm(q(sel)?.getAttribute('content'));
-    let ldTitle = '', ldDesc = '';
+    let ldTitle = '', ldDesc = '', ldImage = '';
+    const imageOf = v => typeof v === 'string' ? v : Array.isArray(v) ? imageOf(v[0]) : (v && (v.url || v.contentUrl)) || '';
     for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
       try {
         const j = JSON.parse(s.textContent);
         const items = [].concat(j['@graph'] || j);
         for (const it of items) {
           if (!it || !/Article|NewsArticle|Report/i.test(String(it['@type']))) continue;
-          ldTitle = ldTitle || norm(it.headline); ldDesc = ldDesc || norm(it.description);
+          ldTitle = ldTitle || norm(it.headline); ldDesc = ldDesc || norm(it.description); ldImage = ldImage || imageOf(it.image);
         }
       } catch {}
     }
     const h1 = norm(q('article h1, main h1, h1')?.textContent);
     const title = ldTitle || meta('meta[property="og:title"]') || h1 || norm(doc.title).replace(/\s*[|–-]\s*[^|–-]{2,30}$/, '');
-    const desc = ldDesc || meta('meta[property="og:description"]') || meta('meta[name="description"]') || norm(q('article p, main p, [class*="lead"], [class*="ingress"], [class*="standfirst"]')?.textContent);
-    return { title: norm(title), desc: norm(desc) };
+    // Fallback lead: the first paragraph-like element that reads as prose, never nav/skip-link text.
+    const prose = t => t.length >= 40 && t.length <= 600 && /[.!?…»"]/.test(t) && !/^(hopp til|skip to|gå til|til hovedinnhold|jump to)/i.test(t) && (t.match(/[a-zæøåäöü] [a-zæøåäöü]/g) || []).length >= 4;
+    let fallback = '';
+    for (const el of doc.querySelectorAll('article p, main p, [class*="lead"], [class*="ingress"], [class*="standfirst"]')) { const t = norm(el.textContent); if (prose(t)) { fallback = t; break; } }
+    const desc = ldDesc || meta('meta[property="og:description"]') || meta('meta[name="description"]') || fallback;
+    const self = meta('meta[property="og:url"]') || norm(q('link[rel="canonical"]')?.getAttribute('href'));
+    let image = meta('meta[property="og:image"]') || meta('meta[name="twitter:image"]') || ldImage;
+    try { image = image ? new URL(image, url).href : ''; } catch { image = ''; }
+    // og:title often carries a section or site suffix (Bild: "… | News").
+    return { title: norm(title).replace(/\s+\|\s+[^|]{2,25}$/, ''), desc: norm(desc), self, image };
   }
+
+  // Site-wide boilerplate ("Fædrelandsvennen - Få siste nytt fra …") shows up as the title or
+  // description of paywalled or shell pages. It is generic if it equals the front page's own
+  // metadata, or if two different articles return the same text.
+  const pageMeta = (() => {
+    const m = sel => norm(document.querySelector(sel)?.getAttribute('content'));
+    return { title: m('meta[property="og:title"]') || norm(document.title), desc: m('meta[property="og:description"]') || m('meta[name="description"]'),
+      site: m('meta[property="og:site_name"]') };
+  })();
+  const seenText = new Map();   // text -> Set of article urls
+  const generic = new Set();
+  function isGeneric(text, url) {
+    if (!text) return false;
+    const t = text.toLowerCase();
+    if (generic.has(t)) return true;
+    if (t === pageMeta.title.toLowerCase() || t === pageMeta.desc.toLowerCase() || (pageMeta.site && t === pageMeta.site.toLowerCase())) { generic.add(t); return true; }
+    const urls = seenText.get(t) || new Set(); urls.add(url); seenText.set(t, urls);
+    if (urls.size >= 2) { generic.add(t); refreshGeneric(t); return true; }
+    return false;
+  }
+  function cleanMeta(m, url) {
+    if (!m) return m;
+    return { ...m, title: isGeneric(m.title, url) ? '' : m.title, desc: isGeneric(m.desc, url) ? '' : m.desc };
+  }
+  // A text just turned out to be generic: redo the headlines that already used it.
+  function refreshGeneric(t) {
+    for (const [el, job] of jobs) {
+      if (!el.isConnected) { jobs.delete(el); continue; }
+      const m = cache[job.key];
+      if (!m || (norm(m.title).toLowerCase() !== t && norm(m.desc).toLowerCase() !== t)) continue;
+      const { text, lead } = choose(job.orig, cleanMeta(m, job.url));
+      apply(el, job.orig, text, lead);
+    }
+  }
+  const jobs = new Map();       // el -> { orig, url, key }
 
   const fetchCount = { n: 0 };
   async function getMeta(url) {
@@ -227,11 +355,18 @@
     if (cache[key]) return cache[key];
     if (!CFG.fetch || fetchCount.n >= CFG.maxFetchesPerPage) return null;
     fetchCount.n++;
+    const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
     try {
       const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
       if (r.status < 200 || r.status >= 400) throw new Error('HTTP ' + r.status);
+      // Guard against a response that belongs to another request (seen with concurrent tabs in
+      // Userscripts.app): the final URL and the page's own og:url/canonical must be on our domain.
+      const finalUrl = r.finalUrl || r.responseURL || '';
+      if (finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)) return null;
+      if (!site && finalUrl) { try { if (!genericArticlePath(new URL(finalUrl).pathname)) return null; } catch {} } // redirected to login/landing
       const m = extractMeta(r.responseText, url);
-      cache[key] = { ...m, t: Date.now() }; cacheDirty = true; saveCache();
+      if (m.self && domainOf(m.self) && domainOf(m.self) !== domainOf(url)) return null;
+      cache[key] = { title: m.title, desc: m.desc, image: m.image, t: Date.now() }; cacheDirty = true; saveCache();
       return cache[key];
     } catch (e) {
       cache[key] = { title: '', desc: '', t: Date.now(), err: 1 }; cacheDirty = true; saveCache();
@@ -243,14 +378,20 @@
   function choose(teaser, meta) {
     const cleaned = applyRules(teaser);
     if (!meta) return { text: cleaned, lead: '' };
-    const title = applyRules(meta.title), desc = meta.desc ? truncate(applyRules(meta.desc), CFG.maxLen) : '';
+    let title = applyRules(meta.title);
+    if (title.split(' ').length < 2) title = ''; // a lone brand/section name ("Nordlys") is not a headline
+    // A description the publisher cut off ("… mellomvalget. Vid…") ends at its last full sentence.
+    const whole = d => /(?:…|\.\.\.)\s*$/.test(d) && /[.!?]\s/.test(d) ? d.replace(/^([\s\S]*[.!?])\s[\s\S]*$/, '$1') : d;
+    const desc = meta.desc ? truncate(applyRules(whole(meta.desc)), CFG.maxLen) : '';
     const same = (a, b) => a && b && a.toLowerCase() === b.toLowerCase();
     let text;
     if (CFG.mode === 'title') text = title || desc || cleaned;
     else if (CFG.mode === 'description') text = desc || title || cleaned;
     else {
       const tScore = baitScore(cleaned), aScore = baitScore(title);
-      if (title && !same(title, cleaned) && aScore < tScore) text = title;
+      // The site's own headline can point just as vaguely ("Gjør dette under talen"): then the lead says it.
+      const vague = t => VAGUE_REFS.test(t) || VAGUE_END.test(t);
+      if (title && !same(title, cleaned) && aScore < tScore && !(desc && vague(title))) text = title;
       else if (desc && tScore >= 2 && !same(desc, cleaned)) text = desc;
       else if (title && !same(title, cleaned) && aScore <= tScore) text = title;
       else text = cleaned;
@@ -277,19 +418,30 @@
     const h = href.hostname.replace(/^www\./, '');
     const target = SITES.find(s => s.host.test(h));
     if (target) { if (!target.article.test(href.pathname)) return false; }
-    else if (site || registrable(h) !== registrable(host) || !articleRe.test(href.pathname)) return false;
+    else if (site || registrable(h) !== registrable(host) || !genericArticlePath(href.pathname)) return false;
     if (href.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '')) return false;
     return href.href;
   }
 
-  // Visible teaser text. aria-label wins (VG/NRK put the un-hyphenated headline there);
-  // innerText keeps a space at <br>/block boundaries where textContent would glue words.
+  // Visible teaser text. innerText keeps a space at <br>/block boundaries where textContent
+  // would glue words; soft hyphens are dropped. aria-label is only a fallback: Schibsted sites
+  // prefix it with badge text ("Premium, …", "VG+, …") that is not on screen.
   function textOf(el) {
-    const al = norm(el.getAttribute && el.getAttribute('aria-label'));
-    if (al && al.length >= CFG.minTeaserLen) return al;
     let t = '';
-    try { t = norm(el.innerText); } catch {}
-    return t || norm(el.textContent);
+    try { t = norm(el.innerText.replace(/\u00AD/g, '')).replace(/\s*[▸▾]$/, ''); } catch {}
+    if (t) return t;
+    const al = norm(el.getAttribute && el.getAttribute('aria-label'));
+    return al || norm(el.textContent.replace(/\u00AD/g, ''));
+  }
+
+  // A link is "inline" when its text-flow container has other words around it.
+  function isInline(a) {
+    const box = a.closest('p, li, blockquote, dd, figcaption, td');
+    if (!box || box.querySelector('h1, h2, h3, h4')) return false;
+    const all = box.textContent;
+    if (all.length > 3000) return false; // a container that big is a layout cell, not a sentence
+    const rest = norm(all).replace(norm(a.textContent), '');
+    return /(?:\p{L}+\s*){2,}/u.test(rest);
   }
 
   function headlineEl(a) {
@@ -317,12 +469,14 @@
       const segs = [...target.children].filter(fitted).map(fs);
       el.dataset.cbMaxSeg = segs.length ? Math.min(...segs) : 0;
     }
+    // Size the new text to about CFG.fitLines lines of the tile width. Never larger than the
+    // site's own size (or its fitted segments); never below 20px unless the site itself is smaller.
     const maxSeg = +el.dataset.cbMaxSeg;
-    if (maxSeg) {
-      const width = target.getBoundingClientRect().width || el.getBoundingClientRect().width || 300;
-      const want = width * CFG.fitLines / (0.55 * Math.max(text.length, 10));
-      target.style.fontSize = Math.round(Math.max(base, Math.min(maxSeg, want))) + 'px';
-    }
+    const width = target.getBoundingClientRect().width || el.getBoundingClientRect().width || 300;
+    const want = width * CFG.fitLines / (0.55 * Math.max(text.length, 10));
+    const cap = maxSeg || base;
+    const size = Math.round(Math.max(Math.min(base, 20), Math.min(cap, want)));
+    if (maxSeg || size < base) target.style.fontSize = size + 'px';
     if (el.hasAttribute('aria-label')) el.setAttribute('aria-label', lead ? text + ' – ' + lead : text);
     let ok = false;
     if (target.children.length === 0) { target.textContent = text; ok = true; }
@@ -336,12 +490,77 @@
       sp.className = 'cb-lead';
       sp.textContent = lead;
       target.appendChild(sp);
+      if (!pushesLayout(sp, el)) sp.remove(); // fixed-height item: headline only
     }
     return ok;
   }
 
+  // Did inserting `block` push the following content down? In lists with fixed-height items
+  // (live tickers, carousels) it does not, and the block would overlap the next item.
+  function pushesLayout(block, el) {
+    const a = el.closest('a') || el;
+    const card = a.closest('li, article') || a.parentElement;
+    if (!card || !block.isConnected) return true;
+    const r = block.getBoundingClientRect();
+    if (!r.height) return true;
+    // 1. the card must grow with the block (a fixed-height item does not)
+    const withBlock = card.getBoundingClientRect().height;
+    block.hidden = true;
+    const without = card.getBoundingClientRect().height;
+    block.hidden = false;
+    if (withBlock - without < r.height - 2) return false;
+    // 2. and the block must not lie on top of a sibling item (absolutely positioned lists)
+    for (const sib of card.parentElement ? card.parentElement.children : []) {
+      if (sib === card) continue;
+      const sr = sib.getBoundingClientRect();
+      if (sr.height && r.bottom > sr.top + 2 && r.top < sr.bottom - 2 && r.right > sr.left + 2 && r.left < sr.right - 2) return false;
+    }
+    return true;
+  }
+
+  function revealBlock(el) {
+    let r = el.nextElementSibling;
+    if (r && r.classList.contains('cb-reveal')) return r;
+    r = document.createElement('span'); r.className = 'cb-reveal'; r.hidden = true;
+    el.insertAdjacentElement('afterend', r);
+    return r;
+  }
+  // 'reveal' and 'stack': the teaser stays; the article headline + lead go in a block underneath.
+  // reveal = block hidden until hover/tap; stack = block always visible.
+  function applyReveal(el, orig, next, lead) {
+    const changed = norm(next) !== norm(orig), stack = CFG.display === 'stack';
+    if (!changed && !lead) return;
+    if (!el.dataset.cbOrigText) el.dataset.cbOrigText = orig;
+    el.dataset.cbNew = next; el.dataset.cbLead = lead;
+    if (!stack) el.title = [changed ? next : '', lead].filter(Boolean).join(' — ');
+    if (CFG.marker) el.classList.add(stack ? 'cb-stack' : 'cb-hint');
+    const r = revealBlock(el);
+    if (stack) r.hidden = showOriginal;
+    r.textContent = '';
+    if (changed) { const b = document.createElement('b'); b.textContent = next; r.appendChild(b); }
+    if (lead) { if (changed) r.appendChild(document.createElement('br')); r.appendChild(document.createTextNode(lead)); }
+    if (stack && !r.hidden && !pushesLayout(r, el)) {
+      // fixed-height item: fall back to tooltip only, no block
+      r.remove(); el.title = [changed ? next : '', lead].filter(Boolean).join(' — ');
+      el.classList.remove('cb-stack'); if (CFG.marker) el.classList.add('cb-hint');
+      return;
+    }
+    if (!stack && !el.querySelector(':scope .cb-btn')) {
+      const btn = document.createElement('span');
+      btn.className = 'cb-btn'; btn.textContent = '▸'; btn.setAttribute('role', 'button'); btn.setAttribute('aria-label', 'Show article headline and lead');
+      btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); r.hidden = !r.hidden; btn.textContent = r.hidden ? '▸' : '▾'; });
+      el.appendChild(btn);
+    }
+    rewritten.add(el);
+  }
+
   function apply(el, orig, next, lead = '') {
-    if (!next || (norm(next) === norm(orig) && !lead)) return;
+    if (!next) return;
+    if (CFG.display === 'reveal' || CFG.display === 'stack') return applyReveal(el, orig, next, lead);
+    if (norm(next) === norm(orig) && !lead) {
+      if (el.dataset.cbOrig) { el.innerHTML = el.dataset.cbOrig; if (el.dataset.cbOrigLabel) el.setAttribute('aria-label', el.dataset.cbOrigLabel); el.classList.remove('cb-rewritten'); el.removeAttribute('title'); delete el.dataset.cbOrig; delete el.dataset.cbNew; delete el.dataset.cbLead; rewritten.delete(el); }
+      return;
+    }
     const first = !el.dataset.cbOrig;
     if (first) { el.dataset.cbOrig = el.innerHTML; el.dataset.cbOrigText = orig; el.dataset.cbOrigLabel = el.getAttribute('aria-label') || ''; }
     if (!showOriginal && !setText(el, next, lead)) { if (first) { delete el.dataset.cbOrig; delete el.dataset.cbOrigText; } return; }
@@ -351,19 +570,16 @@
     rewritten.add(el);
   }
 
-  async function toggleLead() {
-    CFG.includeLead = !CFG.includeLead;
-    await gm.set('includeLead', CFG.includeLead);
-    for (const el of rewritten) {
-      if (!el.isConnected) { rewritten.delete(el); continue; }
-      if (!showOriginal) setText(el, el.dataset.cbNew, CFG.includeLead ? el.dataset.cbLead || '' : '');
-    }
-  }
-
   function toggle() {
     showOriginal = !showOriginal;
     for (const el of rewritten) {
       if (!el.isConnected) { rewritten.delete(el); continue; }
+      if (CFG.display === 'reveal' || CFG.display === 'stack') {
+        const r = el.nextElementSibling, btn = el.querySelector(':scope .cb-btn');
+        // reveal: hotkey opens all; stack: hotkey hides all
+        if (r && r.classList.contains('cb-reveal')) { r.hidden = CFG.display === 'stack' ? showOriginal : !showOriginal; if (btn) btn.textContent = r.hidden ? '▸' : '▾'; }
+        continue;
+      }
       if (showOriginal) { el.innerHTML = el.dataset.cbOrig; if (el.dataset.cbOrigLabel) el.setAttribute('aria-label', el.dataset.cbOrigLabel); }
       else setText(el, el.dataset.cbNew, CFG.includeLead ? el.dataset.cbLead || '' : '');
     }
@@ -390,38 +606,512 @@
           const meta = await getMeta(job.url);
           const orig = textOf(job.el);
           if (orig !== job.orig) return; // page changed it meanwhile
-          const { text, lead } = choose(orig, meta);
+          if (job.inline) {
+            const m = cleanMeta(meta, job.url);
+            const t = m?.title ? applyRules(m.title) : '', d = m?.desc ? truncate(applyRules(m.desc), CFG.maxLen) : '';
+            if (t.split(' ').length < 2 && !d) return;
+            const tip = [t.split(' ').length < 2 ? '' : t, d].filter(Boolean).join(' — ');
+            if (tip && tip.toLowerCase() !== orig.toLowerCase()) { job.el.title = tip; job.el.classList.add('cb-inline'); }
+            return;
+          }
+          jobs.set(job.el, { orig, url: job.url, key: job.url.replace(/[?#].*$/, '') });
+          const { text, lead } = choose(orig, cleanMeta(meta, job.url));
           apply(job.el, orig, text, lead);
         } finally { active--; pump(); }
       })();
     }
   }
 
+  // Cooperative scan: new anchors are processed in slices so a page with thousands of links
+  // (or one that mutates constantly) never has its main thread held for long.
+  let scanning = false, rescan = false;
   function scan(root = document) {
-    for (const a of root.querySelectorAll('a[href]')) {
-      if (seen.has(a)) continue;
+    if (!site && !hostEnabled && !isPublication()) return; // unlisted host that does not look like a publication (yet)
+    if (scanning) { rescan = true; return; }
+    scanning = true;
+    const pending = [...root.querySelectorAll('a[href]')].filter(a => !seen.has(a));
+    const slice = () => {
+      const t0 = performance.now();
+      let n = 0;
+      while (pending.length && n < CFG.scanChunk && performance.now() - t0 < 12) { scanOne(pending.shift()); n++; }
+      if (pending.length) { setTimeout(slice, 0); return; }
+      scanning = false; pump();
+      if (rescan) { rescan = false; scan(); }
+    };
+    slice();
+  }
+  function scanOne(a) {
+    {
       seen.add(a);
-      if (a.closest(SKIP_CONTAINERS)) continue;
+      if (skipLink(a)) return;
       const url = isArticleLink(a);
-      if (!url) continue;
+      if (!url) return;
       const el = headlineEl(a);
-      if (!el || el.dataset.cbOrig) continue;
+      if (!el || el.dataset.cbOrig || el.dataset.cbInline) return;
       const orig = textOf(el);
-      if (orig.length < CFG.minTeaserLen) continue;
-      if (/^\d[\d.,]*\s*k?\s*(?:comments?|kommentarer|shares?|delinger)$/i.test(orig)) continue; // "4.6k comments" links
+      if (orig.length < CFG.minTeaserLen) return;
+      if (/^\d[\d.,]*\s*k?\s*(?:comments?|kommentarer|shares?|delinger)$/i.test(orig)) return; // "4.6k comments" links
+      if (isInline(a) && CFG.inlineLinks !== 'rewrite') {
+        // Part of a sentence: never rewrite. Tooltip with the article's headline + lead instead.
+        if (CFG.inlineLinks === 'tooltip' && CFG.fetch) { el.dataset.cbInline = '1'; queue.push({ el, url, orig, inline: true }); io.observe(el); }
+        return;
+      }
       // instant local pass, then queue the fetch
       apply(el, orig, applyRules(orig));
       if (CFG.fetch) { queue.push({ el, url, orig: textOf(el) }); io.observe(el); }
     }
-    pump();
+  }
+
+  // ───────────────────────────── Reading levels ─────────────────────────────
+  // vanilla   → the site as published (the host is in disabledHosts)
+  // headlines → clickbait headlines rewritten
+  // synopsis  → rewritten headlines plus the article's lead
+  // pictures  → plain view with one image per article, all cropped to the same size
+  // plain     → the site's articles on a calm page of our own (see Plain view)
+  // Chosen per host (siteLevels); the default for other hosts is stored as 'level'.
+  const LEVELS = ['vanilla', 'headlines', 'synopsis', 'pictures', 'plain'];
+  const LEVEL_NAMES = { vanilla: 'Vanilla: the site as published', headlines: 'Clear headlines', synopsis: 'Clear headlines + synopsis', pictures: 'Plain view with images', plain: 'Plain view: sections, no ads' };
+  let level = 'synopsis', defaultLevel = 'synopsis';
+
+  // Many front pages call themselves og:type=article (Express, NPR, FAZ, SZ, NDTV), so a page only
+  // counts as an article when its URL looks like one, or when og:type says so deeper than one section.
+  function onArticlePage() {
+    const path = location.pathname;
+    if (site ? site.article.test(path) : genericArticlePath(path)) return true;
+    const og = document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '';
+    return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2;
+  }
+
+  // ───────────────────────────── Plain view ─────────────────────────────
+  // Level "plain" swaps a front page for a calm page of our own: the site's articles grouped by
+  // section, headline and lead only, in the editors' order. The site's <body> is hidden and its
+  // media paused, so ads, autoplay video, pop-ups and animation never show. A "Latest" section
+  // comes from the site's RSS/Atom feed. Article pages are left alone (they get the synopsis
+  // level). Paywalls stay: paid articles are marked and open on the site as usual.
+  const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
+  const T = NB
+    ? { latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned' }
+    : { latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down' };
+  const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
+  // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
+  const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
+  // First path segment that names a section, skipping dates (/2026/10/24/politics/… → politics)
+  // and wrapper segments (FAZ: /aktuell/politik/… → politik).
+  const WRAPPER = /^(?:aktuell|aktuelles)$/i;
+  function sectionOf(url) {
+    try {
+      for (const sg of new URL(url).pathname.split('/').filter(Boolean).slice(0, -1)) {
+        if (/^\d+$/.test(sg) || WRAPPER.test(sg)) continue;
+        return /^[a-zæøåäöü][a-zæøåäöü-]{1,24}$/.test(sg) && !NOT_SECTION.test(sg) ? sg : 'other';
+      }
+    } catch {}
+    return 'other';
+  }
+  // The site's own name for a section, from a menu link to it ("/vestfoldogtelemark" → "Vestfold og Telemark").
+  const sectionNames = new Map();
+  // Menu links first: their text is the section's name, where body links say "see all …".
+  function readSectionNames() {
+    const links = [...document.querySelectorAll('a[href]')];
+    for (const a of [...links.filter(a => a.closest(SKIP_CONTAINERS)), ...links.filter(a => !a.closest(SKIP_CONTAINERS))]) {
+      let u; try { u = new URL(a.href); } catch { continue; }
+      const m = u.pathname.replace(/^\/(?:aktuell|aktuelles)(?=\/.)/i, '').match(/^\/([^/]+)\/?$/);
+      // "voir toute l'actu Société", "See all Sport", "Alle Nyheter" → the section name only
+      const t = norm(a.textContent).replace(/^(?:voir (?:toute )?l['’]actu|voir tou(?:te)?s? les|tous les|toutes les|see all|view all|more from|se alle|alle|mer fra|mehr aus|mehr)\s+/i, '').replace(/^\p{Ll}/u, c => c.toUpperCase());
+      const id = m && m[1].toLowerCase(), had = id && sectionNames.get(id);
+      if (m && registrable(u.hostname) === registrable(host) && t.length >= 2 && t.length <= 30 && !had) sectionNames.set(id, t);
+    }
+  }
+  const sectionLabel = id => id === 'latest' ? T.latest : id === 'other' ? T.other : sectionNames.get(id) || (id[0].toUpperCase() + id.slice(1)).replace(/-/g, ' ');
+  // Advertorials dressed as articles carry a small label; plain view leaves them out with the other ads.
+  const AD_LABEL = /^(?:annonse|annons|annonsørinnhold|annonsorinnhold|sponset|sponsrat|sponsoreret|sponsored|sponsored content|anzeige|werbung|advertisement|advertorial|reklame|paid post|partner content|i samarbeid med\b.*|i samarbete med\b.*|in partnership with\b.*)$/i;
+  function isAd(a) {
+    const card = a.closest('article, li') || a;
+    if (card.textContent.length > 2000) return false; // a whole column, not one teaser
+    for (const el of card.querySelectorAll('span, div, p, small, strong, em, b, i')) {
+      if (el.children.length) continue;
+      const t = norm(el.textContent);
+      if (t.length < 60 && AD_LABEL.test(t)) return true;
+    }
+    return false;
+  }
+  const PAID_LABEL = /^(?:[A-ZÆØÅ0-9]{1,8}\+|premium|pluss?|abo|subscriber|exclusive)\b/i;
+  function isPaid(a) {
+    if (PAID_LABEL.test(norm(a.getAttribute('aria-label')))) return true;
+    // Schibsted (VG, Aftenposten, BT, E24): data-track-access-level="Free" | "Paid" on the teaser.
+    const access = a.closest('[data-track-access-level]')?.dataset.trackAccessLevel || a.querySelector('[data-track-access-level]')?.dataset.trackAccessLevel;
+    if (access) return !/^free$/i.test(access);
+    const card = a.closest('article, li') || a;
+    return !!card.querySelector('[class*="premium" i], [class*="paywall" i], [data-paywall], [class*="plus-badge" i], [class*="plus-icon" i], [class*="pluss" i]');
+  }
+
+  // Puzzles, quizzes and horoscopes are not news. Matched on the URL (BT: /kultur/i/…/hjernetrim-sudoku)
+  // and on the start of the teaser ("Hjernetrim: …", "Quiz: …").
+  const GAME_URL = /(?:^|[/_-])(?:hjernetrim|kryssord|minikryss|helgekryss|sudoku|k-doku|ordjakten|quiz|quizzes|horoskop|horoscopes?|crosswords?|wordle|puzzles?|raetsel|kreuzwortraetsel|korsord|krydsord|tankenott)(?:[/_.-]|$)/i;
+  const GAME_TEASER = /^(?:hjernetrim|dagens (?:kryssord|quiz|sudoku|horoskop)|kryssord|sudoku|quiz|horoskop|horoscope|crossword|wordle|rätsel|kreuzworträtsel|korsord|krydsord|tankenøtt)\b/i;
+  const isGame = (url, teaser) => CFG.plainSkipGames && (GAME_URL.test(new URL(url).pathname) || GAME_TEASER.test(teaser || ''));
+
+  // The teaser's own picture: the first real image in the link, or in its card when the card
+  // holds just this teaser. Icons, badges and logos (narrower than 80px) and SVGs don't count.
+  function teaserImage(a) {
+    const card = a.closest('article, li');
+    const imgs = [...a.querySelectorAll('img'), ...(card && card.querySelectorAll('a[href]').length <= 3 ? card.querySelectorAll('img') : [])];
+    for (const img of imgs) {
+      const src = img.currentSrc || img.src || img.dataset.src || (img.getAttribute('srcset') || img.dataset.srcset || '').trim().split(/\s+/)[0];
+      if (!src || src.startsWith('data:') || /\.svg(?:[?#]|$)/i.test(src)) continue;
+      const w = img.naturalWidth || +img.getAttribute('width') || 0;
+      if (w && w < 80) continue;
+      try { return new URL(src, location.href).href; } catch {}
+    }
+    return '';
+  }
+
+  function frontPageItems() {
+    const items = new Map();
+    for (const a of document.querySelectorAll('a[href]')) {
+      if (skipLink(a)) continue;
+      const url = isArticleLink(a); if (!url || isAd(a) || AD_SECTION.test(sectionOf(url))) continue;
+      const key = url.replace(/[?#].*$/, ''), el = headlineEl(a), teaser = el ? textOf(el) : '';
+      const it = items.get(key);
+      if (it) { it.teaser ||= teaser; it.paid ||= isPaid(a); it.img ||= teaserImage(a); }
+      else items.set(key, { url, key, teaser, paid: isPaid(a), section: sectionOf(url), img: teaserImage(a) });
+    }
+    return [...items.values()].filter(it => it.teaser.length >= CFG.minTeaserLen && !isGame(it.url, it.teaser));
+  }
+
+  async function feedItems() {
+    const link = document.querySelector('link[rel="alternate"][type*="rss"], link[rel="alternate"][type*="atom"]');
+    if (!link || !CFG.fetch) return [];
+    try {
+      const r = await gm.xhr({ url: new URL(link.getAttribute('href'), location.href).href, headers: { Accept: 'application/rss+xml, application/atom+xml, text/xml;q=0.9, */*;q=0.5' } });
+      const doc = new DOMParser().parseFromString(r.responseText, 'text/xml');
+      const text = html => norm(new DOMParser().parseFromString(html || '', 'text/html').body.textContent);
+      return [...doc.querySelectorAll('item, entry')].slice(0, 25).map(it => {
+        const get = tag => it.getElementsByTagName(tag)[0];
+        const url = get('link')?.getAttribute('href') || norm(get('link')?.textContent);
+        const feedImg = get('enclosure')?.getAttribute('url') || it.getElementsByTagNameNS('*', 'thumbnail')[0]?.getAttribute('url') || it.getElementsByTagNameNS('*', 'content')[0]?.getAttribute('url') || norm(get('image')?.textContent);
+        return { url, key: (url || '').replace(/[?#].*$/, ''), teaser: text(get('title')?.textContent), desc: text((get('description') || get('summary'))?.textContent), img: /^https?:/.test(feedImg || '') ? feedImg : '', section: 'latest' };
+      }).filter(it => { try { return it.teaser && registrable(new URL(it.url).hostname) === registrable(host) && !isGame(it.url, it.teaser); } catch { return false; } });
+    } catch { return []; }
+  }
+
+  const PLAIN_CSS = `
+    :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
+      --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
+    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+    *{box-sizing:border-box;animation:none!important;transition:none!important}
+    .wrap{max-width:42rem;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px))}
+    header{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top, 0px)) 0 8px}
+    .top{display:flex;align-items:center;gap:8px}
+    h1{font-size:20px;margin:0 auto 0 0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    button{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
+    button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    nav{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+    nav::-webkit-scrollbar{display:none}
+    nav button{white-space:nowrap;border-radius:999px}
+    section{padding-top:20px;scroll-margin-top:110px}
+    h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 2px}
+    ol{list-style:none;margin:0;padding:0}
+    li{padding:12px 0;border-bottom:1px solid var(--line)}
+    li a{color:var(--fg);text-decoration:none;font-weight:600;font-size:18px;line-height:1.3}
+    li a:visited{color:var(--muted)}
+    li a:hover{text-decoration:underline}
+    li p{margin:4px 0 0;color:var(--muted);font-size:16px}
+    li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
+    li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block}
+    @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 96px} li.pic .pic-img{width:96px;height:64px}}
+    .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
+    footer{color:var(--muted);font-size:13px;padding-top:24px}
+    .editor{position:fixed;inset:0;z-index:2;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
+    .editor[hidden]{display:none}
+    .sheet{background:var(--bg);width:100%;max-width:28rem;max-height:80vh;overflow:auto;border-radius:12px 12px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px))}
+    .sheet h2{font-size:15px;text-transform:none;letter-spacing:0;color:var(--fg);margin-bottom:8px}
+    .sheet ul{list-style:none;margin:0 0 12px;padding:0}
+    .sheet li{display:flex;align-items:center;gap:6px;padding:6px 0}
+    .sheet label{flex:1;display:flex;gap:8px;align-items:center;cursor:pointer}
+    .sheet input{accent-color:var(--accent);width:18px;height:18px}
+    .sheet li button{padding:2px 9px}
+    .sheet > button{width:100%;padding:8px;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}`;
+
+  let plainHost = null, plainCount = 0;
+  async function plainView(withImages) {
+    let items = frontPageItems();
+    for (let i = 0; i < 3 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
+    if (items.length < 8) return false; // nothing to lay out: the caller falls back to the synopsis level
+    const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
+    readSectionNames();
+
+    // Swallow the site: hide its body and keep its media silent.
+    const st = document.createElement('style');
+    st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body{display:none!important}';
+    document.head.appendChild(st);
+    document.documentElement.classList.add('cb-plain');
+    for (const m of document.querySelectorAll('video, audio')) try { m.pause(); m.muted = true; } catch {}
+    document.addEventListener('play', e => { try { e.target.pause(); e.target.muted = true; } catch {} }, true);
+
+    plainHost = document.createElement('div');
+    plainHost.id = 'declickbait-plain';
+    const sh = plainHost.attachShadow({ mode: 'open' });
+    sh.innerHTML = `<style>${PLAIN_CSS}</style>
+      <div class="wrap"><header><div class="top"><h1></h1><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
+      <main></main><footer></footer></div>
+      <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
+    sh.querySelector('h1').textContent = pageMeta.site || host;
+    document.documentElement.appendChild(plainHost);
+
+    const sections = new Map(), byKey = new Map();
+    const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
+    items.forEach(add);
+    // Sections in the order the user chose, then the rest in order of first appearance on the page.
+    const order = () => [...layout.order.filter(id => sections.has(id)), ...[...sections.keys()].filter(id => !layout.order.includes(id))];
+
+    const main = sh.querySelector('main'), nav = sh.querySelector('nav'), rows = new Map(), want = [];
+    function fill(it, li) {
+      const m = cache[it.key];
+      const meta = m && !m.err ? cleanMeta(m, it.url) : it.desc ? { title: '', desc: it.desc } : null;
+      const { text, lead } = choose(it.teaser, meta);
+      const a = li.querySelector('a'), p = li.querySelector('p');
+      a.textContent = text;
+      if (norm(text) !== norm(it.teaser)) a.title = 'Original: ' + it.teaser;
+      p.textContent = lead; p.hidden = !lead;
+      const im = li.querySelector('.pic-img');
+      const src = im && (it.img || (m && !m.err && m.image) || '');
+      if (src && im.getAttribute('src') !== src) im.src = src;
+    }
+    const seenRows = new IntersectionObserver(es => {
+      for (const e of es) if (e.isIntersecting) { const i = want.indexOf(e.target.dataset.key); if (i > 0) want.unshift(...want.splice(i, 1)); }
+      pumpPlain();
+    }, { rootMargin: '400px' });
+    let running = 0;
+    function pumpPlain() {
+      while (running < CFG.concurrency && want.length) {
+        const key = want.shift(), it = byKey.get(key);
+        running++;
+        getMeta(it.url).finally(() => { running--; const li = rows.get(key); if (li) fill(it, li); pumpPlain(); });
+      }
+    }
+    function render() {
+      const y = plainHost.scrollTop;
+      main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect();
+      for (const id of order()) {
+        if (layout.hidden.includes(id)) continue;
+        const ol = document.createElement('ol');
+        for (const it of sections.get(id)) {
+          if (rows.has(it.key)) continue; // an article in two sections is shown once
+          const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
+          a.href = it.url; li.dataset.key = it.key;
+          const text = withImages ? document.createElement('div') : li;
+          text.append(a);
+          if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
+          text.append(p);
+          if (withImages) {
+            // Every row gets the same frame, with or without a picture, so the list stays even.
+            const im = document.createElement('img');
+            im.className = 'pic-img'; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
+            im.addEventListener('error', () => im.removeAttribute('src'));
+            li.className = 'pic'; li.append(text, im);
+          }
+          ol.append(li); rows.set(it.key, li);
+          fill(it, li);
+          if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
+        }
+        if (!ol.childElementCount) continue;
+        const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
+        sec.id = 's-' + id; h2.textContent = chip.textContent = sectionLabel(id);
+        chip.addEventListener('click', () => sec.scrollIntoView());
+        sec.append(h2, ol); main.append(sec); nav.append(chip);
+      }
+      plainCount = rows.size;
+      sh.querySelector('footer').textContent = `${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`;
+      plainHost.scrollTop = y;
+      pumpPlain();
+    }
+
+    // Section editor: show/hide and reorder, remembered per host.
+    const editor = sh.querySelector('.editor'), list = editor.querySelector('ul');
+    function openEditor() {
+      list.replaceChildren();
+      for (const id of order()) {
+        const li = document.createElement('li');
+        li.dataset.id = id;
+        li.innerHTML = `<label><input type="checkbox"><span></span></label><button data-move="-1" aria-label="${T.up}">↑</button><button data-move="1" aria-label="${T.down}">↓</button>`;
+        li.querySelector('span').textContent = `${sectionLabel(id)} (${sections.get(id).length})`;
+        li.querySelector('input').checked = !layout.hidden.includes(id);
+        list.append(li);
+      }
+      editor.hidden = false;
+    }
+    async function saveEditor() {
+      layout.order = [...list.children].map(li => li.dataset.id);
+      layout.hidden = [...list.children].filter(li => !li.querySelector('input').checked).map(li => li.dataset.id);
+      await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
+      editor.hidden = true;
+      render();
+    }
+    sh.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.act === 'sections') openEditor();
+      else if (b.dataset.act === 'done') saveEditor();
+      else if (b.dataset.act === 'original') { try { sessionStorage.setItem('declickbait-original', host); } catch {} location.reload(); }
+      else if (b.dataset.move) {
+        const li = b.closest('li');
+        if (b.dataset.move < 0 && li.previousElementSibling) list.insertBefore(li, li.previousElementSibling);
+        else if (b.dataset.move > 0 && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
+      }
+    });
+    editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
+
+    render();
+    feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });
+    return true;
+  }
+
+  // ───────────────────────────── Settings panel ─────────────────────────────
+  // Userscripts.app (Safari) has no GM.registerMenuCommand, and nothing of ours sits on the page,
+  // so the panel opens on request: two-finger double tap, Alt+Shift+D, or #declickbait in the address
+  // (a bookmarklet can set it). Tampermonkey/Violentmonkey also get a menu command.
+  const PANEL_HASH = '#declickbait';
+  let panelHost = null, panelOff = false, hostEnabled = false;
+  const panelOpen = () => !!panelHost && !panelHost.shadowRoot.querySelector('.box').hidden;
+  function openPanel() {
+    if (panelHost) { panelHost.shadowRoot.querySelector('.box').hidden = false; listSites(); return; }
+    panelHost = document.createElement('div');
+    panelHost.id = 'declickbait-panel';
+    const sh = panelHost.attachShadow({ mode: 'open' });
+    const on = v => v ? '✓ ' : '';
+    sh.innerHTML = `<style>
+      :host{all:initial;position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));z-index:2147483646;font:13px/1.35 -apple-system,system-ui,sans-serif;color:#111}
+      @media (pointer: coarse){.box{width:min(280px,calc(100vw - 32px))}button{padding:10px 10px}}
+      .box{position:absolute;right:0;bottom:0;width:250px;max-height:calc(100vh - 80px);overflow:auto;background:#fff;border:1px solid #cfd8d2;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:10px 12px}
+      .box[hidden]{display:none}
+      h1{font-size:13px;margin:0 0 8px;color:#28a05a;display:flex;justify-content:space-between;align-items:center}
+      h1 button.x{display:inline;width:auto;margin:0;padding:0 6px;border:0;background:none;font-size:16px;line-height:1;color:#888}
+      .chip{display:inline-flex;align-items:center;gap:2px;margin:2px 4px 2px 0;padding:1px 2px 1px 6px;border:1px solid #d5d5d5;border-radius:10px;font-size:12px}
+      .chip button{display:inline;width:auto;margin:0;padding:0 5px;border:0;background:none;color:#888}
+      .row{margin:6px 0} .lbl{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+      button{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px;border:1px solid #d5d5d5;border-radius:6px;background:#f7f7f7;font:inherit;cursor:pointer;color:#111}
+      button:hover{background:#eef7f1;border-color:#28a05a} button.on{background:#e3f4ea;border-color:#28a05a;font-weight:600}
+      .small{font-size:11px;color:#888;margin-top:8px}
+    </style>
+    <div class="box" hidden>
+      <h1>Declickbait<button class="x" data-act="close" aria-label="Close">✕</button></h1>
+      <div class="row"><div class="lbl">Reading level on ${host}</div>
+        ${LEVELS.map(l => `<button data-level="${l}" class="${level === l ? 'on' : ''}">${LEVEL_NAMES[l]}</button>`).join('')}
+        <button data-act="defaultLevel">${level === defaultLevel ? '✓ Default for all sites' : 'Use this level on all sites'}</button></div>
+      <div class="row"><div class="lbl">Headline style</div>
+        <button data-mode="rewrite" class="${CFG.display === 'rewrite' ? 'on' : ''}">Rewrite headlines</button>
+        <button data-mode="reveal" class="${CFG.display === 'reveal' ? 'on' : ''}">Keep headlines, reveal on hover/tap</button>
+        <button data-mode="stack" class="${CFG.display === 'stack' ? 'on' : ''}">Keep headlines, show article headline + lead below</button></div>
+      <div class="row"><div class="lbl">Options</div>
+        <button data-act="orig">Toggle originals (Alt+Shift+U)</button>
+        <button data-act="generic" class="${CFG.genericSites ? 'on' : ''}">Unlisted sites: ${CFG.genericSites ? 'auto-detect publications' : 'only when enabled here'}</button></div>
+      <div class="row sites" hidden></div>
+      <div class="small">v${(typeof GM !== 'undefined' && GM.info?.script?.version) || ''} · changing level or style reloads the page</div>
+    </div>`;
+    const box = sh.querySelector('.box');
+    sh.addEventListener('click', async e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.act === 'close') closePanel();
+      else if (b.dataset.unset) { await settingsAction('unset', b.dataset.unset.split(' ')); listSites(); }
+      else if (b.dataset.mode) settingsAction('display', b.dataset.mode);
+      else if (b.dataset.level) settingsAction('level', b.dataset.level);
+      else if (b.dataset.act === 'defaultLevel') { await settingsAction('defaultLevel', level); b.textContent = '✓ Default for all sites'; }
+      else await settingsAction(b.dataset.act);
+    });
+    // In plain view the site's <body> is hidden, so the panel goes next to it.
+    (plainHost ? document.documentElement : document.body || document.documentElement).appendChild(panelHost);
+    box.hidden = false; listSites();
+  }
+  // Shared by the panel and the extension popup. display, level and generic reload the page.
+  async function settingsAction(act, arg) {
+    if (act === 'display') { await gm.set('display', arg); location.reload(); }
+    else if (act === 'orig') toggle();
+    else if (act === 'unset') { const [list, h] = arg; await gm.set(list, ((await gm.get(list, [])) || []).filter(x => x !== h)); }
+    else if (act === 'level') {
+      // vanilla is "off on this host" (disabledHosts); any other level switches the host back on.
+      const disabled = (await gm.get('disabledHosts', [])) || [], enabled = (await gm.get('enabledHosts', [])) || [];
+      if (arg === 'vanilla') { await gm.set('disabledHosts', [...new Set([...disabled, host])]); await gm.set('enabledHosts', enabled.filter(h => h !== host)); }
+      else {
+        if (panelOff) { await gm.set('disabledHosts', disabled.filter(h => h !== host)); await gm.set('enabledHosts', [...new Set([...enabled, host])]); }
+        await gm.set('siteLevels', { ...((await gm.get('siteLevels', {})) || {}), [host]: arg });
+      }
+      location.reload();
+    }
+    else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
+    else if (act === 'generic') { await gm.set('genericSites', !CFG.genericSites); location.reload(); }
+  }
+  async function settingsState() {
+    const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
+    return { host, off: panelOff, level, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
+      genericSites: CFG.genericSites, showOriginal, rewritten: plainHost ? plainCount : rewritten.size,
+      disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
+  }
+  // Other hosts you have switched off or on by hand, so you can undo them from any page.
+  async function listSites() {
+    const el = panelHost?.shadowRoot.querySelector('.sites'); if (!el) return;
+    const lists = { disabledHosts: 'Disabled on', enabledHosts: 'Enabled on' };
+    let html = '';
+    for (const [list, label] of Object.entries(lists)) {
+      const hosts = ((await gm.get(list, [])) || []).filter(h => h !== host);
+      if (hosts.length) html += `<div class="lbl">${label}</div>` + hosts.map(h =>
+        `<span class="chip">${h.replace(/[<>&"]/g, '')}<button data-unset="${list} ${h.replace(/[<>&" ]/g, '')}" aria-label="Remove">✕</button></span>`).join('');
+    }
+    el.innerHTML = html; el.hidden = !html;
+  }
+  function closePanel() {
+    if (!panelHost) return;
+    panelHost.shadowRoot.querySelector('.box').hidden = true;
+    if (location.hash === PANEL_HASH) history.replaceState(history.state, '', location.href.replace(/#.*$/, ''));
+  }
+  const panelFromHash = () => { if (location.hash === PANEL_HASH) openPanel(); };
+  // Capture phase: some sites (VG) swallow Escape before it reaches document.
+  if (!EXT) window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && panelOpen()) { closePanel(); return; }
+    const h = CFG.panelHotkey;
+    if ((e.code === 'Key' + h.key || e.key.toUpperCase() === h.key) && !!e.altKey === !!h.alt && !!e.shiftKey === !!h.shift) { e.preventDefault(); panelOpen() ? closePanel() : openPanel(); }
+  }, true);
+  // Two-finger double tap: two fingers down and up without moving, twice within 400 ms.
+  // Pinch-zoom and two-finger scroll move, so they never count.
+  if (CFG.panelGesture && !EXT) {
+    let start = null, lastTap = 0;
+    const opts = { passive: true, capture: true };
+    window.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) start = { t: Date.now(), at: new Map([...e.touches].map(t => [t.identifier, [t.clientX, t.clientY]])) };
+      else if (e.touches.length > 2) start = null;
+    }, opts);
+    window.addEventListener('touchmove', e => {
+      if (start && [...e.touches].some(t => { const p = start.at.get(t.identifier); return !p || Math.hypot(t.clientX - p[0], t.clientY - p[1]) > 12; })) start = null;
+    }, opts);
+    window.addEventListener('touchcancel', () => { start = null; }, opts);
+    window.addEventListener('touchend', e => {
+      if (!start || e.touches.length) return; // wait until both fingers are up
+      const quick = Date.now() - start.t < 350; start = null;
+      if (!quick) { lastTap = 0; return; }
+      const now = Date.now();
+      if (now - lastTap < 400) { lastTap = 0; panelOpen() ? closePanel() : openPanel(); }
+      else lastTap = now;
+    }, opts);
   }
 
   // ───────────────────────────── Boot ─────────────────────────────
   async function main() {
     const disabled = (await gm.get('disabledHosts', [])) || [];
-    const off = CFG.excludeHosts.some(h => host === h || host.endsWith('.' + h)) || disabled.includes(host);
+    const enabled = (await gm.get('enabledHosts', [])) || [];
+    CFG.genericSites = await gm.get('genericSites', CFG.genericSites);
+    hostEnabled = enabled.includes(host);
+    const excluded = CFG.excludeHosts.some(h => h instanceof RegExp ? h.test(host) : host === h || host.endsWith('.' + h));
+    let off = disabled.includes(host) || (!hostEnabled && (excluded || (!site && !CFG.genericSites)));
+    // Reading level: per host, else the default (versions before 1.11 stored only includeLead).
+    defaultLevel = await gm.get('level', (await gm.get('includeLead', true)) ? 'synopsis' : 'headlines');
+    level = off ? 'vanilla' : ((await gm.get('siteLevels', {})) || {})[host] || defaultLevel;
+    if (level === 'vanilla') off = true;
+    panelOff = off;
+    CFG.includeLead = level !== 'headlines';
+    CFG.display = await gm.get('display', CFG.display);
+    let original = false; // the plain view's "Original" button: show the site as published, once
+    try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
     try {
       if (typeof GM !== 'undefined' && GM.registerMenuCommand) {
+        GM.registerMenuCommand('Declickbait: settings…', openPanel);
         GM.registerMenuCommand(off ? 'Declickbait: enable on ' + host : 'Declickbait: disable on ' + host, async () => {
           const next = off ? disabled.filter(h => h !== host) : [...disabled, host];
           await gm.set('disabledHosts', next);
@@ -429,26 +1119,33 @@
         });
       }
     } catch {}
-    if (off) return;
+    // Set after panelOff is known, so the panel/popup offers the right Enable/Disable on this host.
+    if (EXT) GM.exposeSettings(async ({ act, arg } = {}) => { if (act) await settingsAction(act, arg); return settingsState(); });
+    else { window.addEventListener('hashchange', panelFromHash); panelFromHash(); }
+    if (off) return; // the panel still opens here, so you can re-enable the site
     await loadCache();
-    CFG.includeLead = await gm.get('includeLead', CFG.includeLead);
     if (CFG.marker) {
       const st = document.createElement('style');
-      st.textContent = '.cb-rewritten{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.75);padding-left:.25em}.cb-rewritten,.cb-rewritten *{white-space:normal!important;overflow-wrap:break-word;line-height:1.15}.cb-lead{display:block;margin-top:.35em;font-weight:normal;font-size:clamp(14px,.6em,20px);line-height:1.3;opacity:.85}';
+      st.textContent = '.cb-rewritten{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.75);padding-left:.25em}.cb-stack{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.35);padding-left:.25em}.cb-hint{background-image:repeating-linear-gradient(to bottom,rgba(40,160,90,.75) 0 5px,transparent 5px 9px);background-size:3px 100%;background-position:left top;background-repeat:no-repeat;padding-left:.25em}.cb-rewritten,.cb-rewritten *{white-space:normal!important;overflow-wrap:break-word;line-height:1.15}.cb-inline{text-decoration:underline dotted rgba(40,160,90,.9);text-underline-offset:.15em}.cb-btn{display:inline-block;margin-left:.35em;padding:0 .4em;font-size:.6em;line-height:1.6;vertical-align:middle;border-radius:.3em;background:rgba(40,160,90,.18);color:rgb(40,160,90);cursor:pointer;user-select:none;-webkit-user-select:none}.cb-reveal{display:block;margin:.3em 0;padding:.4em .6em;border-left:3px solid rgba(40,160,90,.75);background:rgba(40,160,90,.08);font-weight:normal;font-size:clamp(14px,.75em,20px);line-height:1.35;white-space:normal}.cb-reveal b{font-weight:600}.cb-reveal[hidden],.cb-lead[hidden]{display:none!important}.cb-lead{display:block;margin-top:.35em;font-weight:normal;font-size:clamp(14px,.6em,20px);line-height:1.3;opacity:.85}';
       document.head.appendChild(st);
     }
+    if ((level === 'plain' || level === 'pictures') && !original && !onArticlePage() && await plainView(level === 'pictures')) return;
     scan();
     let t;
-    new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => scan(), 400); })
-      .observe(document.body, { childList: true, subtree: true });
+    let last = 0;
+    new MutationObserver(() => {
+      if (document.hidden) return;
+      clearTimeout(t);
+      t = setTimeout(() => { last = Date.now(); scan(); }, Math.max(400, 1500 - (Date.now() - last)));
+    }).observe(document.body, { childList: true, subtree: true });
     document.addEventListener('keydown', e => {
       const h = CFG.hotkey;
-      if (e.key.toUpperCase() === h.key && !!e.altKey === !!h.alt && !!e.shiftKey === !!h.shift) { e.preventDefault(); toggle(); }
+      // e.code is layout-independent: Option+Shift+U on a Mac produces a different e.key than "U".
+      if ((e.code === 'Key' + h.key || e.key.toUpperCase() === h.key) && !!e.altKey === !!h.alt && !!e.shiftKey === !!h.shift) { e.preventDefault(); toggle(); }
     });
     try {
       if (typeof GM !== 'undefined' && GM.registerMenuCommand) {
         GM.registerMenuCommand('Declickbait: toggle original/rewritten', toggle);
-        GM.registerMenuCommand('Declickbait: toggle lead (ingress)', toggleLead);
       }
     } catch {}
   }

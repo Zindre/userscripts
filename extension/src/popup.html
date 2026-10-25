@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NoThis</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="icons/icon-32.png" alt="" width="20" height="20">
+    <h1>NoThis</h1>
+    <span id="host"></span>
+  </header>
+
+  <main id="settings" hidden>
+    <p id="status"></p>
+
+    <h2>Reading level on this site</h2>
+    <div class="modes" role="radiogroup" aria-label="Reading level">
+      <label><input type="radio" name="level" value="vanilla"><span><b>Vanilla</b>The site as published</span></label>
+      <label><input type="radio" name="level" value="headlines"><span><b>Clear headlines</b>Clickbait replaced with the article's own headline</span></label>
+      <label><input type="radio" name="level" value="synopsis"><span><b>Clear headlines + synopsis</b>Each headline with the article's lead</span></label>
+      <label><input type="radio" name="level" value="pictures"><span><b>Plain view with images</b>As plain view, with one image per article, all the same size</span></label>
+      <label><input type="radio" name="level" value="plain"><span><b>Plain view</b>The articles in sections on a calm page. No ads, video or pop-ups</span></label>
+    </div>
+    <button id="default" type="button" class="link"></button>
+
+    <section id="style-box">
+      <h2>Headline style</h2>
+      <div class="segmented" role="radiogroup" aria-label="Headline style">
+        <label><input type="radio" name="display" value="rewrite"><span>Rewrite</span></label>
+        <label><input type="radio" name="display" value="reveal"><span>Reveal on tap</span></label>
+        <label><input type="radio" name="display" value="stack"><span>Show both</span></label>
+      </div>
+      <label class="switch"><span>Show original headlines <kbd>⌥⇧U</kbd></span><input type="checkbox" id="orig"></label>
+    </section>
+
+    <h2>Other sites</h2>
+    <label class="switch"><span>Auto-detect news sites I haven't set up</span><input type="checkbox" id="generic"></label>
+    <div id="changed" hidden></div>
+  </main>
+
+  <main id="unavailable" hidden>
+    <p>NoThis isn't running on this page.</p>
+    <p class="hint">It only runs on web pages, not on browser or store pages. If you just installed or allowed it, reload the page.</p>
+    <button id="grant" type="button" hidden>Allow on all websites</button>
+  </main>
+
+  <footer id="version"></footer>
+  <script src="popup.js"></script>
+</body>
+</html>

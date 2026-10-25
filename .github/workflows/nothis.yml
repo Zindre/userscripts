@@ -1,0 +1,73 @@
+# NoThis browser extension (extension/, built from declickbait.user.js).
+# Every push and pull request: build the Chrome/Edge and Firefox zips and lint the Firefox build.
+# Tags nothis-v<version>: also archive the Safari apps and upload them to TestFlight.
+# Release: bump @version in declickbait.user.js, commit, then
+#   git tag nothis-v1.12.0 && git push origin nothis-v1.12.0
+# Secrets for the upload: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (see extension/README.md).
+name: NoThis extension
+
+on:
+  push:
+    branches: ['**']
+    tags: ['nothis-v*']
+    paths: ['extension/**', 'declickbait.user.js', '.github/workflows/nothis.yml']
+  pull_request:
+    paths: ['extension/**', 'declickbait.user.js', '.github/workflows/nothis.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check script syntax
+        run: |
+          node --check declickbait.user.js
+          for f in extension/src/*.js; do node --check "$f"; done
+      - name: Build Chrome/Edge and Firefox
+        run: node extension/build.mjs chrome firefox
+      - name: Lint Firefox build
+        run: npx --yes web-ext@8 lint --source-dir extension/dist/firefox
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nothis-zips
+          path: extension/dist/*.zip
+
+  testflight:
+    name: Upload to TestFlight
+    if: startsWith(github.ref, 'refs/tags/nothis-v')
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check tag matches @version
+        run: |
+          v=$(sed -nE 's#^// @version +([^ ]+).*#\1#p' declickbait.user.js)
+          if [ "nothis-v$v" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match @version $v in declickbait.user.js"; exit 1
+          fi
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Write App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
+      - name: Archive and upload iOS and macOS
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: extension/safari/release.sh
+      - name: Remove API key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc"
