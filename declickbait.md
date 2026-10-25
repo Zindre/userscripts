@@ -48,7 +48,7 @@ Before you install, read the [disclaimers in the README](README.md#please-read-b
 
 ## Config
 
-Everything is at the top of the file:
+The userscript is generated from the NoThis engine in [`extension/src/`](extension/README.md#how-the-code-is-laid-out): to change it, edit those files and run `node extension/build.mjs`. In an installed copy, the options are at the top of the script (`CFG`, in `extension/src/engine/config.js`):
 
 - `CFG.mode`: `auto` | `title` | `description`
 - `CFG.fetch`: set `false` for rules-only (no requests)

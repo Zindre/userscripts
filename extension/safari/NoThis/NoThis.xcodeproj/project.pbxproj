@@ -34,7 +34,7 @@
 		BDABED44308D73E300E8E392 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3C308D73E300E8E392 /* popup.html */; };
 		BDABED45308D73E300E8E392 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3D308D73E300E8E392 /* icons */; };
 		BDABED46308D73E300E8E392 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3E308D73E300E8E392 /* manifest.json */; };
-		BDABED47308D73E300E8E392 /* declickbait.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3F308D73E300E8E392 /* declickbait.js */; };
+		BDABED47308D73E300E8E392 /* nothis.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3F308D73E300E8E392 /* nothis.js */; };
 		BDABED48308D73E300E8E392 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = BDABED40308D73E300E8E392 /* popup.css */; };
 		BDABED49308D73E300E8E392 /* gm-shim.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED41308D73E300E8E392 /* gm-shim.js */; };
 		BDABED4A308D73E300E8E392 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3A308D73E300E8E392 /* popup.js */; };
@@ -42,7 +42,7 @@
 		BDABED4C308D73E300E8E392 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3C308D73E300E8E392 /* popup.html */; };
 		BDABED4D308D73E300E8E392 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3D308D73E300E8E392 /* icons */; };
 		BDABED4E308D73E300E8E392 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3E308D73E300E8E392 /* manifest.json */; };
-		BDABED4F308D73E300E8E392 /* declickbait.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3F308D73E300E8E392 /* declickbait.js */; };
+		BDABED4F308D73E300E8E392 /* nothis.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3F308D73E300E8E392 /* nothis.js */; };
 		BDABED50308D73E300E8E392 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = BDABED40308D73E300E8E392 /* popup.css */; };
 		BDABED51308D73E300E8E392 /* gm-shim.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED41308D73E300E8E392 /* gm-shim.js */; };
 /* End PBXBuildFile section */
@@ -112,7 +112,7 @@
 		BDABED3C308D73E300E8E392 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = ../../../dist/safari/popup.html; sourceTree = "<group>"; };
 		BDABED3D308D73E300E8E392 /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../../dist/safari/icons; sourceTree = "<group>"; };
 		BDABED3E308D73E300E8E392 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../../dist/safari/manifest.json; sourceTree = "<group>"; };
-		BDABED3F308D73E300E8E392 /* declickbait.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = declickbait.js; path = ../../../dist/safari/declickbait.js; sourceTree = "<group>"; };
+		BDABED3F308D73E300E8E392 /* nothis.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = nothis.js; path = ../../../dist/safari/nothis.js; sourceTree = "<group>"; };
 		BDABED40308D73E300E8E392 /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = ../../../dist/safari/popup.css; sourceTree = "<group>"; };
 		BDABED41308D73E300E8E392 /* gm-shim.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "gm-shim.js"; path = "../../../dist/safari/gm-shim.js"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -241,7 +241,7 @@
 				BDABED3C308D73E300E8E392 /* popup.html */,
 				BDABED3D308D73E300E8E392 /* icons */,
 				BDABED3E308D73E300E8E392 /* manifest.json */,
-				BDABED3F308D73E300E8E392 /* declickbait.js */,
+				BDABED3F308D73E300E8E392 /* nothis.js */,
 				BDABED40308D73E300E8E392 /* popup.css */,
 				BDABED41308D73E300E8E392 /* gm-shim.js */,
 			);
@@ -396,7 +396,7 @@
 				BDABED4B308D73E300E8E392 /* background.js in Resources */,
 				BDABED50308D73E300E8E392 /* popup.css in Resources */,
 				BDABED4D308D73E300E8E392 /* icons in Resources */,
-				BDABED4F308D73E300E8E392 /* declickbait.js in Resources */,
+				BDABED4F308D73E300E8E392 /* nothis.js in Resources */,
 				BDABED4E308D73E300E8E392 /* manifest.json in Resources */,
 				BDABED4C308D73E300E8E392 /* popup.html in Resources */,
 				BDABED4A308D73E300E8E392 /* popup.js in Resources */,
@@ -409,7 +409,7 @@
 				BDABED43308D73E300E8E392 /* background.js in Resources */,
 				BDABED48308D73E300E8E392 /* popup.css in Resources */,
 				BDABED45308D73E300E8E392 /* icons in Resources */,
-				BDABED47308D73E300E8E392 /* declickbait.js in Resources */,
+				BDABED47308D73E300E8E392 /* nothis.js in Resources */,
 				BDABED46308D73E300E8E392 /* manifest.json in Resources */,
 				BDABED44308D73E300E8E392 /* popup.html in Resources */,
 				BDABED42308D73E300E8E392 /* popup.js in Resources */,

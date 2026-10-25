@@ -2,7 +2,7 @@
 
 _Last updated: 25 October 2026_
 
-NoThis (the browser extension and the Declickbait userscript it is built on) is made by Sindre Sørensen. It is designed to collect nothing about you.
+NoThis is made by Sindre Sørensen. It is designed to collect nothing about you.
 
 ## What NoThis does not do
 

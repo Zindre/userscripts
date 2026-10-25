@@ -1,14 +1,37 @@
 # NoThis browser extension
 
-NoThis is the [Declickbait userscript](../declickbait.md) packaged as a Manifest V3 web extension for Safari (macOS and iOS), Chrome, Edge and Firefox. What it is for, and the principles behind it, are in [PURPOSE.md](PURPOSE.md).
+NoThis is a Manifest V3 web extension for Safari (macOS and iOS), Chrome, Edge and Firefox. What it is for, and the principles behind it, are in [PURPOSE.md](PURPOSE.md).
 
-Settings live in the toolbar popup: the reading level for the current site (Vanilla, Clear headlines, + synopsis, Plain view with images, Plain view), a default for all sites, and the headline style. On iPhone the popup is under the page menu at the left of the address bar. The in-page panel, its shortcut and the two-finger gesture are switched off in the extension.
+Settings live in the toolbar popup: the reading level for the current site (Vanilla, Clear headlines, + synopsis, Plain view with images, Plain view), a default for all sites, the topics you never want, and the headline style. On iPhone the popup is under the page menu at the left of the address bar.
 
-The content script is `../declickbait.user.js`, used unchanged. `src/gm-shim.js` gives it the userscript API it expects:
+## How the code is laid out
+
+The engine is one program split into files by concern under `src/engine/`. The files share one scope, and `build.mjs` joins them in order into a single script:
+
+| File | What it holds |
+|---|---|
+| `config.js` | `CFG`: defaults and options |
+| `sites.js` | Badge labels, the per-site URL patterns (`SITES`), generic article detection, publication detection |
+| `rules.js` | Local rewrite rules, acronyms, bait words |
+| `env.js` | This host, storage and fetching through the GM API |
+| `text.js` | Cleanup, un-shouting, bait scoring, truncation |
+| `meta.js` | Article metadata (headline, lead, image, section, keywords) and its cache |
+| `choose.js` | Picking the clearest headline and lead |
+| `page.js` | Rewriting teasers on the site itself, the fetch queue, scanning |
+| `topics.js` | Never-show topics |
+| `levels.js` | Reading levels |
+| `plain.js` | Plain view: sections, images, importance, puzzles and ads left out |
+| `article.js` | Calm article pages and the related-articles list |
+| `settings.js` | Reading and changing settings, for the popup and the panel |
+| `boot.js` | `main()`: reads the settings and starts the right mode |
+
+The engine talks to the browser through a small GM API. In the extension, `src/gm-shim.js` provides it:
 
 - **Storage:** `GM.getValue` and `GM.setValue` are backed by `storage.local`.
 - **Fetching:** `GM.xmlHttpRequest` is answered by a fetch in `src/background.js`. In Manifest V3, only the background can read cross-site pages.
 - **Settings:** `GM.exposeSettings` lets `src/popup.js` read and change the settings in the active tab.
+
+The build also generates the Declickbait userscript, [`../declickbait.user.js`](../declickbait.md), for userscript managers (the Userscripts app in Safari, Tampermonkey, Violentmonkey). It is the same engine plus `src/userscript/panel.js`, an in-page settings panel, because a userscript has no popup. Never edit the generated file; CI checks that it matches the source.
 
 ## Build
 
@@ -16,7 +39,7 @@ The content script is `../declickbait.user.js`, used unchanged. `src/gm-shim.js`
 node build.mjs
 ```
 
-This writes `dist/chrome/`, `dist/firefox/` and `dist/safari/`, plus a zip of each for store upload. The version comes from the userscript's `@version`. Rebuild after every change to the userscript or `src/`.
+This writes `dist/chrome/`, `dist/firefox/` and `dist/safari/` with a zip of each for store upload, and regenerates `../declickbait.user.js`. The version comes from `package.json`. Rebuild after every change in `src/`, and commit the regenerated userscript with it.
 
 ## Load for testing
 
@@ -38,7 +61,7 @@ The Xcode project in `safari/` was generated with `xcrun safari-web-extension-pa
 
 [`.github/workflows/nothis.yml`](../.github/workflows/nothis.yml) runs on every push and pull request that touches the extension or the userscript. It checks the scripts, builds the Chrome/Edge and Firefox zips (downloadable from the run as the `nothis-zips` artifact) and lints the Firefox build.
 
-A tag `nothis-v<version>` runs the whole chain: build and lint, then archive the iOS and macOS apps on GitHub's Xcode 27 image and upload them to TestFlight, then publish a GitHub release with the zips. The tag must match `@version` in `declickbait.user.js`:
+A tag `nothis-v<version>` runs the whole chain: build and lint, then archive the iOS and macOS apps on GitHub's Xcode 27 image and upload them to TestFlight, then publish a GitHub release with the zips. The tag must match `version` in `package.json`:
 
 ```bash
 git tag nothis-v1.12.0 && git push origin nothis-v1.12.0
