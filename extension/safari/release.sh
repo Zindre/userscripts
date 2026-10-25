@@ -7,13 +7,16 @@
 #
 # Needs: DEVELOPMENT_TEAM set in the project, an app record for no.sedb.NoThis in App Store Connect,
 # and either Xcode signed in to the Apple Developer account (Xcode → Settings → Accounts) or, as in
-# GitHub Actions, an App Store Connect API key: ASC_KEY_PATH (the .p8 file), ASC_KEY_ID, ASC_ISSUER_ID.
+# GitHub Actions, an App Store Connect API key: ASC_KEY_PATH (the .p8 file), ASC_KEY_ID, ASC_ISSUER_ID,
+# set in the environment or in safari/.asc.env.
 set -euo pipefail
 
 # Xcode packages the app with rsync and breaks on Homebrew's rsync 3.x: use the system tools first.
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Locally the API key settings can live in safari/.asc.env (git-ignored); GitHub Actions sets them as env.
+[[ -f "$HERE/.asc.env" ]] && source "$HERE/.asc.env"
 PROJECT="$HERE/NoThis/NoThis.xcodeproj"
 OUT="$HERE/build"
 BUILD_NUMBER="$(date -u +%y%m%d%H%M)" # App Store Connect needs a higher build number for every upload

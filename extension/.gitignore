@@ -1,3 +1,5 @@
 dist/
 safari/build/
 xcuserdata/
+safari/.asc.env
+*.p8
