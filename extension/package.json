@@ -1,6 +1,6 @@
 {
   "name": "nothis",
-  "version": "1.17.0",
+  "version": "1.17.1",
   "private": true,
   "description": "NoThis: news without the bait. Browser extension for Safari, Chrome, Edge and Firefox, and the Declickbait userscript.",
   "scripts": {

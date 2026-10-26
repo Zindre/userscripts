@@ -6,8 +6,8 @@
 // level). Paywalls stay: paid articles are marked and open on the site as usual.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
 const T = NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}`, prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: '↑ ↓ velg sak · Enter åpne · ← → forrige og neste · Esc lukk' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}`, prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: '↑ ↓ choose · Enter open · ← → previous and next · Esc close' };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}`, prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}`, prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -566,8 +566,26 @@ async function plainView(withImages) {
     }
   });
   editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
-  // Keyboard: ↓/j and ↑/k choose an article, Enter (on the focused headline) or o opens it;
-  // while reading, →/j and ←/k go to the next and previous article and Esc closes.
+  // The card next to `from` on screen in direction dx/dy: ↑ ↓ the nearest card in the row above or
+  // below (closest to the same column), ← → the neighbour in the same row, else the previous/next
+  // card in list order (end of a row, or a single column).
+  function nearby(list, from, dx, dy) {
+    const r = from.getBoundingClientRect(), cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
+    let best = null, score = Infinity;
+    for (const li of list) {
+      if (li === from) continue;
+      const q = li.getBoundingClientRect(), qx = (q.left + q.right) / 2, qy = (q.top + q.bottom) / 2;
+      if (dy && !(dy > 0 ? q.top >= r.bottom - 2 : q.bottom <= r.top + 2)) continue;
+      if (dx && !(dx > 0 ? q.left >= r.right - 2 : q.right <= r.left + 2)) continue;
+      if (dx && (q.bottom <= r.top || q.top >= r.bottom)) continue; // same row only
+      const d = dy ? Math.abs(qy - cy) * 4 + Math.abs(qx - cx) : Math.abs(qx - cx);
+      if (d < score) { score = d; best = li; }
+    }
+    return best || (dx ? list[list.indexOf(from) + dx] : null);
+  }
+  // Keyboard: the arrow keys move between the cards as they lie on screen, j/k in list order,
+  // Enter (on the focused headline) or o opens; while reading, →/j and ←/k go to the next and
+  // previous article and Esc closes.
   document.addEventListener('keydown', e => {
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !editor.hidden) return;
     const t = e.composedPath()[0];
@@ -578,11 +596,12 @@ async function plainView(withImages) {
       else if (k === 'ArrowRight' || k === 'j') step(1);
       else if (k === 'ArrowLeft' || k === 'k') step(-1);
       else return;
-    } else if (k === 'ArrowDown' || k === 'j' || k === 'ArrowUp' || k === 'k') {
-      const list = cards(), d = k === 'ArrowDown' || k === 'j' ? 1 : -1;
-      let i = list.findIndex(li => li.contains(sh.activeElement));
-      if (i < 0) { const top = sh.querySelector('header').getBoundingClientRect().bottom; i = list.findIndex(li => li.getBoundingClientRect().top >= top) - (d > 0 ? 1 : 0); }
-      const next = list[Math.max(0, Math.min(list.length - 1, i + d))];
+    } else if (/^(?:Arrow(?:Down|Up|Left|Right)|j|k)$/.test(k)) {
+      const list = cards(), cur = list.find(li => li.contains(sh.activeElement));
+      let next;
+      if (!cur) { const top = sh.querySelector('header').getBoundingClientRect().bottom; next = list.find(li => li.getBoundingClientRect().top >= top) || list[0]; }
+      else if (k === 'j' || k === 'k') next = list[list.indexOf(cur) + (k === 'j' ? 1 : -1)];
+      else next = nearby(list, cur, k === 'ArrowRight' ? 1 : k === 'ArrowLeft' ? -1 : 0, k === 'ArrowDown' ? 1 : k === 'ArrowUp' ? -1 : 0);
       if (!next) return;
       focusCard(next); prefetch(next.dataset.key, true);
     } else if (k === 'o') {
