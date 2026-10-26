@@ -7,7 +7,7 @@
 // Chosen per host (siteLevels); the default for other hosts is stored as 'level'.
 const LEVELS = ['vanilla', 'headlines', 'synopsis', 'pictures', 'plain'];
 const LEVEL_NAMES = { vanilla: 'Vanilla: the site as published', headlines: 'Clear headlines', synopsis: 'Clear headlines + synopsis', pictures: 'Plain view with images', plain: 'Plain view: sections, no ads' };
-let level = 'synopsis', defaultLevel = 'synopsis';
+let level = 'pictures', defaultLevel = 'pictures';
 
 // Many front pages call themselves og:type=article (Express, NPR, FAZ, SZ, NDTV), so a page only
 // counts as an article when its URL looks like one, or when og:type says so deeper than one section.

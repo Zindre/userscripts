@@ -8,14 +8,17 @@ async function main() {
   hostEnabled = enabled.includes(host);
   const excluded = CFG.excludeHosts.some(h => h instanceof RegExp ? h.test(host) : host === h || host.endsWith('.' + h));
   let off = disabled.includes(host) || (!hostEnabled && (excluded || (!site && !CFG.genericSites)));
-  // Reading level: per host, else the default (versions before 1.11 stored only includeLead).
-  defaultLevel = await gm.get('level', (await gm.get('includeLead', true)) ? 'synopsis' : 'headlines');
+  // Reading level: per host, else the default: plain view with images unless you chose otherwise
+  // (versions before 1.11 stored only includeLead).
+  const legacy = await gm.get('includeLead', null);
+  defaultLevel = await gm.get('level', legacy === null ? 'pictures' : legacy ? 'synopsis' : 'headlines');
   level = off ? 'vanilla' : ((await gm.get('siteLevels', {})) || {})[host] || defaultLevel;
   if (level === 'vanilla') off = true;
   hostOff = off;
   CFG.includeLead = level !== 'headlines';
   setMuted((await gm.get('mutedTopics', [])) || []);
   CFG.display = await gm.get('display', CFG.display);
+  CFG.swipeAnimation = await gm.get('swipeAnimation', CFG.swipeAnimation);
   let original = false; // the plain view's "Original" button: show the site as published, once
   try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
   // The extension's popup talks to settingsAction/settingsState; the userscript build has its own panel.

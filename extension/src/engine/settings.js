@@ -21,13 +21,14 @@ async function settingsAction(act, arg) {
   }
   else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
   else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
+  else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
   else if (act === 'generic') { await gm.set('genericSites', !CFG.genericSites); location.reload(); }
 }
 
 async function settingsState() {
   const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
   return { host, off: hostOff, level, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
-    genericSites: CFG.genericSites, showOriginal, mutedTopics: [...muted],
+    genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
     topics: TOPIC_TREE, rewritten: plainHost ? plainCount : rewritten.size,
     disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
 }

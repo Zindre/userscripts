@@ -34,7 +34,7 @@
   const host = location.hostname.replace(/^www\./, '');
   try { if (sessionStorage.getItem('declickbait-original') === host) return; } catch {} // "Original" was pressed
   api.storage.local.get(['level', 'siteLevels', 'disabledHosts', 'plainHosts']).then(s => {
-    const chosen = (s.siteLevels || {})[host], level = chosen || s.level;
+    const chosen = (s.siteLevels || {})[host], level = chosen || s.level || 'pictures'; // 'pictures' is the default level
     if ((level !== 'plain' && level !== 'pictures') || (s.disabledHosts || []).includes(host)) return;
     if (!chosen && !(s.plainHosts || []).includes(host)) return; // only sites known to get plain view
     const cover = document.createElement('style');

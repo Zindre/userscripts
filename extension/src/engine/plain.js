@@ -412,6 +412,49 @@ async function plainView(withImages) {
     openArticle(byKey.get(next.dataset.key), true);
   }
   const cards = () => [...main.querySelectorAll('li[data-key]')];
+  const neighbour = d => { const list = cards(), li = current && rows.get(current.key); return list[list.indexOf(li) + d]; };
+
+  // Swiping on a touch screen: left for the next article, right for the previous. The article
+  // follows the finger like a card in a carousel and slides out as the next one slides in; a swipe
+  // past a quarter of the width, or a quick flick, changes article. "Animate swiping" off in the
+  // settings, or reduced motion, changes article without the movement.
+  const motion = () => CFG.swipeAnimation && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let swipe = null, sliding = false;
+  view.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    swipe = e.touches.length === 1 && !sliding ? { x: t.clientX, y: t.clientY, t: Date.now(), dx: 0, dir: '' } : null;
+  }, { passive: true });
+  view.addEventListener('touchmove', e => {
+    if (!swipe || e.touches.length !== 1) return;
+    const t = e.touches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y;
+    if (!swipe.dir) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      swipe.dir = Math.abs(dx) > Math.abs(dy) * 1.3 ? 'h' : 'v';
+    }
+    if (swipe.dir !== 'h') return;
+    e.preventDefault(); // a sideways swipe doesn't scroll the article
+    swipe.dx = dx;
+    // Past the first or last article the card only gives a little.
+    if (motion()) reader.style.transform = `translateX(${neighbour(dx < 0 ? 1 : -1) ? dx : dx / 4}px)`;
+  }, { passive: false });
+  const endSwipe = cancel => {
+    const sw = swipe; swipe = null;
+    if (!sw || sw.dir !== 'h') return;
+    const w = view.clientWidth, d = sw.dx < 0 ? 1 : -1;
+    const fast = Math.abs(sw.dx) > 50 && Math.abs(sw.dx) / Math.max(1, Date.now() - sw.t) > 0.5; // a flick: over 0.5 px/ms
+    const go = !cancel && neighbour(d) && (Math.abs(sw.dx) > w / 4 || fast);
+    if (!motion()) { reader.style.transform = ''; if (go) step(d); return; }
+    const from = `translateX(${sw.dx}px)`, ease = 'cubic-bezier(.2,.7,.3,1)';
+    if (!go) { reader.animate([{ transform: from }, { transform: 'none' }], { duration: 180, easing: ease }); reader.style.transform = ''; return; }
+    sliding = true;
+    reader.animate([{ transform: from, opacity: 1 }, { transform: `translateX(${-d * w}px)`, opacity: .4 }], { duration: 160, easing: 'ease-in' }).finished.then(() => {
+      step(d);
+      reader.style.transform = '';
+      return reader.animate([{ transform: `translateX(${d * w}px)`, opacity: .4 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: ease }).finished;
+    }).finally(() => { sliding = false; });
+  };
+  view.addEventListener('touchend', () => endSwipe(false));
+  view.addEventListener('touchcancel', () => endSwipe(true));
   function focusCard(li) { li.querySelector('a.h')?.focus({ preventScroll: true }); li.scrollIntoView({ block: 'nearest' }); }
 
   // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40

@@ -43,6 +43,7 @@ function openPanel() {
       <button data-mode="stack" class="${CFG.display === 'stack' ? 'on' : ''}">Keep headlines, show article headline + lead below</button></div>
     <div class="row"><div class="lbl">Options</div>
       <button data-act="orig">Toggle originals (Alt+Shift+U)</button>
+      <button data-act="swipe" class="${CFG.swipeAnimation ? 'on' : ''}">Animate swiping between articles: ${CFG.swipeAnimation ? 'on' : 'off'}</button>
       <button data-act="generic" class="${CFG.genericSites ? 'on' : ''}">Unlisted sites: ${CFG.genericSites ? 'auto-detect publications' : 'only when enabled here'}</button></div>
     <div class="row sites" hidden></div>
     <div class="small">v${(typeof GM !== 'undefined' && GM.info?.script?.version) || ''} · changing level or style reloads the page</div>
@@ -55,6 +56,7 @@ function openPanel() {
     else if (b.dataset.mode) settingsAction('display', b.dataset.mode);
     else if (b.dataset.level) settingsAction('level', b.dataset.level);
     else if (b.dataset.topic) { const next = new Set(muted); next.has(b.dataset.topic) ? next.delete(b.dataset.topic) : next.add(b.dataset.topic); settingsAction('topics', [...next]); }
+    else if (b.dataset.act === 'swipe') { await settingsAction('swipeAnim', !CFG.swipeAnimation); b.classList.toggle('on', CFG.swipeAnimation); b.textContent = `Animate swiping between articles: ${CFG.swipeAnimation ? 'on' : 'off'}`; }
     else if (b.dataset.act === 'defaultLevel') { await settingsAction('defaultLevel', level); b.textContent = '✓ Default for all sites'; }
     else await settingsAction(b.dataset.act);
   });

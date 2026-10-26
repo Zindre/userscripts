@@ -25,7 +25,8 @@ const CFG = {
   includeLead: true,       // show the article lead under the headline; set from the reading level (see LEVELS)
   minTeaserLen: 8,
   marker: true,            // blue left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
-  plainSkipGames: true,    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
+  plainSkipGames: true,
+  swipeAnimation: true,    // plain view on a touch screen: the article follows the finger when you swipe to the next one (setting in the popup)    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
   inlineLinks: 'tooltip',  // links inside running text (article body, "Les også: …"): 'tooltip' keeps the text and
                            // shows headline + lead on hover; 'rewrite' treats them like teasers; 'off' ignores them
   hotkey: { key: 'U', alt: true, shift: true }, // Alt+Shift+U toggles original/rewritten
