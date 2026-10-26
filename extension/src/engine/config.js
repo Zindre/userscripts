@@ -6,7 +6,7 @@ const CFG = {
   mode: 'auto',
   // 'rewrite' → replace the teaser text.
   // 'reveal'  → leave headlines as they are: hover shows the article headline + lead as a tooltip, and a
-  //             small green button after the headline opens the same text underneath on click or tap.
+  //             small blue button after the headline opens the same text underneath on click or tap.
   // 'stack'   → leave the teaser on top, always show the article headline (bold) and lead underneath.
   // The menu command cycles through the three and remembers the choice.
   display: 'rewrite',
@@ -24,7 +24,7 @@ const CFG = {
   fitLines: 2.5,           // for tiles with fitted headline sizes (VG): size the new text to about this many lines
   includeLead: true,       // show the article lead under the headline; set from the reading level (see LEVELS)
   minTeaserLen: 8,
-  marker: true,            // green left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
+  marker: true,            // blue left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
   plainSkipGames: true,    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
   inlineLinks: 'tooltip',  // links inside running text (article body, "Les også: …"): 'tooltip' keeps the text and
                            // shows headline + lead on hover; 'rewrite' treats them like teasers; 'off' ignores them

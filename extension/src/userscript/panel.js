@@ -17,13 +17,13 @@ function openPanel() {
     @media (pointer: coarse){.box{width:min(280px,calc(100vw - 32px))}button{padding:10px 10px}}
     .box{position:absolute;right:0;bottom:0;width:250px;max-height:calc(100vh - 80px);overflow:auto;background:#fff;border:1px solid #cfd8d2;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:10px 12px}
     .box[hidden]{display:none}
-    h1{font-size:13px;margin:0 0 8px;color:#28a05a;display:flex;justify-content:space-between;align-items:center}
+    h1{font-size:13px;margin:0 0 8px;color:#3b6ea5;display:flex;justify-content:space-between;align-items:center}
     h1 button.x{display:inline;width:auto;margin:0;padding:0 6px;border:0;background:none;font-size:16px;line-height:1;color:#888}
     .chip{display:inline-flex;align-items:center;gap:2px;margin:2px 4px 2px 0;padding:1px 2px 1px 6px;border:1px solid #d5d5d5;border-radius:10px;font-size:12px}
     .chip button{display:inline;width:auto;margin:0;padding:0 5px;border:0;background:none;color:#888}
     .row{margin:6px 0} .lbl{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
     button{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px;border:1px solid #d5d5d5;border-radius:6px;background:#f7f7f7;font:inherit;cursor:pointer;color:#111}
-    button:hover{background:#eef7f1;border-color:#28a05a} button.on{background:#e3f4ea;border-color:#28a05a;font-weight:600}
+    button:hover{background:#f0f4f9;border-color:#3b6ea5} button.on{background:#e7eef6;border-color:#3b6ea5;font-weight:600}
     .small{font-size:11px;color:#888;margin-top:8px}
     details summary{list-style:none} details summary::-webkit-details-marker{display:none}
     details summary button::after{content:' ▸';color:#888} details[open] summary button::after{content:' ▾'}

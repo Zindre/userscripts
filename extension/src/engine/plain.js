@@ -153,8 +153,8 @@ async function harvest(known, onNew, done = () => false) {
 
 const PLAIN_CSS = `
   :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
-    --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
-  @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+    --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#2f5f8f;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#7fa8d6}}
   *{box-sizing:border-box;animation:none!important;transition:none!important}
   .wrap{max-width:42rem;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px))}
   header{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top, 0px)) 0 8px}

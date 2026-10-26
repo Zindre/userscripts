@@ -15,8 +15,8 @@ function articleBodyEl() {
 }
 const RELATED_CSS = `
   :host{all:initial;display:block;margin:24px 0;color:var(--fg);font:16px/1.45 -apple-system,system-ui,sans-serif;
-    --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a}
-  @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+    --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#2f5f8f}
+  @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#7fa8d6}}
   *{box-sizing:border-box;animation:none!important;transition:none!important}
   details{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
   summary{cursor:pointer;color:var(--muted);font-weight:600}

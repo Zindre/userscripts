@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.15.1
+// @version      1.15.2
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -32,7 +32,7 @@
     mode: 'auto',
     // 'rewrite' → replace the teaser text.
     // 'reveal'  → leave headlines as they are: hover shows the article headline + lead as a tooltip, and a
-    //             small green button after the headline opens the same text underneath on click or tap.
+    //             small blue button after the headline opens the same text underneath on click or tap.
     // 'stack'   → leave the teaser on top, always show the article headline (bold) and lead underneath.
     // The menu command cycles through the three and remembers the choice.
     display: 'rewrite',
@@ -50,7 +50,7 @@
     fitLines: 2.5,           // for tiles with fitted headline sizes (VG): size the new text to about this many lines
     includeLead: true,       // show the article lead under the headline; set from the reading level (see LEVELS)
     minTeaserLen: 8,
-    marker: true,            // green left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
+    marker: true,            // blue left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
     plainSkipGames: true,    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
     inlineLinks: 'tooltip',  // links inside running text (article body, "Les også: …"): 'tooltip' keeps the text and
                              // shows headline + lead on hover; 'rewrite' treats them like teasers; 'off' ignores them
@@ -1112,8 +1112,8 @@
 
   const PLAIN_CSS = `
     :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
-      --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
-    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+      --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#2f5f8f;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
+    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#7fa8d6}}
     *{box-sizing:border-box;animation:none!important;transition:none!important}
     .wrap{max-width:42rem;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px))}
     header{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top, 0px)) 0 8px}
@@ -1456,8 +1456,8 @@
   }
   const RELATED_CSS = `
     :host{all:initial;display:block;margin:24px 0;color:var(--fg);font:16px/1.45 -apple-system,system-ui,sans-serif;
-      --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a}
-    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+      --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#2f5f8f}
+    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#7fa8d6}}
     *{box-sizing:border-box;animation:none!important;transition:none!important}
     details{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
     summary{cursor:pointer;color:var(--muted);font-weight:600}
@@ -1602,13 +1602,13 @@
       @media (pointer: coarse){.box{width:min(280px,calc(100vw - 32px))}button{padding:10px 10px}}
       .box{position:absolute;right:0;bottom:0;width:250px;max-height:calc(100vh - 80px);overflow:auto;background:#fff;border:1px solid #cfd8d2;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:10px 12px}
       .box[hidden]{display:none}
-      h1{font-size:13px;margin:0 0 8px;color:#28a05a;display:flex;justify-content:space-between;align-items:center}
+      h1{font-size:13px;margin:0 0 8px;color:#3b6ea5;display:flex;justify-content:space-between;align-items:center}
       h1 button.x{display:inline;width:auto;margin:0;padding:0 6px;border:0;background:none;font-size:16px;line-height:1;color:#888}
       .chip{display:inline-flex;align-items:center;gap:2px;margin:2px 4px 2px 0;padding:1px 2px 1px 6px;border:1px solid #d5d5d5;border-radius:10px;font-size:12px}
       .chip button{display:inline;width:auto;margin:0;padding:0 5px;border:0;background:none;color:#888}
       .row{margin:6px 0} .lbl{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
       button{display:block;width:100%;text-align:left;margin:2px 0;padding:6px 8px;border:1px solid #d5d5d5;border-radius:6px;background:#f7f7f7;font:inherit;cursor:pointer;color:#111}
-      button:hover{background:#eef7f1;border-color:#28a05a} button.on{background:#e3f4ea;border-color:#28a05a;font-weight:600}
+      button:hover{background:#f0f4f9;border-color:#3b6ea5} button.on{background:#e7eef6;border-color:#3b6ea5;font-weight:600}
       .small{font-size:11px;color:#888;margin-top:8px}
       details summary{list-style:none} details summary::-webkit-details-marker{display:none}
       details summary button::after{content:' ▸';color:#888} details[open] summary button::after{content:' ▾'}
@@ -1740,7 +1740,7 @@
     await loadCache();
     if (CFG.marker) {
       const st = document.createElement('style');
-      st.textContent = '.cb-rewritten{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.75);padding-left:.25em}.cb-stack{box-shadow:inset 3px 0 0 0 rgba(40,160,90,.35);padding-left:.25em}.cb-hint{background-image:repeating-linear-gradient(to bottom,rgba(40,160,90,.75) 0 5px,transparent 5px 9px);background-size:3px 100%;background-position:left top;background-repeat:no-repeat;padding-left:.25em}.cb-rewritten,.cb-rewritten *{white-space:normal!important;overflow-wrap:break-word;line-height:1.15}.cb-inline{text-decoration:underline dotted rgba(40,160,90,.9);text-underline-offset:.15em}.cb-btn{display:inline-block;margin-left:.35em;padding:0 .4em;font-size:.6em;line-height:1.6;vertical-align:middle;border-radius:.3em;background:rgba(40,160,90,.18);color:rgb(40,160,90);cursor:pointer;user-select:none;-webkit-user-select:none}.cb-reveal{display:block;margin:.3em 0;padding:.4em .6em;border-left:3px solid rgba(40,160,90,.75);background:rgba(40,160,90,.08);font-weight:normal;font-size:clamp(14px,.75em,20px);line-height:1.35;white-space:normal}.cb-reveal b{font-weight:600}.cb-reveal[hidden],.cb-lead[hidden]{display:none!important}.cb-lead{display:block;margin-top:.35em;font-weight:normal;font-size:clamp(14px,.6em,20px);line-height:1.3;opacity:.85}';
+      st.textContent = '.cb-rewritten{box-shadow:inset 3px 0 0 0 rgba(59,110,165,.75);padding-left:.25em}.cb-stack{box-shadow:inset 3px 0 0 0 rgba(59,110,165,.35);padding-left:.25em}.cb-hint{background-image:repeating-linear-gradient(to bottom,rgba(59,110,165,.75) 0 5px,transparent 5px 9px);background-size:3px 100%;background-position:left top;background-repeat:no-repeat;padding-left:.25em}.cb-rewritten,.cb-rewritten *{white-space:normal!important;overflow-wrap:break-word;line-height:1.15}.cb-inline{text-decoration:underline dotted rgba(59,110,165,.9);text-underline-offset:.15em}.cb-btn{display:inline-block;margin-left:.35em;padding:0 .4em;font-size:.6em;line-height:1.6;vertical-align:middle;border-radius:.3em;background:rgba(59,110,165,.18);color:rgb(59,110,165);cursor:pointer;user-select:none;-webkit-user-select:none}.cb-reveal{display:block;margin:.3em 0;padding:.4em .6em;border-left:3px solid rgba(59,110,165,.75);background:rgba(59,110,165,.08);font-weight:normal;font-size:clamp(14px,.75em,20px);line-height:1.35;white-space:normal}.cb-reveal b{font-weight:600}.cb-reveal[hidden],.cb-lead[hidden]{display:none!important}.cb-lead{display:block;margin-top:.35em;font-weight:normal;font-size:clamp(14px,.6em,20px);line-height:1.3;opacity:.85}';
       document.head.appendChild(st);
     }
     if (muted.size) {
