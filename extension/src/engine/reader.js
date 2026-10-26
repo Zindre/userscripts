@@ -1,12 +1,17 @@
 // ───────────────────────────── Reader ─────────────────────────────
 // Plain view opens an article in place: the page is fetched the way the browser would fetch it,
 // and only its text, subheadings, quotes, lists and pictures are kept. Nothing from the page runs
-// or is inserted as HTML. Paid articles are not opened in place; the site's paywall decides there.
-const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
+// or is inserted as HTML.
+// Paid articles (schema.org isAccessibleForFree: false) are never read in place unless you have said
+// you subscribe to the site: many sites (VG) send the whole text to everyone and hide it in the
+// browser, so the page itself can't tell us what you may read. Once you subscribe, you get what the
+// site sends you, paywalled parts included (BT wraps the body in .paywall).
+const READER_SKIP_FREE = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
   '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
-  ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'paywall', 'teaser', 'byline', 'breadcrumb', 'author']
+  ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
     .map(c => `[class*="${c}" i]`)].join(', ');
-const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant)\b/i;
+const READER_SKIP = READER_SKIP_FREE + ', [class*="paywall" i], [data-paywall]';
+const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
 function readerImage(img, base) {
   const src = img.getAttribute('src'), lazy = img.dataset.src || img.dataset.lazySrc || img.dataset.original;
@@ -25,10 +30,10 @@ function readerImage(img, base) {
 // The element that holds the most paragraph text: a paragraph counts fully for its parent, half for
 // its grandparent, a third above that and so on for five levels, so a body whose paragraphs sit in
 // separate wrappers (BBC: a nest of blocks per paragraph) still wins as a whole.
-function readerRoot(doc) {
+function readerRoot(doc, skip) {
   const score = new Map();
   for (const p of doc.querySelectorAll('p')) {
-    if (p.closest(READER_SKIP)) continue;
+    if (p.closest(skip)) continue;
     const n = norm(p.textContent).length; if (n < 40) continue;
     for (let el = p.parentElement, i = 1; el && i <= 5; el = el.parentElement, i++) score.set(el, (score.get(el) || 0) + n / i);
   }
@@ -38,7 +43,8 @@ function readerRoot(doc) {
 }
 
 // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid } or null
-function readArticle(html, url, withImages) {
+// subscribed: you subscribe to this site, so its paywalled parts are yours to read.
+function readArticle(html, url, withImages, subscribed) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   let paid = false, date = '', byline = '';
   for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
@@ -52,14 +58,15 @@ function readArticle(html, url, withImages) {
     } catch {}
   }
   date ||= doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content') || doc.querySelector('time[datetime]')?.getAttribute('datetime') || '';
-  if (paid) return { blocks: [], date, byline, paid };
-  const root = readerRoot(doc);
+  if (paid && !subscribed) return { blocks: [], date, byline, paid };
+  const skip = subscribed ? READER_SKIP_FREE : READER_SKIP;
+  const root = readerRoot(doc, skip);
   if (!root) return null;
   const blocks = [];
   const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
   const walk = el => {
     for (const c of el.children) {
-      if (c.matches(READER_SKIP)) continue;
+      if (c.matches(skip)) continue;
       const tag = c.tagName;
       if (tag === 'P') {
         const t = norm(c.textContent);
@@ -97,16 +104,17 @@ function readArticle(html, url, withImages) {
 }
 
 const readerCache = new Map();
-async function fetchArticle(url, withImages) {
-  if (readerCache.has(url)) return readerCache.get(url);
+async function fetchArticle(url, withImages, subscribed) {
+  const ck = url + (subscribed ? ' +' : '');
+  if (readerCache.has(ck)) return readerCache.get(ck);
   const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
   let out = null;
   try {
     const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
     const finalUrl = r.finalUrl || r.responseURL || '';
     if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-      out = readArticle(r.responseText, finalUrl || url, withImages);
+      out = readArticle(r.responseText, finalUrl || url, withImages, subscribed);
   } catch {}
-  readerCache.set(url, out);
+  readerCache.set(ck, out);
   return out;
 }

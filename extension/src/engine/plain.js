@@ -6,8 +6,8 @@
 // level). Paywalls stay: paid articles are marked and open on the site as usual.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
 const T = NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement. Les den på nettstedet.' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article needs a subscription. Read it on the site.' };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}` }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}` };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -153,8 +153,8 @@ async function harvest(known, onNew, done = () => false) {
 
 const PLAIN_CSS = `
   :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
-    --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
-  @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+    --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
+  @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
   *{box-sizing:border-box;animation:none!important;transition:none!important}
   .wrap{max-width:42rem;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px))}
   header{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top, 0px)) 0 8px}
@@ -178,7 +178,12 @@ const PLAIN_CSS = `
   a.h:hover{text-decoration:underline}
   p.lead{margin:4px 0 0;color:var(--muted);font-size:16px}
   li{scroll-margin-top:110px}
-  .reader{grid-column:1/-1;max-width:40rem;margin-top:12px;font-size:17px;line-height:1.6}
+  .reader{grid-column:1/-1;max-width:42rem;margin-top:12px;padding:0 16px 12px;font-size:17px;line-height:1.6;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+  /* Stays under the page header while you read, so Close is always at hand and it is clear you are in an article. */
+  .reader .bar{position:sticky;top:var(--head,60px);z-index:1;display:flex;align-items:center;gap:10px;margin:0 -16px 12px;padding:8px 10px 8px 16px;background:var(--paper);border-bottom:1px solid var(--line);border-radius:10px 10px 0 0}
+  .reader .bar span{flex:1;min-width:0;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .reader .bar button{flex:none}
+  .reader .note{color:var(--muted)}
   .reader p{margin:0 0 .9em}
   .reader h3{font-size:18px;margin:1.2em 0 .4em}
   .reader blockquote{margin:0 0 .9em;padding-left:12px;border-left:3px solid var(--line);color:var(--muted)}
@@ -237,6 +242,7 @@ async function plainView(withImages) {
   rankItems(items);
   let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
   const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
+  let subscribedHosts = (await gm.get('subscribedHosts', [])) || [];
   readSectionNames();
 
   plainHost = document.createElement('div');
@@ -248,6 +254,9 @@ async function plainView(withImages) {
     <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
   sh.querySelector('h1').textContent = pageMeta.site || host;
   document.documentElement.appendChild(plainHost);
+  // The reader's bar sticks just under the header, whose height changes with the section chips.
+  const head = sh.querySelector('header');
+  new ResizeObserver(() => plainHost.style.setProperty('--head', head.offsetHeight + 'px')).observe(head);
   document.getElementById('nothis-cover')?.remove();
   // Remember the site, so next time the extension covers it before the original is drawn.
   gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
@@ -330,32 +339,49 @@ async function plainView(withImages) {
       if (li.getBoundingClientRect().top < 0) li.scrollIntoView();
       return;
     }
-    const box = document.createElement('div');
-    box.className = 'reader'; box.setAttribute('aria-live', 'polite'); box.textContent = T.loading;
+    const box = el('div', '', 'reader'), body = el('div', T.loading);
+    const bar = el('div', '', 'bar'), close = el('button', '✕ ' + T.close);
+    close.dataset.act = 'close-reader'; bar.append(el('span', a.textContent), close);
+    body.setAttribute('aria-live', 'polite'); box.append(bar, body);
     opened.set(it.key, box); li.append(box); li.classList.add('open', 'read'); a.setAttribute('aria-expanded', 'true');
-    const art = await fetchArticle(it.url, withImages);
+    await fillReader(it, body);
+  }
+  const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+  async function fillReader(it, body) {
+    const box = body.parentNode, subscribed = subscribedHosts.includes(host);
+    const art = await fetchArticle(it.url, withImages, subscribed);
     if (opened.get(it.key) !== box) return; // closed meanwhile
     if (!art) { location.href = it.url; return; } // nothing we can read here: open it on the site
-    box.replaceChildren();
+    body.replaceChildren();
     const by = [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
-    const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
-    if (by) box.append(el('div', by, 'byline'));
-    if (art.paid) box.append(el('p', T.paidHere));
+    if (by) body.append(el('div', by, 'byline'));
     for (const b of art.blocks) {
-      if (b.t === 'p') box.append(el('p', b.text));
-      else if (b.t === 'h') box.append(el('h3', b.text));
-      else if (b.t === 'quote') box.append(el('blockquote', b.text));
-      else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); box.append(l); }
+      if (b.t === 'p') body.append(el('p', b.text));
+      else if (b.t === 'h') body.append(el('h3', b.text));
+      else if (b.t === 'quote') body.append(el('blockquote', b.text));
+      else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); body.append(l); }
       else if (b.t === 'img') {
         const f = el('figure'), im = el('img');
         im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
         im.addEventListener('error', () => f.remove());
-        f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); box.append(f);
+        f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); body.append(f);
       }
     }
+    if (art.paid && !subscribed) body.append(el('p', T.paidHere, 'note'));
     const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
     site.href = it.url; close.dataset.act = 'close-reader';
-    end.append(site, close); box.append(end);
+    end.append(site);
+    if (art.paid) {
+      // Whether you subscribe is yours to say; the site still decides what it sends you.
+      const sub = el('button', subscribed ? T.unsubscribe(host) : T.subscribe(host));
+      sub.addEventListener('click', async () => {
+        subscribedHosts = subscribed ? subscribedHosts.filter(h => h !== host) : [...subscribedHosts, host];
+        await gm.set('subscribedHosts', subscribedHosts);
+        body.replaceChildren(T.loading); fillReader(it, body);
+      });
+      end.append(sub);
+    }
+    end.append(close); body.append(end);
   }
   function render() {
     // Keep the article at the top of the screen in place when the list changes around it.
@@ -420,7 +446,7 @@ async function plainView(withImages) {
     const h = e.target.closest('a.h');
     if (h && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
       const it = byKey.get(h.dataset.key), li = h.closest('li');
-      if (it && !it.paid && li) { e.preventDefault(); toggleReader(it, li); }
+      if (it && li) { e.preventDefault(); toggleReader(it, li); }
       return;
     }
     const b = e.target.closest('button'); if (!b) return;

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.15.0
+// @version      1.15.1
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -410,12 +410,17 @@
   // ───────────────────────────── Reader ─────────────────────────────
   // Plain view opens an article in place: the page is fetched the way the browser would fetch it,
   // and only its text, subheadings, quotes, lists and pictures are kept. Nothing from the page runs
-  // or is inserted as HTML. Paid articles are not opened in place; the site's paywall decides there.
-  const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
+  // or is inserted as HTML.
+  // Paid articles (schema.org isAccessibleForFree: false) are never read in place unless you have said
+  // you subscribe to the site: many sites (VG) send the whole text to everyone and hide it in the
+  // browser, so the page itself can't tell us what you may read. Once you subscribe, you get what the
+  // site sends you, paywalled parts included (BT wraps the body in .paywall).
+  const READER_SKIP_FREE = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
     '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
-    ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'paywall', 'teaser', 'byline', 'breadcrumb', 'author']
+    ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
       .map(c => `[class*="${c}" i]`)].join(', ');
-  const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant)\b/i;
+  const READER_SKIP = READER_SKIP_FREE + ', [class*="paywall" i], [data-paywall]';
+  const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
   function readerImage(img, base) {
     const src = img.getAttribute('src'), lazy = img.dataset.src || img.dataset.lazySrc || img.dataset.original;
@@ -434,10 +439,10 @@
   // The element that holds the most paragraph text: a paragraph counts fully for its parent, half for
   // its grandparent, a third above that and so on for five levels, so a body whose paragraphs sit in
   // separate wrappers (BBC: a nest of blocks per paragraph) still wins as a whole.
-  function readerRoot(doc) {
+  function readerRoot(doc, skip) {
     const score = new Map();
     for (const p of doc.querySelectorAll('p')) {
-      if (p.closest(READER_SKIP)) continue;
+      if (p.closest(skip)) continue;
       const n = norm(p.textContent).length; if (n < 40) continue;
       for (let el = p.parentElement, i = 1; el && i <= 5; el = el.parentElement, i++) score.set(el, (score.get(el) || 0) + n / i);
     }
@@ -447,7 +452,8 @@
   }
 
   // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid } or null
-  function readArticle(html, url, withImages) {
+  // subscribed: you subscribe to this site, so its paywalled parts are yours to read.
+  function readArticle(html, url, withImages, subscribed) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     let paid = false, date = '', byline = '';
     for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
@@ -461,14 +467,15 @@
       } catch {}
     }
     date ||= doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content') || doc.querySelector('time[datetime]')?.getAttribute('datetime') || '';
-    if (paid) return { blocks: [], date, byline, paid };
-    const root = readerRoot(doc);
+    if (paid && !subscribed) return { blocks: [], date, byline, paid };
+    const skip = subscribed ? READER_SKIP_FREE : READER_SKIP;
+    const root = readerRoot(doc, skip);
     if (!root) return null;
     const blocks = [];
     const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
     const walk = el => {
       for (const c of el.children) {
-        if (c.matches(READER_SKIP)) continue;
+        if (c.matches(skip)) continue;
         const tag = c.tagName;
         if (tag === 'P') {
           const t = norm(c.textContent);
@@ -506,17 +513,18 @@
   }
 
   const readerCache = new Map();
-  async function fetchArticle(url, withImages) {
-    if (readerCache.has(url)) return readerCache.get(url);
+  async function fetchArticle(url, withImages, subscribed) {
+    const ck = url + (subscribed ? ' +' : '');
+    if (readerCache.has(ck)) return readerCache.get(ck);
     const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
     let out = null;
     try {
       const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
       const finalUrl = r.finalUrl || r.responseURL || '';
       if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-        out = readArticle(r.responseText, finalUrl || url, withImages);
+        out = readArticle(r.responseText, finalUrl || url, withImages, subscribed);
     } catch {}
-    readerCache.set(url, out);
+    readerCache.set(ck, out);
     return out;
   }
 
@@ -957,8 +965,8 @@
   // level). Paywalls stay: paid articles are marked and open on the site as usual.
   const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
   const T = NB
-    ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement. Les den på nettstedet.' }
-    : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article needs a subscription. Read it on the site.' };
+    ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}` }
+    : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}` };
   const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
   // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
   const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -1104,8 +1112,8 @@
 
   const PLAIN_CSS = `
     :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
-      --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
-    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
+      --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
+    @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#5cc28a}}
     *{box-sizing:border-box;animation:none!important;transition:none!important}
     .wrap{max-width:42rem;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px))}
     header{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top, 0px)) 0 8px}
@@ -1129,7 +1137,12 @@
     a.h:hover{text-decoration:underline}
     p.lead{margin:4px 0 0;color:var(--muted);font-size:16px}
     li{scroll-margin-top:110px}
-    .reader{grid-column:1/-1;max-width:40rem;margin-top:12px;font-size:17px;line-height:1.6}
+    .reader{grid-column:1/-1;max-width:42rem;margin-top:12px;padding:0 16px 12px;font-size:17px;line-height:1.6;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+    /* Stays under the page header while you read, so Close is always at hand and it is clear you are in an article. */
+    .reader .bar{position:sticky;top:var(--head,60px);z-index:1;display:flex;align-items:center;gap:10px;margin:0 -16px 12px;padding:8px 10px 8px 16px;background:var(--paper);border-bottom:1px solid var(--line);border-radius:10px 10px 0 0}
+    .reader .bar span{flex:1;min-width:0;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .reader .bar button{flex:none}
+    .reader .note{color:var(--muted)}
     .reader p{margin:0 0 .9em}
     .reader h3{font-size:18px;margin:1.2em 0 .4em}
     .reader blockquote{margin:0 0 .9em;padding-left:12px;border-left:3px solid var(--line);color:var(--muted)}
@@ -1188,6 +1201,7 @@
     rankItems(items);
     let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
     const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
+    let subscribedHosts = (await gm.get('subscribedHosts', [])) || [];
     readSectionNames();
 
     plainHost = document.createElement('div');
@@ -1199,6 +1213,9 @@
       <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
     sh.querySelector('h1').textContent = pageMeta.site || host;
     document.documentElement.appendChild(plainHost);
+    // The reader's bar sticks just under the header, whose height changes with the section chips.
+    const head = sh.querySelector('header');
+    new ResizeObserver(() => plainHost.style.setProperty('--head', head.offsetHeight + 'px')).observe(head);
     document.getElementById('nothis-cover')?.remove();
     // Remember the site, so next time the extension covers it before the original is drawn.
     gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
@@ -1281,32 +1298,49 @@
         if (li.getBoundingClientRect().top < 0) li.scrollIntoView();
         return;
       }
-      const box = document.createElement('div');
-      box.className = 'reader'; box.setAttribute('aria-live', 'polite'); box.textContent = T.loading;
+      const box = el('div', '', 'reader'), body = el('div', T.loading);
+      const bar = el('div', '', 'bar'), close = el('button', '✕ ' + T.close);
+      close.dataset.act = 'close-reader'; bar.append(el('span', a.textContent), close);
+      body.setAttribute('aria-live', 'polite'); box.append(bar, body);
       opened.set(it.key, box); li.append(box); li.classList.add('open', 'read'); a.setAttribute('aria-expanded', 'true');
-      const art = await fetchArticle(it.url, withImages);
+      await fillReader(it, body);
+    }
+    const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+    async function fillReader(it, body) {
+      const box = body.parentNode, subscribed = subscribedHosts.includes(host);
+      const art = await fetchArticle(it.url, withImages, subscribed);
       if (opened.get(it.key) !== box) return; // closed meanwhile
       if (!art) { location.href = it.url; return; } // nothing we can read here: open it on the site
-      box.replaceChildren();
+      body.replaceChildren();
       const by = [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
-      const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
-      if (by) box.append(el('div', by, 'byline'));
-      if (art.paid) box.append(el('p', T.paidHere));
+      if (by) body.append(el('div', by, 'byline'));
       for (const b of art.blocks) {
-        if (b.t === 'p') box.append(el('p', b.text));
-        else if (b.t === 'h') box.append(el('h3', b.text));
-        else if (b.t === 'quote') box.append(el('blockquote', b.text));
-        else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); box.append(l); }
+        if (b.t === 'p') body.append(el('p', b.text));
+        else if (b.t === 'h') body.append(el('h3', b.text));
+        else if (b.t === 'quote') body.append(el('blockquote', b.text));
+        else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); body.append(l); }
         else if (b.t === 'img') {
           const f = el('figure'), im = el('img');
           im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
           im.addEventListener('error', () => f.remove());
-          f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); box.append(f);
+          f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); body.append(f);
         }
       }
+      if (art.paid && !subscribed) body.append(el('p', T.paidHere, 'note'));
       const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
       site.href = it.url; close.dataset.act = 'close-reader';
-      end.append(site, close); box.append(end);
+      end.append(site);
+      if (art.paid) {
+        // Whether you subscribe is yours to say; the site still decides what it sends you.
+        const sub = el('button', subscribed ? T.unsubscribe(host) : T.subscribe(host));
+        sub.addEventListener('click', async () => {
+          subscribedHosts = subscribed ? subscribedHosts.filter(h => h !== host) : [...subscribedHosts, host];
+          await gm.set('subscribedHosts', subscribedHosts);
+          body.replaceChildren(T.loading); fillReader(it, body);
+        });
+        end.append(sub);
+      }
+      end.append(close); body.append(end);
     }
     function render() {
       // Keep the article at the top of the screen in place when the list changes around it.
@@ -1371,7 +1405,7 @@
       const h = e.target.closest('a.h');
       if (h && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
         const it = byKey.get(h.dataset.key), li = h.closest('li');
-        if (it && !it.paid && li) { e.preventDefault(); toggleReader(it, li); }
+        if (it && li) { e.preventDefault(); toggleReader(it, li); }
         return;
       }
       const b = e.target.closest('button'); if (!b) return;
