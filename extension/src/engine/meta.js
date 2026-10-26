@@ -108,6 +108,7 @@ async function getMeta(url) {
     const m = extractMeta(r.responseText, url);
     if (m.self && domainOf(m.self) && domainOf(m.self) !== domainOf(url)) return null;
     cache[key] = { title: m.title, desc: m.desc, image: m.image, sec: m.sec, tags: m.tags, t: Date.now() }; cacheDirty = true; saveCache();
+    articleFetched(url, r.responseText, finalUrl); // plain view keeps it, so the article opens at once
     return cache[key];
   } catch (e) {
     cache[key] = { title: '', desc: '', t: Date.now(), err: 1 }; cacheDirty = true; saveCache();

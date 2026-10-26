@@ -6,8 +6,8 @@
 // level). Paywalls stay: paid articles are marked and open on the site as usual.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
 const T = NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}` }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}` };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}`, prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: '↑ ↓ velg sak · Enter åpne · ← → forrige og neste · Esc lukk' }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}`, prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: '↑ ↓ choose · Enter open · ← → previous and next · Esc close' };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -151,6 +151,39 @@ async function harvest(known, onNew, done = () => false) {
   }
 }
 
+// The site's own logo for plain view's header: the first picture in a link to the front page near
+// the top. An SVG is copied with the colours it is drawn in (its stylesheet stays behind), without
+// scripts or event handlers; it sits on the colour it had on the site, so it reads in dark mode too.
+// null: plain view shows the site's name instead.
+function siteLogo() {
+  const bgOf = el => { for (; el; el = el.parentElement) { const b = getComputedStyle(el).backgroundColor; if (b && !/^(?:transparent|rgba\(0, 0, 0, 0\))$/.test(b)) return b; } return '#fff'; };
+  for (const a of document.querySelectorAll('a[href]')) {
+    let u; try { u = new URL(a.href); } catch { continue; }
+    if (u.pathname !== '/' || registrable(u.hostname) !== registrable(host)) continue;
+    const g = a.querySelector('svg, img'); if (!g || g.closest('[class*="cmp" i], [id*="cmp" i], [class*="consent" i], dialog')) continue;
+    const r = g.getBoundingClientRect();
+    if (r.top + scrollY > 400 || r.width < 30 || r.height < 12 || r.height > 200) continue;
+    if (g.tagName === 'IMG') {
+      const src = g.currentSrc || g.src; if (!/^https?:/.test(src)) continue;
+      const im = document.createElement('img'); im.src = src; im.alt = '';
+      return { el: im, bg: bgOf(a) };
+    }
+    if (g.querySelector('use')) continue; // sprite references don't survive the move
+    const c = g.cloneNode(true), from = [g, ...g.querySelectorAll('*')], to = [c, ...c.querySelectorAll('*')];
+    from.forEach((x, i) => {
+      const cs = getComputedStyle(x), d = to[i];
+      for (const prop of ['fill', 'fill-rule', 'stroke', 'stroke-width', 'color', 'opacity', 'display']) d.style.setProperty(prop, cs.getPropertyValue(prop));
+      for (const at of [...d.attributes]) if (/^on/i.test(at.name)) d.removeAttribute(at.name);
+    });
+    c.querySelectorAll('script, foreignObject').forEach(x => x.remove());
+    c.removeAttribute('class'); c.setAttribute('aria-hidden', 'true');
+    if (!c.getAttribute('viewBox')) c.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
+    c.setAttribute('width', r.width); c.setAttribute('height', r.height);
+    return { el: c, bg: bgOf(a) };
+  }
+  return null;
+}
+
 const PLAIN_CSS = `
   :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
     --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#2f5f8f;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
@@ -177,6 +210,12 @@ const PLAIN_CSS = `
   a.h:visited,li.read a.h{color:var(--muted)}
   a.h:hover{text-decoration:underline}
   p.lead{margin:4px 0 0;color:var(--muted);font-size:16px}
+  .logo{display:inline-flex;align-items:center;padding:4px 8px;border-radius:6px;margin-left:-8px}
+  .logo svg,.logo img{display:block;height:26px;width:auto;max-width:200px}
+  .keys{display:none;color:var(--muted);font-size:13px;padding-top:6px}
+  @media (hover: hover) and (pointer: fine){.keys{display:block}}
+  main a.h:focus-visible{outline:none}
+  main li[data-key]:focus-within{background:var(--paper);box-shadow:inset 0 0 0 2px var(--accent)}
   /* The whole card opens the article. */
   main li[data-key]{cursor:pointer;scroll-margin-top:110px}
   main li[data-key]:hover{background:var(--paper)}
@@ -188,6 +227,8 @@ const PLAIN_CSS = `
   .view .bar div{max-width:42rem;margin:0 auto;display:flex;align-items:center;gap:10px}
   .view .bar span{flex:1;min-width:0;font-size:14px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .view .bar button{flex:none;font-size:15px;padding:6px 12px}
+  .view .bar button[data-act="prev"],.view .bar button[data-act="next"]{padding:6px 10px}
+  .view .bar button:disabled{opacity:.35;cursor:default}
   .reader{max-width:42rem;margin:0 auto;padding:20px 16px calc(48px + env(safe-area-inset-bottom, 0px));font-size:18px;line-height:1.6}
   .reader h1{font-size:26px;line-height:1.25;margin:0 0 10px;white-space:normal}
   .reader .lede{font-size:19px;color:var(--muted);margin:0 0 14px}
@@ -228,6 +269,7 @@ const PLAIN_CSS = `
 
 let plainHost = null, plainCount = 0;
 async function plainView(withImages) {
+  let logo = null; try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
   let items = frontPageItems();
   for (let i = 0; i < 2 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
   // Swallow the site: hide its body and keep its media silent. The body keeps its layout while
@@ -256,10 +298,17 @@ async function plainView(withImages) {
   const sh = plainHost.attachShadow({ mode: 'open' });
   sh.innerHTML = `<style>${PLAIN_CSS}</style>
     <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
-    <main></main><footer></footer></div>
-    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="close-reader"></button></div></div><article class="reader"></article></div>
+    <main></main><footer></footer><div class="keys"></div></div>
+    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>
     <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
-  sh.querySelector('h1').textContent = pageMeta.site || host;
+  const h1 = sh.querySelector('h1');
+  if (logo) {
+    const chip = document.createElement('span'), name = document.createElement('span');
+    chip.className = 'logo'; chip.style.background = logo.bg; chip.append(logo.el);
+    name.className = 'sr'; name.textContent = pageMeta.site || host;
+    h1.append(chip, name);
+  } else h1.textContent = pageMeta.site || host;
+  sh.querySelector('.keys').textContent = T.keys;
   document.documentElement.appendChild(plainHost);
   document.getElementById('nothis-cover')?.remove();
   // Remember the site, so next time the extension covers it before the original is drawn.
@@ -293,7 +342,7 @@ async function plainView(withImages) {
     sh.querySelector('footer').textContent = `${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`;
   }
   const seenRows = new IntersectionObserver(es => {
-    for (const e of es) if (e.isIntersecting) { const i = want.indexOf(e.target.dataset.key); if (i > 0) want.unshift(...want.splice(i, 1)); }
+    for (const e of es) if (e.isIntersecting) { const i = want.indexOf(e.target.dataset.key); if (i > 0) want.unshift(...want.splice(i, 1)); prefetch(e.target.dataset.key); }
     pumpPlain();
   }, { rootMargin: '400px' });
   let running = 0;
@@ -328,7 +377,8 @@ async function plainView(withImages) {
     rows.set(it.key, li);
     fill(it, li);
     if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
-    if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
+    if (!cache[it.key]) want.push(it.key);
+    seenRows.observe(li);
     if (readKeys.has(it.key)) li.classList.add('read');
     return li;
   }
@@ -339,15 +389,54 @@ async function plainView(withImages) {
   const view = sh.querySelector('.view'), reader = view.querySelector('.reader'), readKeys = new Set();
   view.querySelector('[data-act="close-reader"]').textContent = '✕ ' + T.close;
   let current = null; // the article on screen
-  function openArticle(it) {
+  // replace: moving to the previous/next article, which shouldn't stack up in the history.
+  function openArticle(it, replace) {
     const li = rows.get(it.key);
     current = it; readKeys.add(it.key); li?.classList.add('read');
     view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
+    const list = cards(), i = list.indexOf(li);
+    view.querySelector('[data-act="prev"]').disabled = i <= 0;
+    view.querySelector('[data-act="next"]').disabled = i < 0 || i >= list.length - 1;
     reader.replaceChildren(el('p', T.loading, 'note'));
     view.hidden = false; view.scrollTop = 0; view.focus({ preventScroll: true });
-    try { history.pushState({ nothis: it.key }, ''); } catch {}
+    try { if (!replace || !history.state?.nothis) history.pushState({ nothis: it.key }, ''); } catch {}
     fillReader(it);
+    // The neighbours are likely next: fetch them now.
+    for (const n of [list[i + 1], list[i - 1]]) if (n) prefetch(n.dataset.key, true);
   }
+  // Previous/next article while reading; the list behind follows, so closing lands on it.
+  function step(d) {
+    const list = cards(), li = current && rows.get(current.key), next = list[list.indexOf(li) + d];
+    if (!next) return;
+    focusCard(next);
+    openArticle(byKey.get(next.dataset.key), true);
+  }
+  const cards = () => [...main.querySelectorAll('li[data-key]')];
+  function focusCard(li) { li.querySelector('a.h')?.focus({ preventScroll: true }); li.scrollIntoView({ block: 'nearest' }); }
+
+  // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40
+  // per visit), and right away the one under the pointer or keyboard focus and the neighbours of the
+  // one being read. Pages fetched for the headlines are reused (articleFetched in reader.js).
+  readerFor = () => ({ withImages, subscribed: subscribedHosts.includes(host) });
+  const ahead = [];
+  let aheadRunning = 0, aheadLeft = 40;
+  function prefetch(key, now) {
+    const it = byKey.get(key); if (!it) return;
+    const { subscribed } = readerFor();
+    if (readerCache.has(readerKey(it.url, subscribed))) return;
+    if (now) { fetchArticle(it.url, withImages, subscribed); return; }
+    if (aheadLeft > 0 && !ahead.includes(key)) { ahead.push(key); aheadLeft--; pumpAhead(); }
+  }
+  function pumpAhead() {
+    while (aheadRunning < 2 && ahead.length) {
+      const it = byKey.get(ahead.shift()); if (!it) continue;
+      aheadRunning++;
+      fetchArticle(it.url, withImages, readerFor().subscribed).finally(() => { aheadRunning--; pumpAhead(); });
+    }
+  }
+  for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
+    const li = e.target.closest?.('li[data-key]'); if (li) prefetch(li.dataset.key, true);
+  }, { capture: true, passive: true });
   function closeArticle(fromHistory) {
     if (!current) return;
     const key = current.key;
@@ -360,13 +449,12 @@ async function plainView(withImages) {
     const subscribed = subscribedHosts.includes(host);
     const art = await fetchArticle(it.url, withImages, subscribed);
     if (current !== it) return; // closed, or another one opened meanwhile
-    if (!art) { location.href = it.url; return; } // nothing we can read here: open it on the site
     const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
     const out = [el('h1', li?.querySelector('a.h').textContent || it.teaser)];
     if (lede) out.push(el('p', lede, 'lede'));
-    const by = [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+    const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
     if (by) out.push(el('div', by, 'byline'));
-    for (const b of art.blocks) {
+    for (const b of art?.blocks || []) {
       if (b.t === 'p') out.push(el('p', b.text));
       else if (b.t === 'h') out.push(el('h3', b.text));
       else if (b.t === 'quote') out.push(el('blockquote', b.text));
@@ -378,11 +466,12 @@ async function plainView(withImages) {
         f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
       }
     }
-    if (art.paid && !subscribed) out.push(el('p', T.paidHere, 'note'));
+    if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
+    else if (art.paid && !subscribed) out.push(el('p', T.paidHere, 'note'));
     const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
     site.href = it.url; close.dataset.act = 'close-reader';
     end.append(site);
-    if (art.paid) {
+    if (art?.paid) {
       // Whether you subscribe is yours to say; the site still decides what it sends you.
       const sub = el('button', subscribed ? T.unsubscribe(host) : T.subscribe(host));
       sub.addEventListener('click', async () => {
@@ -464,6 +553,8 @@ async function plainView(withImages) {
     }
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.act === 'close-reader') closeArticle();
+    else if (b.dataset.act === 'prev') step(-1);
+    else if (b.dataset.act === 'next') step(1);
     else if (b.dataset.act === 'sections') openEditor();
     else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
     else if (b.dataset.act === 'done') saveEditor();
@@ -475,7 +566,31 @@ async function plainView(withImages) {
     }
   });
   editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && current && editor.hidden) closeArticle(); });
+  // Keyboard: ↓/j and ↑/k choose an article, Enter (on the focused headline) or o opens it;
+  // while reading, →/j and ←/k go to the next and previous article and Esc closes.
+  document.addEventListener('keydown', e => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !editor.hidden) return;
+    const t = e.composedPath()[0];
+    if (t && (/^(?:INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+    const k = e.key;
+    if (current) {
+      if (k === 'Escape') closeArticle();
+      else if (k === 'ArrowRight' || k === 'j') step(1);
+      else if (k === 'ArrowLeft' || k === 'k') step(-1);
+      else return;
+    } else if (k === 'ArrowDown' || k === 'j' || k === 'ArrowUp' || k === 'k') {
+      const list = cards(), d = k === 'ArrowDown' || k === 'j' ? 1 : -1;
+      let i = list.findIndex(li => li.contains(sh.activeElement));
+      if (i < 0) { const top = sh.querySelector('header').getBoundingClientRect().bottom; i = list.findIndex(li => li.getBoundingClientRect().top >= top) - (d > 0 ? 1 : 0); }
+      const next = list[Math.max(0, Math.min(list.length - 1, i + d))];
+      if (!next) return;
+      focusCard(next); prefetch(next.dataset.key, true);
+    } else if (k === 'o') {
+      const li = cards().find(li => li.contains(sh.activeElement)); if (!li) return;
+      openArticle(byKey.get(li.dataset.key));
+    } else return;
+    e.preventDefault();
+  });
 
   render();
   feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });

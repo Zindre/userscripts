@@ -103,18 +103,30 @@ function readArticle(html, url, withImages, subscribed) {
   return words >= 200 ? { blocks, date, byline, paid } : null;
 }
 
+// Articles read so far (url → promise of readArticle's result), so an article is fetched once and
+// opens at once when it was fetched ahead. readerFor tells which variant plain view wants; plain
+// view sets it, and getMeta() hands over every article page it fetches anyway (articleFetched).
 const readerCache = new Map();
-async function fetchArticle(url, withImages, subscribed) {
-  const ck = url + (subscribed ? ' +' : '');
-  if (readerCache.has(ck)) return readerCache.get(ck);
-  const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
-  let out = null;
-  try {
-    const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
-    const finalUrl = r.finalUrl || r.responseURL || '';
-    if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-      out = readArticle(r.responseText, finalUrl || url, withImages, subscribed);
-  } catch {}
-  readerCache.set(ck, out);
-  return out;
+let readerFor = null; // () => ({ withImages, subscribed }) while plain view is up
+const readerKey = (url, subscribed) => url + (subscribed ? ' +' : '');
+function articleFetched(url, html, finalUrl) {
+  if (!readerFor) return;
+  const { withImages, subscribed } = readerFor(), ck = readerKey(url, subscribed);
+  // Parsed when the page is idle, so a burst of headline fetches doesn't stall scrolling.
+  const idle = window.requestIdleCallback || (f => setTimeout(f, 50));
+  if (!readerCache.has(ck)) readerCache.set(ck, new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages, subscribed)))));
+}
+function fetchArticle(url, withImages, subscribed) {
+  const ck = readerKey(url, subscribed);
+  if (!readerCache.has(ck)) readerCache.set(ck, (async () => {
+    const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
+    try {
+      const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
+      const finalUrl = r.finalUrl || r.responseURL || '';
+      if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
+        return readArticle(r.responseText, finalUrl || url, withImages, subscribed);
+    } catch {}
+    return null;
+  })());
+  return readerCache.get(ck);
 }
