@@ -60,7 +60,26 @@ const NEWS_HOSTS = ['klassekampen.no', 'adressa.no', 'fvn.no', 'nordlys.no', 'da
   'theatlantic.com', 'time.com', 'cnbc.com', 'newsweek.com', 'cbc.ca', 'theglobeandmail.com', 'abc.net.au', 'smh.com.au', 'news.com.au', 'nzherald.co.nz', 'hindustantimes.com', 'timesofindia.indiatimes.com', 'ndtv.com',
   'sueddeutsche.de', 'faz.net', 'zeit.de', 'focus.de', 'tagesschau.de', 'krone.at', '20min.ch', 'lemonde.fr', 'lefigaro.fr', 'leparisien.fr', 'liberation.fr', 'francetvinfo.fr', 'elpais.com', 'elmundo.es', 'marca.com',
   '20minutos.es', 'corriere.it', 'repubblica.it', 'ilfattoquotidiano.it', 'nu.nl', 'telegraaf.nl'];
-const newsHost = h => NEWS_HOSTS.some(n => h === n || h.endsWith('.' + n));
+const curatedHost = h => NEWS_HOSTS.some(n => h === n || h.endsWith('.' + n));
+// NEWS_LIST: some 10,000 news sites from Wikidata and the Norwegian press organisations, as sorted
+// 7-character host keys, put in by build.mjs from news-hosts.json (refresh it with
+// tools/news-hosts.mjs). A host is listed when it or a parent domain is. Sources can be stale, so a
+// listed host still counts only when the page is not a shop or a wiki (see env.js).
+function listedKey(key) {
+  let lo = 0, hi = NEWS_LIST.length / 7 - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1, k = NEWS_LIST.substr(mid * 7, 7);
+    if (k === key) return true;
+    if (k < key) lo = mid + 1; else hi = mid - 1;
+  }
+  return false;
+}
+function listedHost(h) {
+  const p = h.split('.');
+  for (let i = 0; i < p.length - 1; i++) if (listedKey(hostKey(p.slice(i).join('.')))) return true;
+  return false;
+}
+const newsHost = h => curatedHost(h) || listedHost(h);
 // Unlisted hosts. A path is article-like when it has a numeric id segment, an Amedia-style id
 // (/slug/s/80-8-27129, ~80 Norwegian local papers), or a slug of 4+ tokens of which at least 3
 // are real words. UUIDs and hex ids (web apps: /consoles/93552fcc-f6f1-4566-…) never count.
@@ -84,19 +103,28 @@ function genericArticlePath(path) {
 // such as price guides) and wikis (MediaWiki) are always out.
 const NEWS_WORDS = /\b(?:nyheter|nyheder|nyhet\w*|avis\w*|tidende|tidning\w*|news|newspaper|headlines|breaking|nachrichten|zeitung|aktuell\w*|actualit\w*|journal|noticias|notizie|nieuws|uutiset|uutis\w*)\b/i;
 let publication = false;
-function isPublication() {
-  if (publication) return true;
+// Shops, price guides and wikis: never news, whatever lists or scores say. On a listed host
+// (`listed`), WooCommerce and cart buttons alone don't count: papers sell subscriptions that way.
+function notNewsPage(listed) {
   const q = sel => document.querySelector(sel);
   const body = document.body?.className || '';
   const ogType = q('meta[property="og:type"]')?.getAttribute('content') || '';
-  const shop = /\b(woocommerce|shopify|cart|checkout|product|shop)\b/i.test(body) || /^product/i.test(ogType) ||
-    !!q('script[src*="shopify"], link[href*="cdn.shopify.com"], form[action*="/cart"], [class*="add-to-cart"], [class*="add_to_cart"], [name="add-to-cart"]') ||
+  const cart = /\b(woocommerce|cart|checkout|product|shop)\b/i.test(body) ||
+    !!q('form[action*="/cart"], [class*="add-to-cart"], [class*="add_to_cart"], [name="add-to-cart"]');
+  const shop = (cart && !listed) || /\bshopify\b/i.test(body) || /^product/i.test(ogType) || !!q('script[src*="shopify"], link[href*="cdn.shopify.com"]') ||
     /\/(cart|checkout|basket|handlekurv|kasse|product|products|produkt|shop|store)(\/|$)/i.test(location.pathname);
   const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(sc => sc.textContent).join(' ');
   const priced = /"@type"\s*:\s*"(?:Product|ProductGroup)"/.test(ld) || // not Offer: news sites offer subscriptions and apps
     document.querySelectorAll('[itemprop="price"], [class*="price" i]:not([class*="prize" i])').length >= 10;
   const wiki = /\bmediawiki\b/.test(body) || !!q('meta[name="generator"][content^="MediaWiki"]') || /^\/wiki\//.test(location.pathname);
-  if (shop || priced || wiki) return false;
+  return shop || priced || wiki;
+}
+function isPublication() {
+  if (publication) return true;
+  if (notNewsPage()) return false;
+  const q = sel => document.querySelector(sel);
+  const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(sc => sc.textContent).join(' ');
+  const ogType = q('meta[property="og:type"]')?.getAttribute('content') || '';
   let score = 0;
   if (q('link[rel="alternate"][type*="rss"], link[rel="alternate"][type*="atom"]')) score += 1;
   const articles = document.querySelectorAll('article').length;

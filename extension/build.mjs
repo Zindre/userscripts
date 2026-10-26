@@ -18,9 +18,22 @@ const root = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 // Order matters only for code that runs while the script loads; everything else runs from main().
-const ENGINE = ['config', 'sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'settings'];
+const ENGINE = ['config', 'hostkey', 'news-hosts', 'sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'settings'];
 const USERSCRIPT_ONLY = ['userscript/panel'];
-const read = name => readFileSync(join(root, 'src', name.includes('/') ? name : `engine/${name}`) + '.js', 'utf8');
+const read = name => name === 'news-hosts' ? newsList() : readFileSync(join(root, 'src', name.includes('/') ? name : `engine/${name}`) + '.js', 'utf8');
+// src/engine/news-hosts.json (written by tools/news-hosts.mjs) becomes NEWS_LIST: each host's
+// 7-character key (hostKey() in src/engine/hostkey.js), sorted and joined into one string, which
+// sites.js binary-searches. Nothing is decoded when a page loads, and the list is about half the
+// size of the host names. Read the JSON to see which hosts are on it.
+function newsList() {
+  const { generated, hosts } = JSON.parse(readFileSync(join(root, 'src', 'engine', 'news-hosts.json'), 'utf8'));
+  const hostKey = new Function(read('hostkey') + '\nreturn hostKey;')();
+  const keys = [...new Set(Object.values(hosts).flat().map(hostKey))].sort();
+  return `// ───────────────────────────── Known news sites ─────────────────────────────
+// Keys of the ${keys.length} hosts in src/engine/news-hosts.json (generated ${generated} by tools/news-hosts.mjs).
+const NEWS_LIST = '${keys.join('')}';
+`;
+}
 const indent = s => s.split('\n').map(l => (l ? '  ' + l : l)).join('\n');
 const assemble = names => `(() => {\n  'use strict';\n\n${[...names, 'boot'].map(n => indent(read(n))).join('\n')}\n  main();\n})();\n`;
 
