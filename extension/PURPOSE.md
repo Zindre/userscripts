@@ -19,7 +19,7 @@ News should tell you what happened. Many news sites are built to do something el
 | Clear headlines | Clickbait teasers replaced with the article's own headline. |
 | Clear headlines + synopsis | Each headline with the article's lead (ingress). |
 | Plain view with images | As plain view, with one image per article, all cropped to the same size so nothing stands out. |
-| Plain view | The site's articles on a calm page of our own: grouped in sections you choose, headline and lead only, no ads, video or pop-ups. A headline opens the article in place, as text. Paid articles are marked and open on the site. |
+| Plain view | The site's articles on a calm page of our own: grouped in sections you choose, headline and lead only, no ads, video or pop-ups. An article opens full screen as plain text and pictures, and closing it returns you to the list where you were. Paid articles are marked and open on the site. |
 
 Levels are set per site, with a default for all others. Article pages are left as they are. Plain view is for front pages and section pages.
 

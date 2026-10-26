@@ -177,31 +177,37 @@ const PLAIN_CSS = `
   a.h:visited,li.read a.h{color:var(--muted)}
   a.h:hover{text-decoration:underline}
   p.lead{margin:4px 0 0;color:var(--muted);font-size:16px}
-  li{scroll-margin-top:110px}
-  .reader{grid-column:1/-1;max-width:42rem;margin-top:12px;padding:0 16px 12px;font-size:17px;line-height:1.6;background:var(--paper);border:1px solid var(--line);border-radius:10px}
-  /* Stays under the page header while you read, so Close is always at hand and it is clear you are in an article. */
-  .reader .bar{position:sticky;top:var(--head,60px);z-index:1;display:flex;align-items:center;gap:10px;margin:0 -16px 12px;padding:8px 10px 8px 16px;background:var(--paper);border-bottom:1px solid var(--line);border-radius:10px 10px 0 0}
-  .reader .bar span{flex:1;min-width:0;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .reader .bar button{flex:none}
+  /* The whole card opens the article. */
+  main li[data-key]{cursor:pointer;scroll-margin-top:110px}
+  main li[data-key]:hover{background:var(--paper)}
+  /* An article opens over the list, full screen; closing it leaves the list where it was. */
+  .view{position:fixed;inset:0;z-index:3;overflow:auto;overscroll-behavior:contain;background:var(--bg)}
+  .view[hidden]{display:none}
+  .view:focus{outline:none}
+  .view .bar{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top, 0px)) 16px 10px}
+  .view .bar div{max-width:42rem;margin:0 auto;display:flex;align-items:center;gap:10px}
+  .view .bar span{flex:1;min-width:0;font-size:14px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .view .bar button{flex:none;font-size:15px;padding:6px 12px}
+  .reader{max-width:42rem;margin:0 auto;padding:20px 16px calc(48px + env(safe-area-inset-bottom, 0px));font-size:18px;line-height:1.6}
+  .reader h1{font-size:26px;line-height:1.25;margin:0 0 10px;white-space:normal}
+  .reader .lede{font-size:19px;color:var(--muted);margin:0 0 14px}
   .reader .note{color:var(--muted)}
   .reader p{margin:0 0 .9em}
-  .reader h3{font-size:18px;margin:1.2em 0 .4em}
+  .reader h3{font-size:19px;margin:1.2em 0 .4em}
   .reader blockquote{margin:0 0 .9em;padding-left:12px;border-left:3px solid var(--line);color:var(--muted)}
   .reader ul,.reader ol{margin:0 0 .9em;padding-left:1.3em}
   .reader li{padding:0 0 .3em;border:0;box-shadow:none}
   .reader figure{margin:0 0 1em}
   .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
   .reader figcaption{font-size:14px;color:var(--muted);margin-top:4px}
-  .reader .byline{font-size:14px;color:var(--muted);margin-bottom:10px}
-  .reader .end{display:flex;gap:12px;align-items:center;padding-top:4px}
+  .reader .byline{font-size:14px;color:var(--muted);margin-bottom:14px}
+  .reader .end{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:8px;border-top:1px solid var(--line)}
   .reader .end a{color:var(--accent);font-weight:600;text-decoration:none}
   .reader .end a:hover{text-decoration:underline}
-  /* Wide screens: the articles in columns, an opened one across the full width. */
+  /* Wide screens: the articles in columns. */
   @media (min-width: 1000px){
     .wrap{max-width:88rem}
     section > ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(22rem,1fr));column-gap:32px}
-    main li.open{grid-column:1/-1}
-    main li.open.pic{grid-template-columns:minmax(0,40rem) 120px;justify-content:start}
   }
   li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
   li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block}
@@ -251,12 +257,10 @@ async function plainView(withImages) {
   sh.innerHTML = `<style>${PLAIN_CSS}</style>
     <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
     <main></main><footer></footer></div>
+    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="close-reader"></button></div></div><article class="reader"></article></div>
     <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
   sh.querySelector('h1').textContent = pageMeta.site || host;
   document.documentElement.appendChild(plainHost);
-  // The reader's bar sticks just under the header, whose height changes with the section chips.
-  const head = sh.querySelector('header');
-  new ResizeObserver(() => plainHost.style.setProperty('--head', head.offsetHeight + 'px')).observe(head);
   document.getElementById('nothis-cover')?.remove();
   // Remember the site, so next time the extension covers it before the original is drawn.
   gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
@@ -325,49 +329,56 @@ async function plainView(withImages) {
     fill(it, li);
     if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
     if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
-    if (opened.has(it.key)) { li.classList.add('open', 'read'); a.setAttribute('aria-expanded', 'true'); li.append(opened.get(it.key)); }
+    if (readKeys.has(it.key)) li.classList.add('read');
     return li;
   }
 
-  // Reading in place: the headline opens the article under itself, and closes it again.
-  const opened = new Map(); // key → its .reader element, kept across render()
-  async function toggleReader(it, li) {
-    const a = li.querySelector('a.h');
-    if (opened.has(it.key)) {
-      opened.get(it.key).remove(); opened.delete(it.key);
-      li.classList.remove('open'); a.setAttribute('aria-expanded', 'false');
-      if (li.getBoundingClientRect().top < 0) li.scrollIntoView();
-      return;
-    }
-    const box = el('div', '', 'reader'), body = el('div', T.loading);
-    const bar = el('div', '', 'bar'), close = el('button', '✕ ' + T.close);
-    close.dataset.act = 'close-reader'; bar.append(el('span', a.textContent), close);
-    body.setAttribute('aria-live', 'polite'); box.append(bar, body);
-    opened.set(it.key, box); li.append(box); li.classList.add('open', 'read'); a.setAttribute('aria-expanded', 'true');
-    await fillReader(it, body);
-  }
+  // Reading in place: a card opens its article full screen over the list, which stays where it was.
+  // Close, Escape and the browser's back (swipe back on a phone) return to the list.
   const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
-  async function fillReader(it, body) {
-    const box = body.parentNode, subscribed = subscribedHosts.includes(host);
+  const view = sh.querySelector('.view'), reader = view.querySelector('.reader'), readKeys = new Set();
+  view.querySelector('[data-act="close-reader"]').textContent = '✕ ' + T.close;
+  let current = null; // the article on screen
+  function openArticle(it) {
+    const li = rows.get(it.key);
+    current = it; readKeys.add(it.key); li?.classList.add('read');
+    view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
+    reader.replaceChildren(el('p', T.loading, 'note'));
+    view.hidden = false; view.scrollTop = 0; view.focus({ preventScroll: true });
+    try { history.pushState({ nothis: it.key }, ''); } catch {}
+    fillReader(it);
+  }
+  function closeArticle(fromHistory) {
+    if (!current) return;
+    const key = current.key;
+    current = null; view.hidden = true; reader.replaceChildren();
+    if (!fromHistory && history.state?.nothis) history.back();
+    rows.get(key)?.querySelector('a.h')?.focus({ preventScroll: true });
+  }
+  window.addEventListener('popstate', () => closeArticle(true));
+  async function fillReader(it) {
+    const subscribed = subscribedHosts.includes(host);
     const art = await fetchArticle(it.url, withImages, subscribed);
-    if (opened.get(it.key) !== box) return; // closed meanwhile
+    if (current !== it) return; // closed, or another one opened meanwhile
     if (!art) { location.href = it.url; return; } // nothing we can read here: open it on the site
-    body.replaceChildren();
+    const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
+    const out = [el('h1', li?.querySelector('a.h').textContent || it.teaser)];
+    if (lede) out.push(el('p', lede, 'lede'));
     const by = [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
-    if (by) body.append(el('div', by, 'byline'));
+    if (by) out.push(el('div', by, 'byline'));
     for (const b of art.blocks) {
-      if (b.t === 'p') body.append(el('p', b.text));
-      else if (b.t === 'h') body.append(el('h3', b.text));
-      else if (b.t === 'quote') body.append(el('blockquote', b.text));
-      else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); body.append(l); }
+      if (b.t === 'p') out.push(el('p', b.text));
+      else if (b.t === 'h') out.push(el('h3', b.text));
+      else if (b.t === 'quote') out.push(el('blockquote', b.text));
+      else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); out.push(l); }
       else if (b.t === 'img') {
         const f = el('figure'), im = el('img');
         im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
         im.addEventListener('error', () => f.remove());
-        f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); body.append(f);
+        f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
       }
     }
-    if (art.paid && !subscribed) body.append(el('p', T.paidHere, 'note'));
+    if (art.paid && !subscribed) out.push(el('p', T.paidHere, 'note'));
     const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
     site.href = it.url; close.dataset.act = 'close-reader';
     end.append(site);
@@ -377,11 +388,12 @@ async function plainView(withImages) {
       sub.addEventListener('click', async () => {
         subscribedHosts = subscribed ? subscribedHosts.filter(h => h !== host) : [...subscribedHosts, host];
         await gm.set('subscribedHosts', subscribedHosts);
-        body.replaceChildren(T.loading); fillReader(it, body);
+        reader.replaceChildren(el('p', T.loading, 'note')); fillReader(it);
       });
       end.append(sub);
     }
-    end.append(close); body.append(end);
+    end.append(close); out.push(end);
+    reader.replaceChildren(...out);
   }
   function render() {
     // Keep the article at the top of the screen in place when the list changes around it.
@@ -443,14 +455,15 @@ async function plainView(withImages) {
     render();
   }
   sh.addEventListener('click', e => {
-    const h = e.target.closest('a.h');
-    if (h && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
-      const it = byKey.get(h.dataset.key), li = h.closest('li');
-      if (it && li) { e.preventDefault(); toggleReader(it, li); }
+    // The whole card opens the article; Cmd/Ctrl/Shift-click on the headline still opens the site.
+    const card = e.target.closest('main li[data-key]');
+    if (card && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+      const it = byKey.get(card.dataset.key);
+      if (it) { e.preventDefault(); openArticle(it); }
       return;
     }
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.act === 'close-reader') { const li = b.closest('li[data-key]'); const it = li && byKey.get(li.dataset.key); if (it) toggleReader(it, li); }
+    if (b.dataset.act === 'close-reader') closeArticle();
     else if (b.dataset.act === 'sections') openEditor();
     else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
     else if (b.dataset.act === 'done') saveEditor();
@@ -462,12 +475,7 @@ async function plainView(withImages) {
     }
   });
   editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
-  // Escape closes the article opened last.
-  document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || !opened.size || !editor.hidden) return;
-    const key = [...opened.keys()].pop(), li = rows.get(key), it = byKey.get(key);
-    if (li && it) toggleReader(it, li); else opened.delete(key);
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && current && editor.hidden) closeArticle(); });
 
   render();
   feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });
