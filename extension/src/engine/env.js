@@ -2,8 +2,10 @@
 // This host, its entry in SITES, storage and fetching through the GM API (a userscript manager, or
 // gm-shim.js in the extension).
 const host = location.hostname.replace(/^www\./, '');
-// A known news site: its SITES entry, or a generic entry (article: null) for NEWS_HOSTS.
-const site = SITES.find(s => s.host.test(host)) || (newsHost(host) ? { host: null, article: null } : undefined);
+// A known news site: its SITES entry, or a generic entry (article: null) for NEWS_HOSTS and for
+// NEWS_LIST hosts whose page is not a shop or a wiki.
+const site = SITES.find(s => s.host.test(host)) ||
+  (curatedHost(host) || (listedHost(host) && !notNewsPage(true)) ? { host: null, article: null } : undefined);
 if (!site && !CFG.genericSites) return;
 
 const gm = {
