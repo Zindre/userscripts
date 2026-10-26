@@ -6,8 +6,8 @@
 // level). Paywalls stay: paid articles are marked and open on the site as usual.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
 const T = NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down' };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement. Les den på nettstedet.' }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article needs a subscription. Read it on the site.' };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -103,12 +103,15 @@ function rankItems(items) {
   return items;
 }
 
-function frontPageItems() {
+// known: articles already collected, skipped without measuring (harvest() calls this repeatedly).
+function frontPageItems(known) {
   const items = new Map();
   for (const a of document.querySelectorAll('a[href]')) {
     if (skipLink(a)) continue;
-    const url = isArticleLink(a); if (!url || isAd(a) || AD_SECTION.test(sectionOf(url))) continue;
-    const key = url.replace(/[?#].*$/, ''), el = headlineEl(a), teaser = el ? textOf(el) : '';
+    const url = isArticleLink(a); if (!url) continue;
+    const key = url.replace(/[?#].*$/, '');
+    if (known?.has(key) || isAd(a) || AD_SECTION.test(sectionOf(url))) continue;
+    const el = headlineEl(a), teaser = el ? textOf(el) : '';
     const it = items.get(key);
     const m = el ? prominence(a, el) : { fs: 0, area: 0, y: Infinity };
     if (it) { it.teaser ||= teaser; it.paid ||= isPaid(a); it.img ||= teaserImage(a); if (m.fs * Math.sqrt(m.area) > it.m.fs * Math.sqrt(it.m.area)) it.m = { ...m, y: Math.min(m.y, it.m.y) }; }
@@ -133,6 +136,21 @@ async function feedItems() {
   } catch { return []; }
 }
 
+// Front pages that fill in as they are scrolled (VG) are read by scrolling the hidden page, so the
+// site's own lazy loading adds the rest. Stops after six screens without new articles, at the end of
+// the page, when done() says so, or after 40 screens.
+async function harvest(known, onNew, done = () => false) {
+  for (let i = 0, idle = 0; i < 40 && idle < 6 && !done(); i++) {
+    window.scrollBy(0, innerHeight * 1.5);
+    await new Promise(r => setTimeout(r, 250));
+    const fresh = frontPageItems(known);
+    fresh.forEach(it => known.set(it.key, it));
+    if (fresh.length) { idle = 0; onNew(fresh); }
+    else if (scrollY + innerHeight >= document.documentElement.scrollHeight - 2) idle += 3;
+    else idle++;
+  }
+}
+
 const PLAIN_CSS = `
   :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
     --bg:#fbfbf9;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#1f7a4a;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
@@ -155,10 +173,31 @@ const PLAIN_CSS = `
   li[data-tier="2"]{box-shadow:inset 3px 0 0 var(--muted)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .sec-label{display:inline-block;margin-left:6px;font-size:12px;color:var(--muted);vertical-align:2px}
-  li a{color:var(--fg);text-decoration:none;font-weight:600;font-size:18px;line-height:1.3}
-  li a:visited{color:var(--muted)}
-  li a:hover{text-decoration:underline}
-  li p{margin:4px 0 0;color:var(--muted);font-size:16px}
+  a.h{color:var(--fg);text-decoration:none;font-weight:600;font-size:18px;line-height:1.3}
+  a.h:visited,li.read a.h{color:var(--muted)}
+  a.h:hover{text-decoration:underline}
+  p.lead{margin:4px 0 0;color:var(--muted);font-size:16px}
+  li{scroll-margin-top:110px}
+  .reader{grid-column:1/-1;max-width:40rem;margin-top:12px;font-size:17px;line-height:1.6}
+  .reader p{margin:0 0 .9em}
+  .reader h3{font-size:18px;margin:1.2em 0 .4em}
+  .reader blockquote{margin:0 0 .9em;padding-left:12px;border-left:3px solid var(--line);color:var(--muted)}
+  .reader ul,.reader ol{margin:0 0 .9em;padding-left:1.3em}
+  .reader li{padding:0 0 .3em;border:0;box-shadow:none}
+  .reader figure{margin:0 0 1em}
+  .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
+  .reader figcaption{font-size:14px;color:var(--muted);margin-top:4px}
+  .reader .byline{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .reader .end{display:flex;gap:12px;align-items:center;padding-top:4px}
+  .reader .end a{color:var(--accent);font-weight:600;text-decoration:none}
+  .reader .end a:hover{text-decoration:underline}
+  /* Wide screens: the articles in columns, an opened one across the full width. */
+  @media (min-width: 1000px){
+    .wrap{max-width:88rem}
+    section > ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(22rem,1fr));column-gap:32px}
+    main li.open{grid-column:1/-1}
+    main li.open.pic{grid-template-columns:minmax(0,40rem) 120px;justify-content:start}
+  }
   li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
   li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block}
   @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 96px} li.pic .pic-img{width:96px;height:64px}}
@@ -179,20 +218,26 @@ const PLAIN_CSS = `
 let plainHost = null, plainCount = 0;
 async function plainView(withImages) {
   let items = frontPageItems();
-  for (let i = 0; i < 3 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
-  if (items.length < 8) return false; // nothing to lay out: the caller falls back to the synopsis level
-  rankItems(items);
-  let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
-  const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
-  readSectionNames();
-
-  // Swallow the site: hide its body and keep its media silent.
+  for (let i = 0; i < 2 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
+  // Swallow the site: hide its body and keep its media silent. The body keeps its layout while
+  // harvest() scrolls it (lazy loading needs that), and is taken out of the page once it is done.
   const st = document.createElement('style');
-  st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body{display:none!important}';
+  st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body,html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body{display:none!important}';
   document.head.appendChild(st);
   document.documentElement.classList.add('cb-plain');
   for (const m of document.querySelectorAll('video, audio')) try { m.pause(); m.muted = true; } catch {}
   document.addEventListener('play', e => { try { e.target.pause(); e.target.muted = true; } catch {} }, true);
+  const known = new Map(items.map(it => [it.key, it]));
+  if (items.length < 8) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
+  if (items.length < 8) {
+    // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
+    document.documentElement.classList.remove('cb-plain'); st.remove(); window.scrollTo(0, 0);
+    return false;
+  }
+  rankItems(items);
+  let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
+  const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
+  readSectionNames();
 
   plainHost = document.createElement('div');
   plainHost.id = 'declickbait-plain';
@@ -219,7 +264,7 @@ async function plainView(withImages) {
     if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
     const meta = m && !m.err ? cleanMeta(m, it.url) : it.desc ? { title: '', desc: it.desc } : null;
     const { text, lead } = choose(it.teaser, meta);
-    const a = li.querySelector('a'), p = li.querySelector('p');
+    const a = li.querySelector('a.h'), p = li.querySelector('p.lead');
     a.textContent = text;
     if (norm(text) !== norm(it.teaser)) a.title = 'Original: ' + it.teaser;
     p.textContent = lead; p.hidden = !lead;
@@ -248,7 +293,7 @@ async function plainView(withImages) {
   }
   function row(it, withSection) {
     const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
-    a.href = it.url; li.dataset.key = it.key;
+    a.href = it.url; a.className = 'h'; a.dataset.key = it.key; p.className = 'lead'; li.dataset.key = it.key;
     if (it.tier > 1) {
       // The front page's own sense of importance, as a quiet bar instead of big type.
       li.dataset.tier = it.tier;
@@ -271,10 +316,52 @@ async function plainView(withImages) {
     fill(it, li);
     if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
     if (!cache[it.key]) { want.push(it.key); seenRows.observe(li); }
+    if (opened.has(it.key)) { li.classList.add('open', 'read'); a.setAttribute('aria-expanded', 'true'); li.append(opened.get(it.key)); }
     return li;
   }
+
+  // Reading in place: the headline opens the article under itself, and closes it again.
+  const opened = new Map(); // key → its .reader element, kept across render()
+  async function toggleReader(it, li) {
+    const a = li.querySelector('a.h');
+    if (opened.has(it.key)) {
+      opened.get(it.key).remove(); opened.delete(it.key);
+      li.classList.remove('open'); a.setAttribute('aria-expanded', 'false');
+      if (li.getBoundingClientRect().top < 0) li.scrollIntoView();
+      return;
+    }
+    const box = document.createElement('div');
+    box.className = 'reader'; box.setAttribute('aria-live', 'polite'); box.textContent = T.loading;
+    opened.set(it.key, box); li.append(box); li.classList.add('open', 'read'); a.setAttribute('aria-expanded', 'true');
+    const art = await fetchArticle(it.url, withImages);
+    if (opened.get(it.key) !== box) return; // closed meanwhile
+    if (!art) { location.href = it.url; return; } // nothing we can read here: open it on the site
+    box.replaceChildren();
+    const by = [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+    const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+    if (by) box.append(el('div', by, 'byline'));
+    if (art.paid) box.append(el('p', T.paidHere));
+    for (const b of art.blocks) {
+      if (b.t === 'p') box.append(el('p', b.text));
+      else if (b.t === 'h') box.append(el('h3', b.text));
+      else if (b.t === 'quote') box.append(el('blockquote', b.text));
+      else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); box.append(l); }
+      else if (b.t === 'img') {
+        const f = el('figure'), im = el('img');
+        im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
+        im.addEventListener('error', () => f.remove());
+        f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); box.append(f);
+      }
+    }
+    const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
+    site.href = it.url; close.dataset.act = 'close-reader';
+    end.append(site, close); box.append(end);
+  }
   function render() {
-    const y = plainHost.scrollTop;
+    // Keep the article at the top of the screen in place when the list changes around it.
+    const y = plainHost.scrollTop, top = sh.querySelector('header').getBoundingClientRect().bottom;
+    const anchor = [...main.querySelectorAll('li[data-key]')].find(li => li.getBoundingClientRect().bottom > top);
+    const anchorKey = anchor?.dataset.key, anchorTop = anchor?.getBoundingClientRect().top;
     main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect();
     sh.querySelector('[data-act="sort"]').textContent = sortMode === 'importance' ? T.siteOrder : T.byImportance;
     if (sortMode === 'importance') {
@@ -303,6 +390,8 @@ async function plainView(withImages) {
     plainCount = rows.size;
     sh.querySelector('footer').textContent = `${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`;
     plainHost.scrollTop = y;
+    const again = y > 0 && anchorKey && rows.get(anchorKey); // at the top, the top it stays
+    if (again) plainHost.scrollTop += again.getBoundingClientRect().top - anchorTop;
     pumpPlain();
   }
 
@@ -328,8 +417,15 @@ async function plainView(withImages) {
     render();
   }
   sh.addEventListener('click', e => {
+    const h = e.target.closest('a.h');
+    if (h && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+      const it = byKey.get(h.dataset.key), li = h.closest('li');
+      if (it && !it.paid && li) { e.preventDefault(); toggleReader(it, li); }
+      return;
+    }
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.act === 'sections') openEditor();
+    if (b.dataset.act === 'close-reader') { const li = b.closest('li[data-key]'); const it = li && byKey.get(li.dataset.key); if (it) toggleReader(it, li); }
+    else if (b.dataset.act === 'sections') openEditor();
     else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
     else if (b.dataset.act === 'done') saveEditor();
     else if (b.dataset.act === 'original') { try { sessionStorage.setItem('declickbait-original', host); } catch {} location.reload(); }
@@ -340,8 +436,20 @@ async function plainView(withImages) {
     }
   });
   editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
+  // Escape closes the article opened last.
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || !opened.size || !editor.hidden) return;
+    const key = [...opened.keys()].pop(), li = rows.get(key), it = byKey.get(key);
+    if (li && it) toggleReader(it, li); else opened.delete(key);
+  });
 
   render();
   feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });
+  // Read the rest of a lazily filled front page, a few articles at a time, then drop the site's body.
+  let later = null;
+  harvest(known, fresh => {
+    items.push(...fresh); rankItems(items); fresh.forEach(add);
+    clearTimeout(later); later = setTimeout(render, 600);
+  }).then(() => { window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); });
   return true;
 }

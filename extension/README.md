@@ -20,7 +20,8 @@ The engine is one program split into files by concern under `src/engine/`. The f
 | `page.js` | Rewriting teasers on the site itself, the fetch queue, scanning |
 | `topics.js` | Never-show topics |
 | `levels.js` | Reading levels |
-| `plain.js` | Plain view: sections, images, importance, puzzles and ads left out |
+| `plain.js` | Plain view: sections, images, importance, puzzles and ads left out, columns on wide screens, lazily filled front pages |
+| `reader.js` | Reading an article in place in plain view: the article's text and pictures, nothing else |
 | `article.js` | Calm article pages and the related-articles list |
 | `settings.js` | Reading and changing settings, for the popup and the panel |
 | `boot.js` | `main()`: reads the settings and starts the right mode |

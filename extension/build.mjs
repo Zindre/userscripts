@@ -18,7 +18,7 @@ const root = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 // Order matters only for code that runs while the script loads; everything else runs from main().
-const ENGINE = ['config', 'sites', 'rules', 'env', 'text', 'meta', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'settings'];
+const ENGINE = ['config', 'sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'settings'];
 const USERSCRIPT_ONLY = ['userscript/panel'];
 const read = name => readFileSync(join(root, 'src', name.includes('/') ? name : `engine/${name}`) + '.js', 'utf8');
 const indent = s => s.split('\n').map(l => (l ? '  ' + l : l)).join('\n');

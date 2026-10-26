@@ -19,7 +19,7 @@ You can remove all of it by removing the extension, or by clearing its data in y
 
 ## Which requests NoThis makes
 
-To find an article's real headline and lead, NoThis loads the article pages and RSS feeds of the news sites you visit, directly from your device to those sites, the same way your browser would if you opened them. Those requests go only to the sites whose links are on the page you are reading. The news sites receive them as ordinary visits and handle them under their own privacy policies.
+To find an article's real headline and lead, NoThis loads the article pages and RSS feeds of the news sites you visit, directly from your device to those sites, the same way your browser would if you opened them. When you open an article in plain view, NoThis loads that article the same way. Those requests go only to the sites whose links are on the page you are reading. The news sites receive them as ordinary visits and handle them under their own privacy policies.
 
 NoThis needs permission to read the websites you visit for this reason only: to find news teasers on the page and replace or rearrange them on your screen.
 
