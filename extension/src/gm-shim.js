@@ -27,20 +27,33 @@
     return true; // respond asynchronously
   });
 
-  // This file runs before the page is drawn (document_start), the engine only once it has loaded.
-  // On a site where plain view took over before, or that the reader set to a plain level, cover the
-  // page with a calm background so the original never flashes. The engine lifts the cover
-  // (#nothis-cover) as soon as plain view is up, or when it decides against it; after 6 s it goes anyway.
+  // This file runs before the page is drawn (document_start), the engine only once it has loaded,
+  // so plain view would show the original front page for a moment first. Instead the page is covered
+  // with a calm background before anything is drawn: at once on the front or a section page of a
+  // known news site (NEWS_LIST, put in below by build.mjs), since waiting for the settings lets the
+  // page be drawn first, notably in Safari. The settings, read next, take the cover off again when
+  // the site isn't at a plain level; a site off the list is covered once they are read if plain view
+  // has taken it over before. The engine lifts the cover (#nothis-cover) as soon as plain view is up
+  // or when it decides against it; after 12 s it goes anyway.
+  // @include news-list
   const host = location.hostname.replace(/^www\./, '');
   try { if (sessionStorage.getItem('declickbait-original') === host) return; } catch {} // "Original" was pressed
+  let path = location.pathname; try { path = decodeURIComponent(path); } catch {}
+  if (!/^\/(?:[\p{L}-]{1,30}\/?){0,2}$/u.test(path)) return; // "/", "/sport", "/nyheter/innenriks": not an article
+  let cover = null;
+  const put = () => {
+    if (cover) return;
+    cover = document.createElement('style');
+    cover.id = 'nothis-cover';
+    // opacity too: an element can make itself visible again (VG's timestamps), not opaque.
+    cover.textContent = 'html{background:#fbfbf9!important}html>body{visibility:hidden!important;opacity:0!important}@media (prefers-color-scheme: dark){html{background:#1a1b1a!important}}';
+    (document.head || document.documentElement).appendChild(cover);
+    setTimeout(() => cover.remove(), 12000);
+  };
+  if (typeof listedHost === 'function' && listedHost(host)) put();
   api.storage.local.get(['level', 'siteLevels', 'disabledHosts', 'plainHosts']).then(s => {
     const chosen = (s.siteLevels || {})[host], level = chosen || s.level || 'pictures'; // 'pictures' is the default level
-    if ((level !== 'plain' && level !== 'pictures') || (s.disabledHosts || []).includes(host)) return;
-    if (!chosen && !(s.plainHosts || []).includes(host)) return; // only sites known to get plain view
-    const cover = document.createElement('style');
-    cover.id = 'nothis-cover';
-    cover.textContent = 'html{background:#fbfbf9!important}html>body{visibility:hidden!important}@media (prefers-color-scheme: dark){html{background:#1a1b1a!important}}';
-    (document.head || document.documentElement).appendChild(cover);
-    setTimeout(() => cover.remove(), 6000);
+    if ((level !== 'plain' && level !== 'pictures') || (s.disabledHosts || []).includes(host)) { cover?.remove(); return; }
+    if (chosen || (s.plainHosts || []).includes(host)) put();
   });
 })();

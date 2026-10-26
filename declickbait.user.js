@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.18.0
+// @version      1.19.0
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -62,7 +62,8 @@
 
   // ───────────────────────────── Host keys ─────────────────────────────
   // A host's 42-bit fingerprint as 7 characters, for NEWS_LIST (see sites.js). build.mjs runs this
-  // same function to make the list, so the two always agree. cyrb53 hash (public domain, bryc).
+  // same function to make the list, so the two always agree. gm-shim.js gets this file and the list
+  // too, to cover news sites before they are drawn. cyrb53 hash (public domain, bryc).
   const KEY_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
   function hostKey(h) {
     let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -72,6 +73,21 @@
     let n = 4294967296 * (2097151 & h2) + (h1 >>> 0), key = '';
     for (let i = 0; i < 7; i++) { key += KEY_CHARS[n % 64]; n = Math.floor(n / 64); }
     return key;
+  }
+  // Is this key on NEWS_LIST (sorted, 7 characters each)? Is this host, or a parent domain, listed?
+  function listedKey(key) {
+    let lo = 0, hi = NEWS_LIST.length / 7 - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1, k = NEWS_LIST.substr(mid * 7, 7);
+      if (k === key) return true;
+      if (k < key) lo = mid + 1; else hi = mid - 1;
+    }
+    return false;
+  }
+  function listedHost(h) {
+    const p = h.split('.');
+    for (let i = 0; i < p.length - 1; i++) if (listedKey(hostKey(p.slice(i).join('.')))) return true;
+    return false;
   }
 
   // ───────────────────────────── Known news sites ─────────────────────────────
@@ -143,22 +159,9 @@
   const curatedHost = h => NEWS_HOSTS.some(n => h === n || h.endsWith('.' + n));
   // NEWS_LIST: some 10,000 news sites from Wikidata and the Norwegian press organisations, as sorted
   // 7-character host keys, put in by build.mjs from news-hosts.json (refresh it with
-  // tools/news-hosts.mjs). A host is listed when it or a parent domain is. Sources can be stale, so a
-  // listed host still counts only when the page is not a shop or a wiki (see env.js).
-  function listedKey(key) {
-    let lo = 0, hi = NEWS_LIST.length / 7 - 1;
-    while (lo <= hi) {
-      const mid = (lo + hi) >> 1, k = NEWS_LIST.substr(mid * 7, 7);
-      if (k === key) return true;
-      if (k < key) lo = mid + 1; else hi = mid - 1;
-    }
-    return false;
-  }
-  function listedHost(h) {
-    const p = h.split('.');
-    for (let i = 0; i < p.length - 1; i++) if (listedKey(hostKey(p.slice(i).join('.')))) return true;
-    return false;
-  }
+  // tools/news-hosts.mjs). A host is listed when it or a parent domain is (listedHost() in
+  // hostkey.js). Sources can be stale, so a listed host still counts only when the page is not a shop
+  // or a wiki (see env.js).
   const newsHost = h => curatedHost(h) || listedHost(h);
   // Unlisted hosts. A path is article-like when it has a numeric id segment, an Amedia-style id
   // (/slug/s/80-8-27129, ~80 Norwegian local papers), or a slug of 4+ tokens of which at least 3

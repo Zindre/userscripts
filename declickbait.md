@@ -25,7 +25,7 @@ Safari userscript (for [Userscripts.app](https://github.com/quoid/userscripts), 
 
 **Importance.** Before plain view takes over, the script notes how loudly the front page presents each teaser: headline size, how high up it sits and the size of its card. Plain view shows that as a quiet bar instead of big type: blue for the top stories, grey for important ones. **Most important first** in the plain view header lists all articles in that order across sections; **Site order** goes back to sections. The choice is remembered.
 
-**No flash of the original.** In the browser extension, a site that has had plain view before (or that you set to a plain level yourself) is covered with a calm background before it is drawn, and the cover lifts as soon as plain view is ready, so the original front page never flashes up. The userscript can't do this; it starts after the page has loaded.
+**No flash of the original.** In the browser extension, the front and section pages of known news sites (about 10,000, from Wikidata and the Norwegian press organisations) are covered with a calm background before anything is drawn, and so are other sites that have had plain view before. The cover lifts as soon as plain view is ready, or within a few milliseconds when the site isn't set to a plain level, so the original front page never flashes up. Article pages are never covered. The userscript can't do this; it starts after the page has loaded.
 
 **Article pages.** At the two plain view levels, blocks of teasers for other articles under or beside an article ("Les også", related, recommended) are hidden. Their articles are offered once, collapsed, as **Related articles** after the article, in the plain view style; leads are only fetched when you open it.
 

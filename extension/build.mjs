@@ -104,6 +104,10 @@ for (const t of wanted) {
   const skip = new Set(['engine', 'userscript'].map(d => join(root, 'src', d)));
   cpSync(join(root, 'src'), out, { recursive: true, filter: f => !f.endsWith('.svg') && !skip.has(f) });
   writeFileSync(join(out, 'nothis.js'), assemble(ENGINE));
+  // gm-shim.js covers known news sites before they are drawn, so it gets the list too.
+  const shim = readFileSync(join(out, 'gm-shim.js'), 'utf8');
+  if (!shim.includes('// @include news-list')) throw new Error('gm-shim.js: missing "// @include news-list"');
+  writeFileSync(join(out, 'gm-shim.js'), shim.replace('  // @include news-list', () => indent(read('hostkey') + read('news-hosts')).replace(/^  /, '')));
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(targets[t], null, 2) + '\n');
   const zip = join(root, 'dist', `nothis-${t}-${version}.zip`);
   rmSync(zip, { force: true });
