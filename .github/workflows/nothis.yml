@@ -68,12 +68,27 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/asc"
           printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
+      # Every runner makes a new development certificate to archive with; Apple allows about ten.
+      # Revoke the ones earlier runs left behind, and this run's own when it is done.
+      - name: Revoke old CI development certificates
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: node extension/safari/revoke-ci-certs.mjs
       - name: Archive and upload iOS and macOS
         env:
           ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: extension/safari/release.sh
+      - name: Revoke this run's development certificate
+        if: always()
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: node extension/safari/revoke-ci-certs.mjs
       - name: Remove API key
         if: always()
         run: rm -rf "$RUNNER_TEMP/asc"
