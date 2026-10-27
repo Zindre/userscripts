@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.19.1
+// @version      1.20.0
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
@@ -277,8 +277,20 @@
     async get(k, d) { try { return typeof GM !== 'undefined' && GM.getValue ? await GM.getValue(k, d) : d; } catch { return d; } },
     async set(k, v) { try { if (typeof GM !== 'undefined' && GM.setValue) await GM.setValue(k, v); } catch {} },
     xhr(opts) { return new Promise((res, rej) => {
-      if (typeof GM === 'undefined' || !GM.xmlHttpRequest) return rej(new Error('no GM.xmlHttpRequest'));
-      GM.xmlHttpRequest({ method: 'GET', timeout: 12000, onload: res, onerror: rej, ontimeout: rej, ...opts });
+      // Pages on this site are fetched from the page itself, as a first-party request with your own
+      // cookies: a subscriber gets the article as on the site. (The extension's background fetch
+      // may go without them; Safari keeps a site's cookies to the site.)
+      // If that fails (a strict page policy), the GM fetch takes over.
+      const viaGM = () => {
+        if (typeof GM === 'undefined' || !GM.xmlHttpRequest) return rej(new Error('no GM.xmlHttpRequest'));
+        GM.xmlHttpRequest({ method: 'GET', timeout: 12000, onload: res, onerror: rej, ontimeout: rej, ...opts });
+      };
+      let same = false; try { same = new URL(opts.url, location.href).origin === location.origin; } catch {}
+      if (!same) return viaGM();
+      const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), opts.timeout || 12000);
+      fetch(opts.url, { headers: opts.headers || {}, credentials: 'include', redirect: 'follow', signal: ctrl.signal })
+        .then(async r => res({ status: r.status, finalUrl: r.url, responseText: await r.text() }), viaGM)
+        .finally(() => clearTimeout(timer));
     }); },
   };
   // Running inside the browser extension (extension/): its toolbar popup replaces the in-page panel.
@@ -464,15 +476,15 @@
   // Plain view opens an article in place: the page is fetched the way the browser would fetch it,
   // and only its text, subheadings, quotes, lists and pictures are kept. Nothing from the page runs
   // or is inserted as HTML.
-  // Paid articles (schema.org isAccessibleForFree: false) are never read in place unless you have said
-  // you subscribe to the site: many sites (VG) send the whole text to everyone and hide it in the
-  // browser, so the page itself can't tell us what you may read. Once you subscribe, you get what the
-  // site sends you, paywalled parts included (BT wraps the body in .paywall).
-  const READER_SKIP_FREE = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
+  // Paid articles: what the site sends is what you read, the same as the browser gets it. A logged-in
+  // subscriber gets the whole text, and so does everyone where the site sends it all (VG); a paywall
+  // is the publisher's to keep, not ours to add. When a paid article arrives short (the site held the
+  // rest back), the reader says the rest needs a subscription. Paywalled parts are read like the rest
+  // (BT wraps the body in .paywall).
+  const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
     '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
     ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
       .map(c => `[class*="${c}" i]`)].join(', ');
-  const READER_SKIP = READER_SKIP_FREE + ', [class*="paywall" i], [data-paywall]';
   const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
   function readerImage(img, base) {
@@ -504,9 +516,9 @@
     return best;
   }
 
-  // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid } or null
-  // subscribed: you subscribe to this site, so its paywalled parts are yours to read.
-  function readArticle(html, url, withImages, subscribed) {
+  // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid, partial } or null
+  // partial: a paid article that arrived with only its start.
+  function readArticle(html, url, withImages) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     let paid = false, date = '', byline = '';
     for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
@@ -520,10 +532,9 @@
       } catch {}
     }
     date ||= doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content') || doc.querySelector('time[datetime]')?.getAttribute('datetime') || '';
-    if (paid && !subscribed) return { blocks: [], date, byline, paid };
-    const skip = subscribed ? READER_SKIP_FREE : READER_SKIP;
+    const skip = READER_SKIP;
     const root = readerRoot(doc, skip);
-    if (!root) return null;
+    if (!root) return paid ? { blocks: [], date, byline, paid, partial: true } : null;
     const blocks = [];
     const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
     const walk = el => {
@@ -562,31 +573,32 @@
       } catch {}
     }
     const words = blocks.reduce((n, b) => n + (b.text || '').length + (b.items || []).join(' ').length, 0);
-    return words >= 200 ? { blocks, date, byline, paid } : null;
+    // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
+    if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
+    return words >= 200 ? { blocks, date, byline, paid, partial: false } : null;
   }
 
   // Articles read so far (url → promise of readArticle's result), so an article is fetched once and
   // opens at once when it was fetched ahead. readerFor tells which variant plain view wants; plain
   // view sets it, and getMeta() hands over every article page it fetches anyway (articleFetched).
   const readerCache = new Map();
-  let readerFor = null; // () => ({ withImages, subscribed }) while plain view is up
-  const readerKey = (url, subscribed) => url + (subscribed ? ' +' : '');
+  let readerFor = null; // () => ({ withImages }) while plain view is up
   function articleFetched(url, html, finalUrl) {
     if (!readerFor) return;
-    const { withImages, subscribed } = readerFor(), ck = readerKey(url, subscribed);
+    const { withImages } = readerFor(), ck = url;
     // Parsed when the page is idle, so a burst of headline fetches doesn't stall scrolling.
     const idle = window.requestIdleCallback || (f => setTimeout(f, 50));
-    if (!readerCache.has(ck)) readerCache.set(ck, new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages, subscribed)))));
+    if (!readerCache.has(ck)) readerCache.set(ck, new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages)))));
   }
-  function fetchArticle(url, withImages, subscribed) {
-    const ck = readerKey(url, subscribed);
+  function fetchArticle(url, withImages) {
+    const ck = url;
     if (!readerCache.has(ck)) readerCache.set(ck, (async () => {
       const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
       try {
         const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
         const finalUrl = r.finalUrl || r.responseURL || '';
         if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-          return readArticle(r.responseText, finalUrl || url, withImages, subscribed);
+          return readArticle(r.responseText, finalUrl || url, withImages);
       } catch {}
       return null;
     })());
@@ -1027,11 +1039,11 @@
   // section, headline and lead only, in the editors' order. The site's <body> is hidden and its
   // media paused, so ads, autoplay video, pop-ups and animation never show. A "Latest" section
   // comes from the site's RSS/Atom feed. Article pages are left alone (they get the synopsis
-  // level). Paywalls stay: paid articles are marked and open on the site as usual.
+  // level). Paid articles are marked; what the site sends for them is what the reader shows.
   const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
   const T = NB
-    ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}`, prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
-    : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}`, prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
+    ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
+    : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
   const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
   // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
   const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -1314,7 +1326,6 @@
     rankItems(items);
     let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
     const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
-    let subscribedHosts = (await gm.get('subscribedHosts', [])) || [];
     readSectionNames();
 
     plainHost = document.createElement('div');
@@ -1484,21 +1495,20 @@
     // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40
     // per visit), and right away the one under the pointer or keyboard focus and the neighbours of the
     // one being read. Pages fetched for the headlines are reused (articleFetched in reader.js).
-    readerFor = () => ({ withImages, subscribed: subscribedHosts.includes(host) });
+    readerFor = () => ({ withImages });
     const ahead = [];
     let aheadRunning = 0, aheadLeft = 40;
     function prefetch(key, now) {
       const it = byKey.get(key); if (!it) return;
-      const { subscribed } = readerFor();
-      if (readerCache.has(readerKey(it.url, subscribed))) return;
-      if (now) { fetchArticle(it.url, withImages, subscribed); return; }
+      if (readerCache.has(it.url)) return;
+      if (now) { fetchArticle(it.url, withImages); return; }
       if (aheadLeft > 0 && !ahead.includes(key)) { ahead.push(key); aheadLeft--; pumpAhead(); }
     }
     function pumpAhead() {
       while (aheadRunning < 2 && ahead.length) {
         const it = byKey.get(ahead.shift()); if (!it) continue;
         aheadRunning++;
-        fetchArticle(it.url, withImages, readerFor().subscribed).finally(() => { aheadRunning--; pumpAhead(); });
+        fetchArticle(it.url, withImages).finally(() => { aheadRunning--; pumpAhead(); });
       }
     }
     for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
@@ -1513,8 +1523,7 @@
     }
     window.addEventListener('popstate', () => closeArticle(true));
     async function fillReader(it) {
-      const subscribed = subscribedHosts.includes(host);
-      const art = await fetchArticle(it.url, withImages, subscribed);
+      const art = await fetchArticle(it.url, withImages);
       if (current !== it) return; // closed, or another one opened meanwhile
       const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
       const out = [el('h1', li?.querySelector('a.h').textContent || it.teaser)];
@@ -1534,20 +1543,10 @@
         }
       }
       if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
-      else if (art.paid && !subscribed) out.push(el('p', T.paidHere, 'note'));
+      else if (art.partial) out.push(el('p', T.paidHere, 'note'));
       const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
       site.href = it.url; close.dataset.act = 'close-reader';
       end.append(site);
-      if (art?.paid) {
-        // Whether you subscribe is yours to say; the site still decides what it sends you.
-        const sub = el('button', subscribed ? T.unsubscribe(host) : T.subscribe(host));
-        sub.addEventListener('click', async () => {
-          subscribedHosts = subscribed ? subscribedHosts.filter(h => h !== host) : [...subscribedHosts, host];
-          await gm.set('subscribedHosts', subscribedHosts);
-          reader.replaceChildren(el('p', T.loading, 'note')); fillReader(it);
-        });
-        end.append(sub);
-      }
       end.append(close); out.push(end);
       reader.replaceChildren(...out);
     }

@@ -3,11 +3,11 @@
 // section, headline and lead only, in the editors' order. The site's <body> is hidden and its
 // media paused, so ads, autoplay video, pop-ups and animation never show. A "Latest" section
 // comes from the site's RSS/Atom feed. Article pages are left alone (they get the synopsis
-// level). Paywalls stay: paid articles are marked and open on the site as usual.
+// level). Paid articles are marked; what the site sends for them is what the reader shows.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
 const T = NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Saken krever abonnement.', subscribe: h => `Jeg abonnerer på ${h}`, unsubscribe: h => `Jeg abonnerer ikke på ${h}`, prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'This article is for subscribers.', subscribe: h => `I subscribe to ${h}`, unsubscribe: h => `I don't subscribe to ${h}`, prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -290,7 +290,6 @@ async function plainView(withImages) {
   rankItems(items);
   let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
   const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
-  let subscribedHosts = (await gm.get('subscribedHosts', [])) || [];
   readSectionNames();
 
   plainHost = document.createElement('div');
@@ -460,21 +459,20 @@ async function plainView(withImages) {
   // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40
   // per visit), and right away the one under the pointer or keyboard focus and the neighbours of the
   // one being read. Pages fetched for the headlines are reused (articleFetched in reader.js).
-  readerFor = () => ({ withImages, subscribed: subscribedHosts.includes(host) });
+  readerFor = () => ({ withImages });
   const ahead = [];
   let aheadRunning = 0, aheadLeft = 40;
   function prefetch(key, now) {
     const it = byKey.get(key); if (!it) return;
-    const { subscribed } = readerFor();
-    if (readerCache.has(readerKey(it.url, subscribed))) return;
-    if (now) { fetchArticle(it.url, withImages, subscribed); return; }
+    if (readerCache.has(it.url)) return;
+    if (now) { fetchArticle(it.url, withImages); return; }
     if (aheadLeft > 0 && !ahead.includes(key)) { ahead.push(key); aheadLeft--; pumpAhead(); }
   }
   function pumpAhead() {
     while (aheadRunning < 2 && ahead.length) {
       const it = byKey.get(ahead.shift()); if (!it) continue;
       aheadRunning++;
-      fetchArticle(it.url, withImages, readerFor().subscribed).finally(() => { aheadRunning--; pumpAhead(); });
+      fetchArticle(it.url, withImages).finally(() => { aheadRunning--; pumpAhead(); });
     }
   }
   for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
@@ -489,8 +487,7 @@ async function plainView(withImages) {
   }
   window.addEventListener('popstate', () => closeArticle(true));
   async function fillReader(it) {
-    const subscribed = subscribedHosts.includes(host);
-    const art = await fetchArticle(it.url, withImages, subscribed);
+    const art = await fetchArticle(it.url, withImages);
     if (current !== it) return; // closed, or another one opened meanwhile
     const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
     const out = [el('h1', li?.querySelector('a.h').textContent || it.teaser)];
@@ -510,20 +507,10 @@ async function plainView(withImages) {
       }
     }
     if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
-    else if (art.paid && !subscribed) out.push(el('p', T.paidHere, 'note'));
+    else if (art.partial) out.push(el('p', T.paidHere, 'note'));
     const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
     site.href = it.url; close.dataset.act = 'close-reader';
     end.append(site);
-    if (art?.paid) {
-      // Whether you subscribe is yours to say; the site still decides what it sends you.
-      const sub = el('button', subscribed ? T.unsubscribe(host) : T.subscribe(host));
-      sub.addEventListener('click', async () => {
-        subscribedHosts = subscribed ? subscribedHosts.filter(h => h !== host) : [...subscribedHosts, host];
-        await gm.set('subscribedHosts', subscribedHosts);
-        reader.replaceChildren(el('p', T.loading, 'note')); fillReader(it);
-      });
-      end.append(sub);
-    }
     end.append(close); out.push(end);
     reader.replaceChildren(...out);
   }

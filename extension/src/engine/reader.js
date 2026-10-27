@@ -2,15 +2,15 @@
 // Plain view opens an article in place: the page is fetched the way the browser would fetch it,
 // and only its text, subheadings, quotes, lists and pictures are kept. Nothing from the page runs
 // or is inserted as HTML.
-// Paid articles (schema.org isAccessibleForFree: false) are never read in place unless you have said
-// you subscribe to the site: many sites (VG) send the whole text to everyone and hide it in the
-// browser, so the page itself can't tell us what you may read. Once you subscribe, you get what the
-// site sends you, paywalled parts included (BT wraps the body in .paywall).
-const READER_SKIP_FREE = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
+// Paid articles: what the site sends is what you read, the same as the browser gets it. A logged-in
+// subscriber gets the whole text, and so does everyone where the site sends it all (VG); a paywall
+// is the publisher's to keep, not ours to add. When a paid article arrives short (the site held the
+// rest back), the reader says the rest needs a subscription. Paywalled parts are read like the rest
+// (BT wraps the body in .paywall).
+const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
   '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
   ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
     .map(c => `[class*="${c}" i]`)].join(', ');
-const READER_SKIP = READER_SKIP_FREE + ', [class*="paywall" i], [data-paywall]';
 const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
 function readerImage(img, base) {
@@ -42,9 +42,9 @@ function readerRoot(doc, skip) {
   return best;
 }
 
-// → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid } or null
-// subscribed: you subscribe to this site, so its paywalled parts are yours to read.
-function readArticle(html, url, withImages, subscribed) {
+// → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid, partial } or null
+// partial: a paid article that arrived with only its start.
+function readArticle(html, url, withImages) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   let paid = false, date = '', byline = '';
   for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
@@ -58,10 +58,9 @@ function readArticle(html, url, withImages, subscribed) {
     } catch {}
   }
   date ||= doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content') || doc.querySelector('time[datetime]')?.getAttribute('datetime') || '';
-  if (paid && !subscribed) return { blocks: [], date, byline, paid };
-  const skip = subscribed ? READER_SKIP_FREE : READER_SKIP;
+  const skip = READER_SKIP;
   const root = readerRoot(doc, skip);
-  if (!root) return null;
+  if (!root) return paid ? { blocks: [], date, byline, paid, partial: true } : null;
   const blocks = [];
   const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
   const walk = el => {
@@ -100,31 +99,32 @@ function readArticle(html, url, withImages, subscribed) {
     } catch {}
   }
   const words = blocks.reduce((n, b) => n + (b.text || '').length + (b.items || []).join(' ').length, 0);
-  return words >= 200 ? { blocks, date, byline, paid } : null;
+  // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
+  if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
+  return words >= 200 ? { blocks, date, byline, paid, partial: false } : null;
 }
 
 // Articles read so far (url → promise of readArticle's result), so an article is fetched once and
 // opens at once when it was fetched ahead. readerFor tells which variant plain view wants; plain
 // view sets it, and getMeta() hands over every article page it fetches anyway (articleFetched).
 const readerCache = new Map();
-let readerFor = null; // () => ({ withImages, subscribed }) while plain view is up
-const readerKey = (url, subscribed) => url + (subscribed ? ' +' : '');
+let readerFor = null; // () => ({ withImages }) while plain view is up
 function articleFetched(url, html, finalUrl) {
   if (!readerFor) return;
-  const { withImages, subscribed } = readerFor(), ck = readerKey(url, subscribed);
+  const { withImages } = readerFor(), ck = url;
   // Parsed when the page is idle, so a burst of headline fetches doesn't stall scrolling.
   const idle = window.requestIdleCallback || (f => setTimeout(f, 50));
-  if (!readerCache.has(ck)) readerCache.set(ck, new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages, subscribed)))));
+  if (!readerCache.has(ck)) readerCache.set(ck, new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages)))));
 }
-function fetchArticle(url, withImages, subscribed) {
-  const ck = readerKey(url, subscribed);
+function fetchArticle(url, withImages) {
+  const ck = url;
   if (!readerCache.has(ck)) readerCache.set(ck, (async () => {
     const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
     try {
       const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
       const finalUrl = r.finalUrl || r.responseURL || '';
       if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-        return readArticle(r.responseText, finalUrl || url, withImages, subscribed);
+        return readArticle(r.responseText, finalUrl || url, withImages);
     } catch {}
     return null;
   })());
