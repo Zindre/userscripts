@@ -4,6 +4,9 @@
 # GitHub release with the Chrome/Edge and Firefox zips.
 # Release: bump "version" in extension/package.json, run node extension/build.mjs, commit, then
 #   git tag nothis-v1.12.0 && git push origin nothis-v1.12.0
+# A new build of a version already in TestFlight keeps the version and adds a suffix,
+#   git tag nothis-v1.12.0-2 && git push origin nothis-v1.12.0-2
+# so external testers get it without a new Beta App Review (Apple reviews each new version once).
 # Secrets for the upload: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (see extension/README.md).
 name: NoThis extension
 
@@ -56,8 +59,10 @@ jobs:
       - name: Check tag matches the version
         run: |
           v=$(node -p "require('./extension/package.json').version")
-          if [ "nothis-v$v" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match version $v in extension/package.json"; exit 1
+          case "$GITHUB_REF_NAME" in
+            "nothis-v$v" | "nothis-v$v"-[0-9]*) ;; # nothis-v1.20.0, or a rebuild nothis-v1.20.0-2
+            *) echo "::error::Tag $GITHUB_REF_NAME does not match version $v in extension/package.json"; exit 1 ;;
+          esac
           fi
       - uses: maxim-lobanov/setup-xcode@v1
         with:

@@ -97,6 +97,14 @@ A tag `nothis-v<version>` runs the whole chain: build and lint, then archive the
 git tag nothis-v1.12.0 && git push origin nothis-v1.12.0
 ```
 
+Apple's Beta App Review looks at the first build of each new version before external testers get it; later builds of the same version usually go straight through. So while a version is being tested, ship fixes as new builds of it: keep `version` and tag with a suffix. Each upload still gets its own build number (the UTC time).
+
+```bash
+git tag nothis-v1.12.0-2 && git push origin nothis-v1.12.0-2
+```
+
+Bump `version` when it's time for a new round of review, for instance for bigger changes. Chrome, Edge and Firefox users and the userscript only see a new version when `version` changes.
+
 ### App Store Connect API key
 
 Uploads use an App Store Connect API key instead of an Xcode login, both on GitHub and locally.
