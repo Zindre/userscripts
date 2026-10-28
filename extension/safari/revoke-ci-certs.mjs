@@ -8,11 +8,12 @@
 // Uses the App Store Connect API key from the environment, as release.sh does:
 // ASC_KEY_PATH (the .p8 file), ASC_KEY_ID, ASC_ISSUER_ID. Never fails the build: a certificate that
 // can't be revoked is reported and left.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { sign } from 'node:crypto';
 
 const { ASC_KEY_PATH, ASC_KEY_ID, ASC_ISSUER_ID } = process.env;
-if (!ASC_KEY_PATH || !ASC_KEY_ID || !ASC_ISSUER_ID) { console.log('No App Store Connect API key; nothing to do.'); process.exit(0); }
+// The key is missing when an earlier step failed before writing it.
+if (!ASC_KEY_PATH || !ASC_KEY_ID || !ASC_ISSUER_ID || !existsSync(ASC_KEY_PATH)) { console.log('No App Store Connect API key; nothing to do.'); process.exit(0); }
 
 const b64 = x => Buffer.from(typeof x === 'string' ? x : JSON.stringify(x)).toString('base64url');
 const now = Math.floor(Date.now() / 1000);
