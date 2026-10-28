@@ -488,6 +488,8 @@
     '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
     ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
       .map(c => `[class*="${c}" i]`)].join(', ');
+  // Live pages ("Nyheter direkte"): a running feed of short news, each entry a story of its own.
+  const LIVE_ENTRY = '[data-testid="liveblog-entry"], [itemtype$="/BlogPosting"]';
   const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
   function readerImage(img, base) {
@@ -538,13 +540,24 @@
     date ||= doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content') || doc.querySelector('time[datetime]')?.getAttribute('datetime') || '';
     const skip = READER_SKIP;
     const root = readerRoot(doc, skip);
-    if (!root) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
+    // On a live page the most text is the feed as a whole, a jumble of unrelated stories. A link to one
+    // entry (BT's ?pinnedEntry=…, the page then titled after it) reads as that entry alone, a proper
+    // article however short; the feed itself reads entry by entry, each under its own heading.
+    const live = [...doc.querySelectorAll(LIVE_ENTRY)].filter(e => !e.parentElement?.closest(LIVE_ENTRY));
+    const title = norm(doc.querySelector('meta[property="og:title"]')?.getAttribute('content'));
+    const entry = live.length > 1 && title && live.find(e => norm(e.querySelector('h1, h2, h3')?.textContent) === title);
+    const feed = !entry && live.length > 1 && root && live.some(e => e.contains(root) || root.contains(e)) ? live.slice(0, 30) : null;
+    if (entry) article = true;
+    if (feed) date = ''; // the feed's own date is when it was started
+    if (!root && !entry) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
     const blocks = [];
     const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
     const walk = el => {
       for (const c of el.children) {
         if (c.matches(skip)) continue;
         const tag = c.tagName;
+        // A link around a picture and text is a card for another story (BT's live entries end with one).
+        if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
         if (tag === 'P') {
           const t = norm(c.textContent);
           if (t && !ALSO.test(t) && t !== lead) blocks.push({ t: 'p', text: t });
@@ -566,11 +579,13 @@
         } else walk(c);
       }
     };
-    walk(root);
+    if (entry) walk(entry); else if (feed) feed.forEach(walk); else walk(root);
+    // The entry's own heading is the reader's headline already.
+    if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
     // Headings with nothing after them are links to other stories (BBC's "more on this").
     while (blocks.length && blocks[blocks.length - 1].t === 'h') blocks.pop();
     // The story's own picture leads when the body has none of its own.
-    if (withImages && !blocks.some(b => b.t === 'img')) {
+    if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
       try {
         const og = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
         if (og) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
