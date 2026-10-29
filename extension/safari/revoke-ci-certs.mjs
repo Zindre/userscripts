@@ -4,6 +4,8 @@
 // certificate ("Created via API") for every archive, and Apple stops issuing them after about ten.
 // They are useless once the runner is gone. Only development certificates named "Created via API"
 // are touched: never distribution certificates, never ones made in Xcode on a Mac.
+// The workflow now archives with a stored certificate (SIGNING_CERT_P12), so this finds nothing
+// unless that secret is missing or Xcode made a certificate anyway.
 //
 // Uses the App Store Connect API key from the environment, as release.sh does:
 // ASC_KEY_PATH (the .p8 file), ASC_KEY_ID, ASC_ISSUER_ID. Never fails the build: a certificate that

@@ -109,7 +109,7 @@ Bump `version` when it's time for a new round of review, for instance for bigger
 
 Uploads use an App Store Connect API key instead of an Xcode login, both on GitHub and locally.
 
-1. In App Store Connect → Users and Access → Integrations → App Store Connect API → Team Keys, generate a key with **Admin** access. Admin is needed so the runner can create its own signing certificate. Download the `.p8` file (it can only be downloaded once) and note the Key ID and the Issuer ID.
+1. In App Store Connect → Users and Access → Integrations → App Store Connect API → Team Keys, generate a key with **Admin** access. Admin is needed so the runner can update provisioning profiles (and make a certificate when none is stored, below). Download the `.p8` file (it can only be downloaded once) and note the Key ID and the Issuer ID.
 2. Keep the file at `~/.appstoreconnect/private_keys/AuthKey_<KEY ID>.p8`, the place Apple's tools look by default.
 3. Store it as three repository secrets (run these yourself):
 
@@ -131,3 +131,20 @@ Uploads use an App Store Connect API key instead of an Xcode login, both on GitH
    ```
 
 `safari/release.sh` uses the key whenever these are set, and the Xcode account otherwise. Build numbers are the UTC time (`yymmddHHMM`), so local and GitHub uploads never collide.
+
+### Signing certificate for GitHub
+
+The runner archives with one stored development certificate. Without it, Xcode asks Apple for a new certificate on every run, which means an email each time and a limit of about ten; the workflow then revokes it again after the run (`safari/revoke-ci-certs.mjs`, which only touches certificates named "Created via API").
+
+1. In Keychain Access → login → My Certificates, find **Apple Development** for the NoThis team (XCZ5XRJPV9), the one with the latest expiry date. Right-click → Export → `.p12`, with a password of your own.
+2. Store it as two repository secrets (run these yourself), then delete the `.p12` file:
+
+   ```bash
+   base64 -i nothis-ci.p12 | gh secret set SIGNING_CERT_P12 -R Zindre/userscripts
+   ```
+   ```bash
+   gh secret set SIGNING_CERT_PASSWORD -R Zindre/userscripts
+   ```
+3. The certificate lasts a year. When Xcode on the Mac has made a new one, export and store it again.
+
+The workflow imports it into a keychain of its own for the run and deletes that keychain afterwards. Without the secret it warns and falls back to a certificate per run.

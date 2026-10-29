@@ -7,7 +7,8 @@
 # A new build of a version already in TestFlight keeps the version and adds a suffix,
 #   git tag nothis-v1.12.0-2 && git push origin nothis-v1.12.0-2
 # so external testers get it without a new Beta App Review (Apple reviews each new version once).
-# Secrets for the upload: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (see extension/README.md).
+# Secrets for the upload: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, and the signing certificate
+# SIGNING_CERT_P12 (base64) with SIGNING_CERT_PASSWORD (see extension/README.md).
 name: NoThis extension
 
 on:
@@ -72,30 +73,44 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/asc"
           printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
-      # Every runner makes a new development certificate to archive with; Apple allows about ten.
-      # Revoke the ones earlier runs left behind, and this run's own when it is done.
-      - name: Revoke old CI development certificates
+      # Archive with the one stored development certificate, put in a keychain of its own for this run.
+      # Without it Xcode asks Apple for a new certificate on every run (an email each time, and Apple
+      # stops at about ten); the cleanup below then revokes it again.
+      - name: Import signing certificate
         env:
-          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-        run: node extension/safari/revoke-ci-certs.mjs
+          SIGNING_CERT_P12: ${{ secrets.SIGNING_CERT_P12 }}
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          if [ -z "$SIGNING_CERT_P12" ]; then echo "::warning::No SIGNING_CERT_P12 secret: Xcode will make a certificate for this run"; exit 0; fi
+          kc="$RUNNER_TEMP/signing.keychain-db" kcpw=$(uuidgen)
+          security create-keychain -p "$kcpw" "$kc"
+          security set-keychain-settings -lut 21600 "$kc"
+          security unlock-keychain -p "$kcpw" "$kc"
+          printf '%s' "$SIGNING_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -P "$SIGNING_CERT_PASSWORD" -f pkcs12 -k "$kc" -T /usr/bin/codesign -T /usr/bin/security
+          rm "$RUNNER_TEMP/cert.p12"
+          security set-key-partition-list -S apple-tool:,apple: -k "$kcpw" "$kc" > /dev/null
+          security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$kc"
       - name: Archive and upload iOS and macOS
         env:
           ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: extension/safari/release.sh
-      - name: Revoke this run's development certificate
+      # Only certificates Xcode made through the API key ("Created via API"); none when the stored one was used.
+      - name: Revoke CI-made development certificates
         if: always()
         env:
           ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: node extension/safari/revoke-ci-certs.mjs
-      - name: Remove API key
+      - name: Remove API key and signing keychain
         if: always()
-        run: rm -rf "$RUNNER_TEMP/asc"
+        run: |
+          rm -rf "$RUNNER_TEMP/asc"
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
 
   release:
     name: GitHub release
