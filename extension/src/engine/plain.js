@@ -139,8 +139,10 @@ async function feedItems() {
 // Front pages that fill in as they are scrolled (VG) are read by scrolling the hidden page, so the
 // site's own lazy loading adds the rest. Stops after six screens without new articles, at the end of
 // the page, when done() says so, or after 40 screens.
-async function harvest(known, onNew, done = () => false) {
+// hold: while true the scrolling waits (someone is using plain view; see the end of plainView).
+async function harvest(known, onNew, done = () => false, hold = () => false) {
   for (let i = 0, idle = 0; i < 40 && idle < 6 && !done(); i++) {
+    while (hold()) await new Promise(r => setTimeout(r, 400));
     window.scrollBy(0, innerHeight * 1.5);
     await new Promise(r => setTimeout(r, 250));
     const fresh = frontPageItems(known);
@@ -458,15 +460,16 @@ async function plainView(withImages) {
 
   // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40
   // per visit), and right away the one under the pointer or keyboard focus and the neighbours of the
-  // one being read. Pages fetched for the headlines are reused (articleFetched in reader.js). One
-  // fetched more than two minutes ago is fetched again before it opens: the story may have grown.
-  readerFor = () => ({ withImages });
+  // one being read. A page is read for the reader only when it opens (fetchArticle), so scrolling
+  // and tapping stay quick. Pages fetched for the headlines are reused (articleFetched in reader.js).
+  // One fetched more than two minutes ago is fetched again before it opens: the story may have grown.
+  readerFor = true;
   const ahead = [];
   let aheadRunning = 0, aheadLeft = 40;
   const FRESH = 2 * 60 * 1000;
   function prefetch(key, now) {
     const it = byKey.get(key); if (!it) return;
-    if (now) { fetchArticle(it.url, withImages, FRESH); return; }
+    if (now) { fetchArticle(it.url, withImages, FRESH, false); return; }
     if (readerCache.has(it.url)) return;
     if (aheadLeft > 0 && !ahead.includes(key)) { ahead.push(key); aheadLeft--; pumpAhead(); }
   }
@@ -474,7 +477,7 @@ async function plainView(withImages) {
     while (aheadRunning < 2 && ahead.length) {
       const it = byKey.get(ahead.shift()); if (!it) continue;
       aheadRunning++;
-      fetchArticle(it.url, withImages).finally(() => { aheadRunning--; pumpAhead(); });
+      fetchArticle(it.url, withImages, Infinity, false).finally(() => { aheadRunning--; pumpAhead(); });
     }
   }
   for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
@@ -647,10 +650,13 @@ async function plainView(withImages) {
   render();
   feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });
   // Read the rest of a lazily filled front page, a few articles at a time, then drop the site's body.
-  let later = null;
+  // Each step makes the site load more (pictures, players, ads), work that holds up a tap, so it
+  // waits while an article is open and for a moment after each touch, click, scroll or key.
+  let later = null, quietAt = 0;
+  for (const ev of ['pointerdown', 'touchstart', 'wheel', 'keydown']) plainHost.addEventListener(ev, () => { quietAt = Date.now() + 2500; }, { capture: true, passive: true });
   harvest(known, fresh => {
     items.push(...fresh); rankItems(items); fresh.forEach(add);
     clearTimeout(later); later = setTimeout(render, 600);
-  }).then(() => { window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); });
+  }, undefined, () => !!current || Date.now() < quietAt).then(() => { window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); });
   return true;
 }

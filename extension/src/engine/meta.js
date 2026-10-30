@@ -20,8 +20,16 @@ const saveCache = (() => { let timer; return () => {
 }; })();
 
 // ───────────────────────────── Article metadata ─────────────────────────────
+// A fetched page parsed without what nothing here reads: scripts other than ld+json, styles, inline
+// SVG and templates, often half the page (VG's inline player and state scripts). Parsing runs on the
+// page's main thread, so a front page fetching dozens of articles stays responsive to taps.
+function parseHtml(html) {
+  const lean = html.replace(/<script(?=[\s>])(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<(style|svg|template)(?=[\s>])[^>]*>[\s\S]*?<\/\1>/gi, '');
+  return new DOMParser().parseFromString(lean, 'text/html');
+}
 function extractMeta(html, url) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const doc = parseHtml(html);
   const q = sel => doc.querySelector(sel);
   const meta = (sel) => norm(q(sel)?.getAttribute('content'));
   let ldTitle = '', ldDesc = '', ldImage = '', ldSection = '', ldKeywords = '';

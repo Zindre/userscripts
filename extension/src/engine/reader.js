@@ -50,7 +50,7 @@ function readerRoot(doc, skip) {
 // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid, partial } or null
 // partial: a paid article that arrived with only its start. short: an article with little text.
 function readArticle(html, url, withImages) {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const doc = parseHtml(html);
   let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
   for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
     try {
@@ -124,31 +124,34 @@ function readArticle(html, url, withImages) {
   return article ? { blocks, date, byline, paid, partial: false, short: true } : null;
 }
 
-// Articles read so far (url → { p: promise of readArticle's result, at: when fetched }), so an article
-// opens at once when it was fetched ahead. readerFor tells which variant plain view wants; plain
-// view sets it, and getMeta() hands over every article page it fetches anyway (articleFetched).
+// Articles fetched so far (url → { at: when fetched, raw: promise of { html, finalUrl } or null,
+// p: promise of readArticle's result }), so an article opens at once when it was fetched ahead.
+// A page is only read (p) when it is about to be opened: reading every page fetched ahead on arrival
+// kept the main thread busy, and a tap on the front page waited for it. Once read, raw points to the
+// result instead of holding on to the page. readerFor is set while plain view is up; getMeta()
+// hands over every article page it fetches anyway (articleFetched).
 // A news story changes while the front page stays open (a stub grows into the full story), so plain
 // view asks for a fresh copy (maxAge) when an article is about to be opened.
 const readerCache = new Map();
-let readerFor = null; // () => ({ withImages }) while plain view is up
+let readerFor = false; // true while plain view is up
 function articleFetched(url, html, finalUrl) {
-  if (!readerFor) return;
-  const { withImages } = readerFor(), ck = url;
-  // Parsed when the page is idle, so a burst of headline fetches doesn't stall scrolling.
-  const idle = window.requestIdleCallback || (f => setTimeout(f, 50));
-  if (!readerCache.has(ck)) readerCache.set(ck, { p: new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages)))), at: Date.now() });
+  if (readerFor && !readerCache.has(url)) readerCache.set(url, { at: Date.now(), raw: Promise.resolve({ html, finalUrl }) });
 }
-function fetchArticle(url, withImages, maxAge = Infinity) {
-  const ck = url;
-  if (!(Date.now() - readerCache.get(ck)?.at <= maxAge)) readerCache.set(ck, { at: Date.now(), p: (async () => {
-    const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
-    try {
-      const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
-      const finalUrl = r.finalUrl || r.responseURL || '';
-      if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-        return readArticle(r.responseText, finalUrl || url, withImages);
-    } catch {}
-    return null;
-  })() });
-  return readerCache.get(ck).p;
+async function fetchPage(url) {
+  const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
+  try {
+    const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
+    const finalUrl = r.finalUrl || r.responseURL || '';
+    if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
+      return { html: r.responseText, finalUrl };
+  } catch {}
+  return null;
+}
+// read false: only fetch ahead (resolves when the page is here), without reading it yet.
+function fetchArticle(url, withImages, maxAge = Infinity, read = true) {
+  let e = readerCache.get(url);
+  if (!(Date.now() - e?.at <= maxAge)) readerCache.set(url, e = { at: Date.now(), raw: fetchPage(url) });
+  if (!read) return e.raw;
+  if (!e.p) { e.p = e.raw.then(r => r && readArticle(r.html, r.finalUrl || url, withImages)); e.raw = e.p; }
+  return e.p;
 }

@@ -376,8 +376,16 @@
   }; })();
 
   // ───────────────────────────── Article metadata ─────────────────────────────
+  // A fetched page parsed without what nothing here reads: scripts other than ld+json, styles, inline
+  // SVG and templates, often half the page (VG's inline player and state scripts). Parsing runs on the
+  // page's main thread, so a front page fetching dozens of articles stays responsive to taps.
+  function parseHtml(html) {
+    const lean = html.replace(/<script(?=[\s>])(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<(style|svg|template)(?=[\s>])[^>]*>[\s\S]*?<\/\1>/gi, '');
+    return new DOMParser().parseFromString(lean, 'text/html');
+  }
   function extractMeta(html, url) {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const doc = parseHtml(html);
     const q = sel => doc.querySelector(sel);
     const meta = (sel) => norm(q(sel)?.getAttribute('content'));
     let ldTitle = '', ldDesc = '', ldImage = '', ldSection = '', ldKeywords = '';
@@ -524,7 +532,7 @@
   // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid, partial } or null
   // partial: a paid article that arrived with only its start. short: an article with little text.
   function readArticle(html, url, withImages) {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const doc = parseHtml(html);
     let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
     for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
       try {
@@ -598,33 +606,36 @@
     return article ? { blocks, date, byline, paid, partial: false, short: true } : null;
   }
 
-  // Articles read so far (url → { p: promise of readArticle's result, at: when fetched }), so an article
-  // opens at once when it was fetched ahead. readerFor tells which variant plain view wants; plain
-  // view sets it, and getMeta() hands over every article page it fetches anyway (articleFetched).
+  // Articles fetched so far (url → { at: when fetched, raw: promise of { html, finalUrl } or null,
+  // p: promise of readArticle's result }), so an article opens at once when it was fetched ahead.
+  // A page is only read (p) when it is about to be opened: reading every page fetched ahead on arrival
+  // kept the main thread busy, and a tap on the front page waited for it. Once read, raw points to the
+  // result instead of holding on to the page. readerFor is set while plain view is up; getMeta()
+  // hands over every article page it fetches anyway (articleFetched).
   // A news story changes while the front page stays open (a stub grows into the full story), so plain
   // view asks for a fresh copy (maxAge) when an article is about to be opened.
   const readerCache = new Map();
-  let readerFor = null; // () => ({ withImages }) while plain view is up
+  let readerFor = false; // true while plain view is up
   function articleFetched(url, html, finalUrl) {
-    if (!readerFor) return;
-    const { withImages } = readerFor(), ck = url;
-    // Parsed when the page is idle, so a burst of headline fetches doesn't stall scrolling.
-    const idle = window.requestIdleCallback || (f => setTimeout(f, 50));
-    if (!readerCache.has(ck)) readerCache.set(ck, { p: new Promise(res => idle(() => res(readArticle(html, finalUrl || url, withImages)))), at: Date.now() });
+    if (readerFor && !readerCache.has(url)) readerCache.set(url, { at: Date.now(), raw: Promise.resolve({ html, finalUrl }) });
   }
-  function fetchArticle(url, withImages, maxAge = Infinity) {
-    const ck = url;
-    if (!(Date.now() - readerCache.get(ck)?.at <= maxAge)) readerCache.set(ck, { at: Date.now(), p: (async () => {
-      const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
-      try {
-        const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
-        const finalUrl = r.finalUrl || r.responseURL || '';
-        if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
-          return readArticle(r.responseText, finalUrl || url, withImages);
-      } catch {}
-      return null;
-    })() });
-    return readerCache.get(ck).p;
+  async function fetchPage(url) {
+    const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
+    try {
+      const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
+      const finalUrl = r.finalUrl || r.responseURL || '';
+      if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
+        return { html: r.responseText, finalUrl };
+    } catch {}
+    return null;
+  }
+  // read false: only fetch ahead (resolves when the page is here), without reading it yet.
+  function fetchArticle(url, withImages, maxAge = Infinity, read = true) {
+    let e = readerCache.get(url);
+    if (!(Date.now() - e?.at <= maxAge)) readerCache.set(url, e = { at: Date.now(), raw: fetchPage(url) });
+    if (!read) return e.raw;
+    if (!e.p) { e.p = e.raw.then(r => r && readArticle(r.html, r.finalUrl || url, withImages)); e.raw = e.p; }
+    return e.p;
   }
 
   // ───────────────────────────── Choosing the replacement ─────────────────────────────
@@ -1205,8 +1216,10 @@
   // Front pages that fill in as they are scrolled (VG) are read by scrolling the hidden page, so the
   // site's own lazy loading adds the rest. Stops after six screens without new articles, at the end of
   // the page, when done() says so, or after 40 screens.
-  async function harvest(known, onNew, done = () => false) {
+  // hold: while true the scrolling waits (someone is using plain view; see the end of plainView).
+  async function harvest(known, onNew, done = () => false, hold = () => false) {
     for (let i = 0, idle = 0; i < 40 && idle < 6 && !done(); i++) {
+      while (hold()) await new Promise(r => setTimeout(r, 400));
       window.scrollBy(0, innerHeight * 1.5);
       await new Promise(r => setTimeout(r, 250));
       const fresh = frontPageItems(known);
@@ -1524,15 +1537,16 @@
 
     // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40
     // per visit), and right away the one under the pointer or keyboard focus and the neighbours of the
-    // one being read. Pages fetched for the headlines are reused (articleFetched in reader.js). One
-    // fetched more than two minutes ago is fetched again before it opens: the story may have grown.
-    readerFor = () => ({ withImages });
+    // one being read. A page is read for the reader only when it opens (fetchArticle), so scrolling
+    // and tapping stay quick. Pages fetched for the headlines are reused (articleFetched in reader.js).
+    // One fetched more than two minutes ago is fetched again before it opens: the story may have grown.
+    readerFor = true;
     const ahead = [];
     let aheadRunning = 0, aheadLeft = 40;
     const FRESH = 2 * 60 * 1000;
     function prefetch(key, now) {
       const it = byKey.get(key); if (!it) return;
-      if (now) { fetchArticle(it.url, withImages, FRESH); return; }
+      if (now) { fetchArticle(it.url, withImages, FRESH, false); return; }
       if (readerCache.has(it.url)) return;
       if (aheadLeft > 0 && !ahead.includes(key)) { ahead.push(key); aheadLeft--; pumpAhead(); }
     }
@@ -1540,7 +1554,7 @@
       while (aheadRunning < 2 && ahead.length) {
         const it = byKey.get(ahead.shift()); if (!it) continue;
         aheadRunning++;
-        fetchArticle(it.url, withImages).finally(() => { aheadRunning--; pumpAhead(); });
+        fetchArticle(it.url, withImages, Infinity, false).finally(() => { aheadRunning--; pumpAhead(); });
       }
     }
     for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
@@ -1713,11 +1727,14 @@
     render();
     feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });
     // Read the rest of a lazily filled front page, a few articles at a time, then drop the site's body.
-    let later = null;
+    // Each step makes the site load more (pictures, players, ads), work that holds up a tap, so it
+    // waits while an article is open and for a moment after each touch, click, scroll or key.
+    let later = null, quietAt = 0;
+    for (const ev of ['pointerdown', 'touchstart', 'wheel', 'keydown']) plainHost.addEventListener(ev, () => { quietAt = Date.now() + 2500; }, { capture: true, passive: true });
     harvest(known, fresh => {
       items.push(...fresh); rankItems(items); fresh.forEach(add);
       clearTimeout(later); later = setTimeout(render, 600);
-    }).then(() => { window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); });
+    }, undefined, () => !!current || Date.now() < quietAt).then(() => { window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); });
     return true;
   }
 
