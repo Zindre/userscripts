@@ -680,12 +680,20 @@
   // Visible teaser text. innerText keeps a space at <br>/block boundaries where textContent
   // would glue words; soft hyphens are dropped. aria-label is only a fallback: Schibsted sites
   // prefix it with badge text ("Premium, …", "VG+, …") that is not on screen.
+  // innerText is empty while the page is hidden (the cover before plain view is up), so the last
+  // resort is the markup's text without what isn't text: style blocks, and copies hidden from screen
+  // readers (BA's headlines carry a <style> and each part twice, once aria-hidden, for an animation).
   function textOf(el) {
     let t = '';
     try { t = norm(el.innerText.replace(/\u00AD/g, '')).replace(/\s*[▸▾]$/, ''); } catch {}
     if (t) return t;
     const al = norm(el.getAttribute && el.getAttribute('aria-label'));
-    return al || norm(el.textContent.replace(/\u00AD/g, ''));
+    if (al) return al;
+    const c = el.cloneNode(true);
+    c.querySelectorAll('style, script, template, noscript').forEach(e => e.remove());
+    const all = c.textContent;
+    c.querySelectorAll('[aria-hidden="true"]').forEach(e => e.remove());
+    return norm((norm(c.textContent) ? c.textContent : all).replace(/\u00AD/g, ''));
   }
 
   // A link is "inline" when its text-flow container has other words around it.
