@@ -62,7 +62,9 @@ for (const b of builds) {
     const r = await api(`betaGroups/${g.id}/relationships/builds`, 'POST', { data: [{ type: 'builds', id: b.id }] });
     console.log(`${what}: ${r.ok ? 'added to' : `not added to (HTTP ${r.status} ${r.error})`} ${g.attributes.name}`);
   }
-  if (groups.some(g => !g.attributes.isInternalGroup)) {
+  // Only once: a build already submitted, in review or approved can't be submitted again.
+  const ready = (await must(`builds/${b.id}/buildBetaDetail`)).data.attributes.externalBuildState === 'READY_FOR_BETA_SUBMISSION';
+  if (ready && groups.some(g => !g.attributes.isInternalGroup)) {
     const r = await api('betaAppReviewSubmissions', 'POST', { data: { type: 'betaAppReviewSubmissions', relationships: { build: { data: { type: 'builds', id: b.id } } } } });
     console.log(`${what}: ${r.ok ? 'submitted to Beta App Review' : `review submission: HTTP ${r.status} ${r.error}`}`);
   }
