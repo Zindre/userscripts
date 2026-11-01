@@ -8,11 +8,13 @@ async function main() {
   hostEnabled = enabled.includes(host);
   const excluded = CFG.excludeHosts.some(h => h instanceof RegExp ? h.test(host) : host === h || host.endsWith('.' + h));
   let off = disabled.includes(host) || (!hostEnabled && (excluded || (!site && !CFG.genericSites)));
+  // A calm site (calm-sites.js) has two levels: Calm, unless you chose Vanilla there.
+  if (calmSite) off = disabled.includes(host);
   // Reading level: per host, else the default: plain view with images unless you chose otherwise
   // (versions before 1.11 stored only includeLead).
   const legacy = await gm.get('includeLead', null);
   defaultLevel = await gm.get('level', legacy === null ? 'pictures' : legacy ? 'synopsis' : 'headlines');
-  level = off ? 'vanilla' : ((await gm.get('siteLevels', {})) || {})[host] || defaultLevel;
+  level = off ? 'vanilla' : calmSite ? 'calm' : ((await gm.get('siteLevels', {})) || {})[host] || defaultLevel;
   if (level === 'vanilla') off = true;
   hostOff = off;
   CFG.includeLead = level !== 'headlines';
@@ -28,6 +30,7 @@ async function main() {
   // cover itself once it is up, every other path lifts it here.
   const uncover = () => document.getElementById('nothis-cover')?.remove();
   if (off) { uncover(); return; } // settings still open here, so the site can be switched back on
+  if (calmSite) { uncover(); runCalm(calmSite); return; }
   await loadCache();
   if (CFG.marker) {
     const st = document.createElement('style');

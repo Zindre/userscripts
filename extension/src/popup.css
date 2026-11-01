@@ -21,6 +21,7 @@ p { margin: 0 0 6px; }
 
 .modes { display: grid; gap: 4px; }
 .modes label { display: flex; gap: 8px; align-items: flex-start; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.modes label[hidden] { display: none; }
 .modes label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
 .modes input { margin: 2px 0 0; accent-color: var(--accent); }
 .modes b { display: block; font-weight: 600; }

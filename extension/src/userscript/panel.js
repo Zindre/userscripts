@@ -32,8 +32,8 @@ function openPanel() {
   <div class="box" hidden>
     <h1>Declickbait<button class="x" data-act="close" aria-label="Close">✕</button></h1>
     <div class="row"><div class="lbl">Reading level on ${host}</div>
-      ${LEVELS.map(l => `<button data-level="${l}" class="${level === l ? 'on' : ''}">${LEVEL_NAMES[l]}</button>`).join('')}
-      <button data-act="defaultLevel">${level === defaultLevel ? '✓ Default for all sites' : 'Use this level on all sites'}</button></div>
+      ${(calmSite ? ['vanilla', 'calm'] : LEVELS).map(l => `<button data-level="${l}" class="${level === l ? 'on' : ''}">${LEVEL_NAMES[l]}</button>`).join('')}
+      ${calmSite ? '' : `<button data-act="defaultLevel">${level === defaultLevel ? '✓ Default for all sites' : 'Use this level on all sites'}</button>`}</div>
     <div class="row"><div class="lbl">Never show me (all sites)</div>
       ${TOPIC_TREE.map(g => `<details${g.children.some(c => muted.has(c.id)) ? ' open' : ''}><summary><button data-topic="${g.id}" class="${muted.has(g.id) ? 'on' : ''}">${g.label}</button></summary>
         ${g.children.map(c => `<button data-topic="${c.id}" class="sub ${muted.has(c.id) || muted.has(g.id) ? 'on' : ''}"${muted.has(g.id) ? ' disabled' : ''}>${c.label}</button>`).join('')}</details>`).join('')}</div>

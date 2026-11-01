@@ -1,6 +1,6 @@
 # NoThis: privacy policy
 
-_Last updated: 25 October 2026_
+_Last updated: 1 November 2026_
 
 NoThis is made by Sindre Sørensen. It is designed to collect nothing about you.
 
@@ -21,7 +21,7 @@ You can remove all of it by removing the extension, or by clearing its data in y
 
 To find an article's real headline and lead, NoThis loads the article pages and RSS feeds of the news sites you visit, directly from your device to those sites, the same way your browser would if you opened them. When you open an article in plain view, NoThis loads that article the same way. Those requests go only to the sites whose links are on the page you are reading. The news sites receive them as ordinary visits and handle them under their own privacy policies.
 
-NoThis needs permission to read the websites you visit for this reason only: to find news teasers on the page and replace or rearrange them on your screen.
+NoThis needs permission to read the websites you visit for these reasons only: to find news teasers on the page and replace or rearrange them on your screen, and on social media sites to hide ads, suggestions and pop-ups on your screen. On those sites it makes no requests of its own and reads nothing beyond the page in front of you.
 
 ## Apple, TestFlight and the browser stores
 
@@ -35,4 +35,4 @@ Questions about privacy: sindre@sedb.no
 
 ## Kort på norsk
 
-NoThis samler ingen data om deg. Det finnes ingen konto, ingen egne servere, ingen sporing og ingen statistikk. Innstillingene dine og et midlertidig lager av overskrifter og ingresser (inntil 12 timer) ligger bare i nettleseren på din egen enhet. For å finne artiklenes egne overskrifter henter NoThis artikkelsider og RSS-feeder direkte fra nyhetsnettstedene du besøker, slik nettleseren ellers ville gjort. Installerer du via TestFlight eller App Store, kan Apple samle krasjrapporter og tilbakemeldinger du selv sender, etter Apples egne regler. Spørsmål: sindre@sedb.no
+NoThis samler ingen data om deg. Det finnes ingen konto, ingen egne servere, ingen sporing og ingen statistikk. Innstillingene dine og et midlertidig lager av overskrifter og ingresser (inntil 12 timer) ligger bare i nettleseren på din egen enhet. For å finne artiklenes egne overskrifter henter NoThis artikkelsider og RSS-feeder direkte fra nyhetsnettstedene du besøker, slik nettleseren ellers ville gjort. På sosiale medier skjuler NoThis reklame, forslag og oppsprett på skjermen din, uten egne forespørsler. Installerer du via TestFlight eller App Store, kan Apple samle krasjrapporter og tilbakemeldinger du selv sender, etter Apples egne regler. Spørsmål: sindre@sedb.no

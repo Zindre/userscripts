@@ -20,6 +20,7 @@ News should tell you what happened. Many news sites are built to do something el
 | Clear headlines + synopsis | Each headline with the article's lead (ingress). |
 | Plain view with images | As plain view, with one image per article, all cropped to the same size so nothing stands out. |
 | Plain view | The site's articles on a calm page of our own: grouped in sections you choose, headline and lead only, no ads, video or pop-ups. An article opens full screen as plain text and pictures, and closing it returns you to the list where you were. Paid articles are marked and open on the site. |
+| Calm | On social media sites only, besides Vanilla: what you follow, without ads, suggestions, short-video feeds, trending or pop-ups that push the app. |
 
 Levels are set per site, with a default for all others. Article pages are left as they are. Plain view is for front pages and section pages.
 
@@ -31,6 +32,7 @@ Levels are set per site, with a default for all others. Article pages are left a
 
 ## Direction
 
+- **Calm everywhere you read, one area at a time:** social media first. The 21 biggest platforms (Facebook, YouTube, Instagram, TikTok, X, Reddit, LinkedIn and others) have a Calm level. It hides ads, suggestions, short-video feeds, trending and pop-ups that push the app, and keeps what you follow. You are never forced into an app. Next: other kinds of sites built to hold your attention.
 - **Topic filters:** a tree of topics (Sport, Entertainment, Lifestyle, Crime and accidents, Death notices and obituaries, Opinion, Politics, Business, Tech and science, Weather, with subtopics) can already be switched off for all sites. Next: topics of your own (a keyword or a show), and a broadcaster's promotion of its own programmes and sports rights.
 - **Calmer by default:** no images in plain view, or quiet ones only if the reader asks. Respect "reduce motion" everywhere.
 - **Several sites in one plain view:** your chosen sections from the sites you read, in one place, without the noise.

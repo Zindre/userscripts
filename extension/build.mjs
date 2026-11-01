@@ -18,7 +18,7 @@ const root = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 // Order matters only for code that runs while the script loads; everything else runs from main().
-const ENGINE = ['config', 'hostkey', 'news-hosts', 'sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'settings'];
+const ENGINE = ['config', 'hostkey', 'news-hosts', 'sites', 'calm-sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'calm', 'settings'];
 const USERSCRIPT_ONLY = ['userscript/panel'];
 const read = name => name === 'news-hosts' ? newsList() : readFileSync(join(root, 'src', name.includes('/') ? name : `engine/${name}`) + '.js', 'utf8');
 // src/engine/news-hosts.json (written by tools/news-hosts.mjs) becomes NEWS_LIST: each host's
@@ -104,10 +104,14 @@ for (const t of wanted) {
   const skip = new Set(['engine', 'userscript'].map(d => join(root, 'src', d)));
   cpSync(join(root, 'src'), out, { recursive: true, filter: f => !f.endsWith('.svg') && !skip.has(f) });
   writeFileSync(join(out, 'nothis.js'), assemble(ENGINE));
-  // gm-shim.js covers known news sites before they are drawn, so it gets the list too.
-  const shim = readFileSync(join(out, 'gm-shim.js'), 'utf8');
-  if (!shim.includes('// @include news-list')) throw new Error('gm-shim.js: missing "// @include news-list"');
-  writeFileSync(join(out, 'gm-shim.js'), shim.replace('  // @include news-list', () => indent(read('hostkey') + read('news-hosts')).replace(/^  /, '')));
+  // gm-shim.js covers known news sites and calms the calm sites before they are drawn, so it gets
+  // both lists too.
+  let shim = readFileSync(join(out, 'gm-shim.js'), 'utf8');
+  for (const [tag, names] of [['news-list', ['hostkey', 'news-hosts']], ['calm-sites', ['calm-sites']]]) {
+    if (!shim.includes(`// @include ${tag}`)) throw new Error(`gm-shim.js: missing "// @include ${tag}"`);
+    shim = shim.replace(`  // @include ${tag}`, () => indent(names.map(read).join('')).replace(/^  /, ''));
+  }
+  writeFileSync(join(out, 'gm-shim.js'), shim);
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(targets[t], null, 2) + '\n');
   const zip = join(root, 'dist', `nothis-${t}-${version}.zip`);
   rmSync(zip, { force: true });

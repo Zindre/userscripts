@@ -37,6 +37,18 @@
   // or when it decides against it; after 12 s it goes anyway.
   // @include news-list
   const host = location.hostname.replace(/^www\./, '');
+  // A calm site (calm-sites.js, put in below by build.mjs) gets its hide list and the guard against
+  // redirects to the app at once, and loses them again if you chose Vanilla there.
+  // @include calm-sites
+  const calm = CALM_SITES.find(s => s.host.test(host));
+  if (calm) {
+    let on = true;
+    const st = calmStyle(calm);
+    (document.head || document.documentElement).appendChild(st);
+    calmRedirects(calm, () => on);
+    api.storage.local.get('disabledHosts').then(s => { if ((s.disabledHosts || []).includes(host)) { on = false; st.remove(); } });
+    return;
+  }
   try { if (sessionStorage.getItem('declickbait-original') === host) return; } catch {} // "Original" was pressed
   let path = location.pathname; try { path = decodeURIComponent(path); } catch {}
   if (!/^\/(?:[\p{L}-]{1,30}\/?){0,2}$/u.test(path)) return; // "/", "/sport", "/nyheter/innenriks": not an article

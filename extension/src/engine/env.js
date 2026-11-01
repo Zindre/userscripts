@@ -6,7 +6,9 @@ const host = location.hostname.replace(/^www\./, '');
 // NEWS_LIST hosts whose page is not a shop or a wiki.
 const site = SITES.find(s => s.host.test(host)) ||
   (curatedHost(host) || (listedHost(host) && !notNewsPage(true)) ? { host: null, article: null } : undefined);
-if (!site && !CFG.genericSites) return;
+// A site to calm rather than read (calm-sites.js).
+const calmSite = CALM_SITES.find(s => s.host.test(host));
+if (!site && !calmSite && !CFG.genericSites) return;
 
 const gm = {
   async get(k, d) { try { return typeof GM !== 'undefined' && GM.getValue ? await GM.getValue(k, d) : d; } catch { return d; } },
@@ -30,3 +32,6 @@ const gm = {
 };
 // Running inside the browser extension (extension/): its toolbar popup replaces the in-page panel.
 const EXT = typeof GM !== 'undefined' && typeof GM.exposeSettings === 'function';
+// The guard against redirects to the app goes up at once (the extension's gm-shim.js has it before the
+// page loads): some pages redirect a moment after they have loaded, before the settings are read.
+if (calmSite && !EXT) calmRedirects(calmSite, () => !hostOff);

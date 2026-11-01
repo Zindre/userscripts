@@ -27,8 +27,8 @@ async function settingsAction(act, arg) {
 
 async function settingsState() {
   const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
-  return { host, off: hostOff, level, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
+  return { host, off: hostOff, level, calm: calmSite?.name || null, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
     genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
-    topics: TOPIC_TREE, rewritten: plainHost ? plainCount : rewritten.size,
+    topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
     disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
 }

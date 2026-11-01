@@ -4,9 +4,10 @@
 // synopsis  → rewritten headlines plus the article's lead
 // pictures  → plain view with one image per article, all cropped to the same size
 // plain     → the site's articles on a calm page of our own (see Plain view)
+// calm      → on a calm site (calm-sites.js), the only level besides vanilla: without its distractions
 // Chosen per host (siteLevels); the default for other hosts is stored as 'level'.
 const LEVELS = ['vanilla', 'headlines', 'synopsis', 'pictures', 'plain'];
-const LEVEL_NAMES = { vanilla: 'Vanilla: the site as published', headlines: 'Clear headlines', synopsis: 'Clear headlines + synopsis', pictures: 'Plain view with images', plain: 'Plain view: sections, no ads' };
+const LEVEL_NAMES = { vanilla: 'Vanilla: the site as published', headlines: 'Clear headlines', synopsis: 'Clear headlines + synopsis', pictures: 'Plain view with images', plain: 'Plain view: sections, no ads', calm: 'Calm: no ads, suggestions or app pop-ups' };
 let level = 'pictures', defaultLevel = 'pictures';
 
 // Many front pages call themselves og:type=article (Express, NPR, FAZ, SZ, NDTV), so a page only

@@ -23,9 +23,11 @@
       <label><input type="radio" name="level" value="synopsis"><span><b>Clear headlines + synopsis</b>Each headline with the article's lead</span></label>
       <label><input type="radio" name="level" value="pictures"><span><b>Plain view with images</b>As plain view, with one image per article, all the same size</span></label>
       <label><input type="radio" name="level" value="plain"><span><b>Plain view</b>The articles in sections on a calm page. No ads, video or pop-ups</span></label>
+      <label data-calm><input type="radio" name="level" value="calm"><span><b>Calm</b>What you follow, without ads, suggestions, short-video feeds or pop-ups that push the app</span></label>
     </div>
     <button id="default" type="button" class="link"></button>
 
+    <section id="news-box">
     <h2>Never show me <span class="note">all sites</span></h2>
     <div id="topics" class="topic-tree"></div>
 
@@ -41,6 +43,7 @@
 
     <h2>Plain view</h2>
     <label class="switch"><span>Animate swiping between articles</span><input type="checkbox" id="swipe"></label>
+    </section>
 
     <h2>Other sites</h2>
     <label class="switch"><span>Auto-detect news sites I haven't set up</span><input type="checkbox" id="generic"></label>

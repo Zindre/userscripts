@@ -51,15 +51,22 @@ function show(s) {
   const checked = s.fetches?.ok ? ` Checked ${plural(s.fetches.ok, 'article')}.` : '';
   const failed = s.fetches?.failed ? ` ${plural(s.fetches.failed, 'article')} could not be loaded.` : '';
   $('status').textContent = s.off ? `Showing ${s.host} as published.`
+    : s.calm ? `${s.calm} without distractions: ${s.rewritten ? `${plural(s.rewritten, 'thing')} hidden on this page.` : 'nothing to hide on this page yet.'}`
     : s.plain ? `Plain view: ${plural(s.rewritten, 'article')}.` + checked + failed
     : ((s.level === 'plain' || s.level === 'pictures') && s.onArticle ? 'Plain view is for front pages; this article shows clear headlines + synopsis. ' : '')
       + (s.rewritten ? `Changed ${plural(s.rewritten, 'headline')} on this page.` : 'No clickbait headlines found on this page yet.') + checked + failed;
-  for (const r of document.querySelectorAll('input[name=level]')) r.checked = r.value === s.level;
+  // A calm site (social media) has two levels, Vanilla and Calm; a news site the others.
+  for (const r of document.querySelectorAll('input[name=level]')) {
+    r.checked = r.value === s.level;
+    r.closest('label').hidden = !!s.calm !== (r.value === 'calm') && r.value !== 'vanilla';
+  }
+  $('news-box').hidden = !!s.calm;
   const isDefault = s.level === s.defaultLevel;
   $('default').textContent = isDefault ? '✓ Default for all sites' : 'Use this level on all sites';
   $('default').disabled = isDefault;
+  $('default').hidden = !!s.calm;
   // Headline style applies to the two rewriting levels, and to article pages under plain view.
-  $('style-box').hidden = s.off || s.plain;
+  $('style-box').hidden = s.off || s.plain || !!s.calm;
   for (const r of document.querySelectorAll('input[name=display]')) r.checked = r.value === s.display;
   $('orig').checked = s.showOriginal;
   $('generic').checked = s.genericSites;
