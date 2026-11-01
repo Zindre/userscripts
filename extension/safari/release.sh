@@ -55,4 +55,5 @@ for platform in iOS macOS; do
     -exportOptionsPlist "$OUT/ExportOptions.plist" \
     -exportPath "$OUT/$platform" -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"}
 done
+[[ -n "${GITHUB_OUTPUT:-}" ]] && echo "build=$BUILD_NUMBER" >> "$GITHUB_OUTPUT" # for the beta testers job
 echo "Done. Build $BUILD_NUMBER: $([[ $DESTINATION == upload ]] && echo 'uploaded; it appears in TestFlight once App Store Connect has processed it' || echo "exported to $OUT")."

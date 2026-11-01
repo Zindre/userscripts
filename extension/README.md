@@ -105,6 +105,12 @@ Apple's Beta App Review looks at the first build of each new version before exte
 git tag nothis-v1.12.0-2 && git push origin nothis-v1.12.0-2
 ```
 
+After the upload the run waits for App Store Connect to process the builds, sets their What to Test text from `safari/what-to-test.txt` (update it before tagging), adds them to every beta group and submits them to Beta App Review (`safari/beta-testers.mjs`). To do that again for a build already uploaded, run the workflow by hand:
+
+```bash
+gh workflow run nothis.yml -R Zindre/userscripts -f build=<BUILD NUMBER>
+```
+
 Bump `version` when it's time for a new round of review, for instance for bigger changes. Chrome, Edge and Firefox users and the userscript only see a new version when `version` changes.
 
 ### App Store Connect API key
