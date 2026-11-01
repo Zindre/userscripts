@@ -245,6 +245,8 @@
   //          against the short labels in its first leaves (text or aria-label of 1-40 characters), so
   //          "Sponsored" or "Suggested for you" in the post's header, not in what someone wrote
   //   head   how many of an item's first leaf elements count as its header for drop's RegExps (default 40)
+  //   notices  offers with no stable markup, found by their text: the nearest box with a button around
+  //          the text is hidden, and the layer it sits in if it covers the page
   //   block  extra URL tests for redirects the page makes by itself: to the app through the site's own
   //          URLs, or to a login wall (custom schemes and app stores always count)
   //   unlock true when a wall in hide locks scrolling: scrolling is unlocked on that site from the start
@@ -493,6 +495,12 @@
         // mobile: "Snapchat is better on the app" sheet with its backdrop
         '[class*="mobileCustomFooterWrapper"]:has([data-testid="mobileExpandedCtaBanner"])',
       ],
+      // Snapchat for Web: Team Snapchat's own chat in the list. The list places its rows itself, so the row leaves a gap.
+      items: '[role="listitem"]',
+      drop: [/^Team Snapchat$/i],
+      head: 8,
+      // Snapchat for Web: the offers to turn on notifications. Settings can still turn them on.
+      notices: /(?:Varsler er deaktivert|Notifications are off|Tillat nettleseren å sende varsler|Allow your browser to send notifications|Aktiver varsler i dag|Enable notifications today|enabling browser notifications|ved å aktivere varsler)/i,
       block: [/^https?:\/\/click\.snapchat\.com\//],
       unlock: true }, // the app sheet locks scrolling
     { name: 'Twitch', host: /(^|\.)twitch\.tv$/,
@@ -2257,6 +2265,21 @@
       }
     };
 
+    // Offers found by their text (s.notices): the nearest box with a button around the text.
+    const notices = () => {
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+        if (!s.notices.test(t.data)) continue;
+        let box = t.parentElement;
+        if (box.closest('script, style, [data-nothis-calm="off"]')) continue;
+        while (box && box !== document.body && !box.querySelector('button, a, [role="button"]')) box = box.parentElement;
+        if (!box || box === document.body || box.textContent.length > 400) continue;
+        const layer = layerOf(box) || box;
+        off(layer);
+        if (fixed(layer) && big(layer)) document.documentElement.dataset.nothisUnlock = '';
+      }
+    };
+
     // A fixed bar that holds nothing but an "Open app" button (m.facebook.com when logged in). A bar
     // with more in it, like a header with the logo and "Log in", keeps its small button.
     const appBars = () => {
@@ -2283,6 +2306,7 @@
       }
       pushes();
       appBars();
+      if (s.notices) notices();
     };
     let queued = false;
     const later = () => { if (queued) return; queued = true; setTimeout(() => { queued = false; requestAnimationFrame(pass); }, 250); };

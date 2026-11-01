@@ -13,6 +13,8 @@
 //          against the short labels in its first leaves (text or aria-label of 1-40 characters), so
 //          "Sponsored" or "Suggested for you" in the post's header, not in what someone wrote
 //   head   how many of an item's first leaf elements count as its header for drop's RegExps (default 40)
+//   notices  offers with no stable markup, found by their text: the nearest box with a button around
+//          the text is hidden, and the layer it sits in if it covers the page
 //   block  extra URL tests for redirects the page makes by itself: to the app through the site's own
 //          URLs, or to a login wall (custom schemes and app stores always count)
 //   unlock true when a wall in hide locks scrolling: scrolling is unlocked on that site from the start
@@ -261,6 +263,12 @@ const CALM_SITES = [
       // mobile: "Snapchat is better on the app" sheet with its backdrop
       '[class*="mobileCustomFooterWrapper"]:has([data-testid="mobileExpandedCtaBanner"])',
     ],
+    // Snapchat for Web: Team Snapchat's own chat in the list. The list places its rows itself, so the row leaves a gap.
+    items: '[role="listitem"]',
+    drop: [/^Team Snapchat$/i],
+    head: 8,
+    // Snapchat for Web: the offers to turn on notifications. Settings can still turn them on.
+    notices: /(?:Varsler er deaktivert|Notifications are off|Tillat nettleseren å sende varsler|Allow your browser to send notifications|Aktiver varsler i dag|Enable notifications today|enabling browser notifications|ved å aktivere varsler)/i,
     block: [/^https?:\/\/click\.snapchat\.com\//],
     unlock: true }, // the app sheet locks scrolling
   { name: 'Twitch', host: /(^|\.)twitch\.tv$/,

@@ -74,6 +74,21 @@ function runCalm(s) {
     }
   };
 
+  // Offers found by their text (s.notices): the nearest box with a button around the text.
+  const notices = () => {
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let t = walk.nextNode(); t; t = walk.nextNode()) {
+      if (!s.notices.test(t.data)) continue;
+      let box = t.parentElement;
+      if (box.closest('script, style, [data-nothis-calm="off"]')) continue;
+      while (box && box !== document.body && !box.querySelector('button, a, [role="button"]')) box = box.parentElement;
+      if (!box || box === document.body || box.textContent.length > 400) continue;
+      const layer = layerOf(box) || box;
+      off(layer);
+      if (fixed(layer) && big(layer)) document.documentElement.dataset.nothisUnlock = '';
+    }
+  };
+
   // A fixed bar that holds nothing but an "Open app" button (m.facebook.com when logged in). A bar
   // with more in it, like a header with the logo and "Log in", keeps its small button.
   const appBars = () => {
@@ -100,6 +115,7 @@ function runCalm(s) {
     }
     pushes();
     appBars();
+    if (s.notices) notices();
   };
   let queued = false;
   const later = () => { if (queued) return; queued = true; setTimeout(() => { queued = false; requestAnimationFrame(pass); }, 250); };
