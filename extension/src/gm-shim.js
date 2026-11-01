@@ -46,7 +46,11 @@
     const st = calmStyle(calm);
     (document.head || document.documentElement).appendChild(st);
     calmRedirects(calm, () => on);
-    api.storage.local.get('disabledHosts').then(s => { if ((s.disabledHosts || []).includes(host)) { on = false; st.remove(); } });
+    api.storage.local.get('disabledHosts').then(s => {
+      if ((s.disabledHosts || []).includes(host)) { on = false; st.remove(); }
+      // For snapchat-web.js, which runs in the page's world and can't read the settings.
+      if (calm.name === 'Snapchat') try { on ? localStorage.removeItem('nothis-vanilla') : localStorage.setItem('nothis-vanilla', '1'); } catch {}
+    });
     return;
   }
   try { if (sessionStorage.getItem('declickbait-original') === host) return; } catch {} // "Original" was pressed

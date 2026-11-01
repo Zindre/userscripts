@@ -76,7 +76,9 @@ const base = {
   host_permissions: sites,
   // gm-shim.js runs before the page is drawn (it covers plain-view sites against a flash of the
   // original); the engine runs once the page has loaded. Both share the content script's scope.
-  content_scripts: [{ matches: sites, js: ['gm-shim.js'], run_at: 'document_start' }, { matches: sites, js: ['nothis.js'], run_at: 'document_idle' }],
+  content_scripts: [{ matches: sites, js: ['gm-shim.js'], run_at: 'document_start' }, { matches: sites, js: ['nothis.js'], run_at: 'document_idle' },
+    // In the page's own world: Snapchat for Web on a phone (src/snapchat-web.js).
+    { matches: ['https://www.snapchat.com/web*', 'https://snapchat.com/web*'], js: ['snapchat-web.js'], run_at: 'document_start', world: 'MAIN' }],
 };
 
 const targets = {

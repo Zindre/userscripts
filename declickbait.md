@@ -33,7 +33,7 @@ What you follow stays: friends, groups, channels, events, birthdays, search, mes
 
 Opening the app is always your choice. An ordinary "Open app" link in the page stays. A layer that covers the page until you open the app is removed, and so are a fixed bar that holds nothing but an "Open app" button, Safari's own "Open in the app" banner at the top, and a redirect the site makes by itself to the app or an app store. A tap on a link still goes where it says. Cookie and privacy dialogs are never touched; that choice is yours. A login dialog stays when you opened it yourself.
 
-On messaging sites, t.me and wa.me links show their page and don't launch the app by themselves.
+On messaging sites, t.me and wa.me links show their page and don't launch the app by themselves. Snapchat for Web opens on a phone too, in the NoThis extension: Snapchat sends phones to a page that says to use a computer, so NoThis tells Snapchat's scripts the phone is a Mac, as Safari's "Request Desktop Website" does.
 
 In the extension, the hidden parts are hidden before the page is drawn. Each site's rules are tested on its public pages, logged out. Parts that only a logged-in user sees, such as sponsored posts in a feed, follow the sites' own markup as far as it could be checked; they may need adjusting when a site changes.
 
