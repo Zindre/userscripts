@@ -278,7 +278,7 @@ const CALM_SITES = [
 
 // Pop-ups that push the app, in the languages the extension is used in. Word edges are written as
 // (?<!\p{L}) and (?!\p{L}), since \b doesn't count å, ö or ü as letters.
-const APP_PUSH = /(?<!\p{L})(?:open|use|get|download|continue in|switch to|try) (?:in |on )?(?:the |our )?(?:\w+ )?app(?!\p{L})|(?<!\p{L})app (?:is )?(?:better|experience)|(?<!\p{L})better (?:on|in) the app(?!\p{L})|(?<!\p{L})på appen(?!\p{L})|(?<!\p{L})(?:åpne|bruk|fortsett i|last ned|hent|få) (?:i |inn i )?(?:\w+-)?app(?:en|likasjonen)(?!\p{L})|(?<!\p{L})i (?:appen|applikasjonen)(?!\p{L})|(?<!\p{L})(?:öppna|använd|fortsätt i|hämta|ladda ner) (?:i )?appen(?!\p{L})|(?<!\p{L})(?:åbn|brug|fortsæt i|hent) (?:i )?appen(?!\p{L})|(?<!\p{L})(?:in der |in )?app (?:öffnen|nutzen|verwenden|holen|herunterladen)(?!\p{L})|(?<!\p{L})app-?\s*opplevelse/iu;
+const APP_PUSH = /(?<!\p{L})(?:open|use|get|download|continue in|switch to|try) (?:in |on )?(?:the |our )?(?:\w+ )?app(?!\p{L})|(?<!\p{L})app (?:is )?(?:better|experience)|(?<!\p{L})better (?:on|in) the app(?!\p{L})|(?<!\p{L})på appen(?!\p{L})|(?<!\p{L})(?:åpne|bruk|fortsett i|last ned|hent|få) (?:i |inn i )?(?:\w+-)?app(?:en|likasjonen)?(?!\p{L})|(?<!\p{L})i (?:appen|applikasjonen)(?!\p{L})|(?<!\p{L})(?:öppna|använd|fortsätt i|hämta|ladda ner) (?:i )?app(?:en)?(?!\p{L})|(?<!\p{L})(?:åbn|brug|fortsæt i|hent) (?:i )?app(?:en)?(?!\p{L})|(?<!\p{L})(?:in der |in )?app (?:öffnen|nutzen|verwenden|holen|herunterladen)(?!\p{L})|(?<!\p{L})app-?\s*opplevelse/iu;
 // Cookie and privacy choices are never taken away: they are yours to make.
 const CONSENT = /(?<!\p{L})cookies?(?!\p{L})|informasjonskapsler|(?<!\p{L})samtykke|(?<!\p{L})consent(?!\p{L})|personvern|privacy (?:choices|settings)|kakor|datenschutz/iu;
 const LOGIN_PUSH = /(?<!\p{L})(?:log ?in|sign ?in|sign up|create (?:an |new )?account|join \w+)(?!\p{L})|(?<!\p{L})(?:logg (?:deg )?inn|logg på|log på|registrer deg|opprett (?:en )?(?:ny )?konto)(?!\p{L})|(?<!\p{L})(?:logga in|skapa konto)(?!\p{L})|(?<!\p{L})(?:log ind|opret konto)(?!\p{L})|(?<!\p{L})(?:anmelden|einloggen|registrieren)(?!\p{L})/iu;
@@ -314,10 +314,13 @@ function calmRedirects(s, on = () => true) {
   } catch {}
   // An app launched from a hidden frame (t.me and wa.me on a Mac) is a frame that never loads.
   const frame = f => { try { if (f.tagName === 'IFRAME' && f.getAttribute('src') && on() && toApp(new URL(f.src, location.href))) f.remove(); } catch {} };
+  // Safari's own "Open in the app" banner comes from this tag; taken out as the page is parsed.
+  const BANNER = 'meta[name="apple-itunes-app"]';
+  const banner = n => { if (on()) { if (n.matches(BANNER)) n.remove(); else n.querySelectorAll(BANNER).forEach(m => m.remove()); } };
   new MutationObserver(ms => {
     for (const m of ms) {
       if (m.type === 'attributes') frame(m.target);
-      else for (const n of m.addedNodes) if (n.nodeType === 1) { frame(n); n.querySelectorAll?.('iframe[src]').forEach(frame); }
+      else for (const n of m.addedNodes) if (n.nodeType === 1) { frame(n); n.querySelectorAll?.('iframe[src]').forEach(frame); banner(n); }
     }
   }).observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
 }

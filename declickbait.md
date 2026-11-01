@@ -31,7 +31,7 @@ Safari userscript (for [Userscripts.app](https://github.com/quoid/userscripts), 
 
 What you follow stays: friends, groups, channels, events, birthdays, search, messages and notifications. On Facebook a post is left out when its header says "Sponsored" or "Suggested for you", or carries a Follow or Join button. Posts from your friends and your groups never carry these.
 
-Opening the app is always your choice. An ordinary "Open app" link stays. A layer that covers the page until you open the app is removed, and so is a redirect the site makes by itself to the app or an app store. A tap on a link still goes where it says. Cookie and privacy dialogs are never touched; that choice is yours. A login dialog stays when you opened it yourself.
+Opening the app is always your choice. An ordinary "Open app" link in the page stays. A layer that covers the page until you open the app is removed, and so are a fixed bar that holds nothing but an "Open app" button, Safari's own "Open in the app" banner at the top, and a redirect the site makes by itself to the app or an app store. A tap on a link still goes where it says. Cookie and privacy dialogs are never touched; that choice is yours. A login dialog stays when you opened it yourself.
 
 On messaging sites, t.me and wa.me links show their page and don't launch the app by themselves.
 

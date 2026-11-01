@@ -74,6 +74,20 @@ function runCalm(s) {
     }
   };
 
+  // A fixed bar that holds nothing but an "Open app" button (m.facebook.com when logged in). A bar
+  // with more in it, like a header with the logo and "Log in", keeps its small button.
+  const appBars = () => {
+    for (const b of document.querySelectorAll('a, button, [role="button"]')) {
+      const t = (b.textContent.trim() || b.getAttribute('aria-label') || '').trim();
+      if (!t || t.length > 40 || !APP_PUSH.test(t) || b.closest('[data-nothis-calm="off"], [data-nothis-push="yours"]')) continue;
+      let bar = b;
+      while (bar && bar !== document.body && !fixed(bar)) bar = bar.parentElement;
+      if (!bar || bar === document.body || bar.innerText.replace(/\s+/g, ' ').trim().length > t.length + 3) continue;
+      bar.dataset.nothisPush = '';
+      off(bar);
+    }
+  };
+
   const pass = () => {
     sheet();
     if (s.items) for (const it of document.querySelectorAll(s.items)) {
@@ -85,6 +99,7 @@ function runCalm(s) {
       else if (it.dataset.nothisCalm === 'off') { delete it.dataset.nothisCalm; calmCount--; }
     }
     pushes();
+    appBars();
   };
   let queued = false;
   const later = () => { if (queued) return; queued = true; setTimeout(() => { queued = false; requestAnimationFrame(pass); }, 250); };
