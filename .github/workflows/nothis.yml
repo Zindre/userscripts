@@ -31,7 +31,13 @@ jobs:
   build:
     name: Build and lint
     runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.number.outputs.build }}
     steps:
+      # The UTC time; set here so the iOS and macOS uploads below share it.
+      - name: Build number for TestFlight
+        id: number
+        run: echo "build=$(date -u +%y%m%d%H%M)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
@@ -53,14 +59,17 @@ jobs:
           name: nothis-zips
           path: extension/dist/*.zip
 
+  # iOS and macOS on a runner each, at the same time: most of the time goes to signing and uploading.
   testflight:
-    name: Upload to TestFlight
+    name: Upload to TestFlight (${{ matrix.platform }})
     if: startsWith(github.ref, 'refs/tags/nothis-v')
     needs: build
+    strategy:
+      fail-fast: false # one platform's upload doesn't stop the other's
+      matrix:
+        platform: [iOS, macOS]
     # Xcode 27 image (public preview); its default Xcode 27.1 is the version the project is made with.
     runs-on: xcode-27
-    outputs:
-      build: ${{ steps.upload.outputs.build }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -101,30 +110,48 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$kcpw" "$kc" > /dev/null
           security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
           security find-identity -v -p codesigning "$kc"
-      - name: Archive and upload iOS and macOS
-        id: upload
+      - name: Archive and upload
         env:
           ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          BUILD_NUMBER: ${{ needs.build.outputs.build }}
+          PLATFORMS: ${{ matrix.platform }}
         run: extension/safari/release.sh
-      # Only certificates Xcode made through the API key ("Created via API"); none when the stored one was used.
-      - name: Revoke CI-made development certificates
-        if: always()
-        env:
-          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-        run: node extension/safari/revoke-ci-certs.mjs
       - name: Remove API key and signing keychain
         if: always()
         run: |
           rm -rf "$RUNNER_TEMP/asc"
           security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
 
+  # Once both uploads are done, so neither runner loses a certificate it is still signing with.
+  revoke:
+    name: Revoke CI-made development certificates
+    needs: testflight
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/nothis-v') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Write App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
+      # Only certificates Xcode made through the API key ("Created via API"); none when the stored one was used.
+      - name: Revoke
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: node extension/safari/revoke-ci-certs.mjs
+      - name: Remove API key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc"
+
   testers:
     name: Give the build to the beta testers
-    needs: testflight
+    needs: [build, testflight]
     if: ${{ !cancelled() && (needs.testflight.result == 'success' || inputs.build != '') }}
     runs-on: ubuntu-latest
     timeout-minutes: 75
@@ -144,7 +171,7 @@ jobs:
           ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          BUILD: ${{ inputs.build || needs.testflight.outputs.build }}
+          BUILD: ${{ inputs.build || needs.build.outputs.build }}
         run: node extension/safari/beta-testers.mjs
       - name: Remove API key
         if: always()

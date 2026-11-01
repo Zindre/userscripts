@@ -19,7 +19,10 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 [[ -f "$HERE/.asc.env" ]] && source "$HERE/.asc.env"
 PROJECT="$HERE/NoThis/NoThis.xcodeproj"
 OUT="$HERE/build"
-BUILD_NUMBER="$(date -u +%y%m%d%H%M)" # App Store Connect needs a higher build number for every upload
+# App Store Connect needs a higher build number for every upload. GitHub Actions sets BUILD_NUMBER, so
+# its iOS and macOS runners share one, and PLATFORMS to the one each of them archives.
+BUILD_NUMBER="${BUILD_NUMBER:-$(date -u +%y%m%d%H%M)}"
+read -ra PLATFORMS <<< "${PLATFORMS:-iOS macOS}"
 DESTINATION=upload
 [[ "${1:-}" == "--export" ]] && DESTINATION=export
 AUTH=()
@@ -42,7 +45,7 @@ cat > "$OUT/ExportOptions.plist" <<EOF
 </plist>
 EOF
 
-for platform in iOS macOS; do
+for platform in "${PLATFORMS[@]}"; do
   echo "== $platform: archive (build $BUILD_NUMBER)"
   xcodebuild archive -quiet \
     -project "$PROJECT" -scheme "NoThis ($platform)" -configuration Release \
@@ -55,5 +58,4 @@ for platform in iOS macOS; do
     -exportOptionsPlist "$OUT/ExportOptions.plist" \
     -exportPath "$OUT/$platform" -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"}
 done
-[[ -n "${GITHUB_OUTPUT:-}" ]] && echo "build=$BUILD_NUMBER" >> "$GITHUB_OUTPUT" # for the beta testers job
 echo "Done. Build $BUILD_NUMBER: $([[ $DESTINATION == upload ]] && echo 'uploaded; it appears in TestFlight once App Store Connect has processed it' || echo "exported to $OUT")."
