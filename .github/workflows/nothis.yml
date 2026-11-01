@@ -7,7 +7,7 @@
 # A new build of a version already in TestFlight keeps the version and adds a suffix,
 #   git tag nothis-v1.12.0-2 && git push origin nothis-v1.12.0-2
 # so external testers get it without a new Beta App Review (Apple reviews each new version once).
-# Then the build goes to every beta group with the What to Test text in extension/safari/what-to-test.txt;
+# Then the iOS build goes to every beta group and the macOS build to the internal ones, with the What to Test text in extension/safari/what-to-test.txt;
 # update that file before tagging. To give an uploaded build to the testers again, run the workflow by
 # hand with its build number:  gh workflow run nothis.yml -R Zindre/userscripts -f build=2611011001
 # Secrets for the upload: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, and the signing certificate

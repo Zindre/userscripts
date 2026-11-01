@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Gives a TestFlight build to the beta testers: waits until App Store Connect has processed the iOS
-// and macOS builds, sets their "What to Test" text from safari/what-to-test.txt, adds them to every
-// beta group of the app and submits them to Beta App Review (a later build of a version already
-// reviewed usually goes straight through).
+// and macOS builds and sets their "What to Test" text from safari/what-to-test.txt. The iOS build goes
+// to every beta group and to Beta App Review (a later build of a version already reviewed usually goes
+// straight through). The macOS build only goes to the internal groups: no macOS version is approved
+// for external testers, so it would wait in Apple's review queue.
 //
 //   BUILD=2611011001 node beta-testers.mjs   that build number
 //   node beta-testers.mjs                     the newest upload
@@ -58,13 +59,14 @@ for (const b of builds) {
   else await must('betaBuildLocalizations', 'POST', { data: { type: 'betaBuildLocalizations', attributes: { locale: 'en-US', whatsNew },
     relationships: { build: { data: { type: 'builds', id: b.id } } } } });
   // Internal groups that see every build already have it.
-  for (const g of groups.filter(g => !g.attributes.hasAccessToAllBuilds)) {
+  const ios = v?.platform === 'IOS';
+  for (const g of groups.filter(g => !g.attributes.hasAccessToAllBuilds && (ios || g.attributes.isInternalGroup))) {
     const r = await api(`betaGroups/${g.id}/relationships/builds`, 'POST', { data: [{ type: 'builds', id: b.id }] });
     console.log(`${what}: ${r.ok ? 'added to' : `not added to (HTTP ${r.status} ${r.error})`} ${g.attributes.name}`);
   }
   // Only once: a build already submitted, in review or approved can't be submitted again.
   const ready = (await must(`builds/${b.id}/buildBetaDetail`)).data.attributes.externalBuildState === 'READY_FOR_BETA_SUBMISSION';
-  if (ready && groups.some(g => !g.attributes.isInternalGroup)) {
+  if (ios && ready && groups.some(g => !g.attributes.isInternalGroup)) {
     const r = await api('betaAppReviewSubmissions', 'POST', { data: { type: 'betaAppReviewSubmissions', relationships: { build: { data: { type: 'builds', id: b.id } } } } });
     console.log(`${what}: ${r.ok ? 'submitted to Beta App Review' : `review submission: HTTP ${r.status} ${r.error}`}`);
   }
