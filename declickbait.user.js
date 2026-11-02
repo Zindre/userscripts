@@ -554,7 +554,8 @@
     } catch {}
     // An app launched from a hidden frame (t.me and wa.me on a Mac) is a frame that never loads.
     const frame = f => { try { if (f.tagName === 'IFRAME' && f.getAttribute('src') && on() && toApp(new URL(f.src, location.href))) f.remove(); } catch {} };
-    // Safari's own "Open in the app" banner comes from this tag; taken out as the page is parsed.
+    // A site can ask for Safari's own app banner with this tag; taken out as the page is parsed. When the
+    // app is installed and has claimed the site's URLs, Safari shows its banner anyway: no page can stop that.
     const BANNER = 'meta[name="apple-itunes-app"]';
     const banner = n => { if (on()) { if (n.matches(BANNER)) n.remove(); else n.querySelectorAll(BANNER).forEach(m => m.remove()); } };
     new MutationObserver(ms => {

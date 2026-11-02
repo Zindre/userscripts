@@ -3,6 +3,14 @@
 'use strict';
 const api = globalThis.browser ?? globalThis.chrome;
 
+// Safari only (the others have it in the manifest, and no scripting permission): snapchat-web.js, in the page's world.
+const registerPageScript = async () => {
+  await api.scripting.unregisterContentScripts({ ids: ['snapchat-web'] }).catch(() => {});
+  await api.scripting.registerContentScripts([{ id: 'snapchat-web', matches: ['https://www.snapchat.com/web*', 'https://snapchat.com/web*'],
+    js: ['snapchat-web.js'], runAt: 'document_start', world: 'MAIN' }]);
+};
+if (api.scripting) for (const ev of [api.runtime.onInstalled, api.runtime.onStartup]) ev.addListener(registerPageScript);
+
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type !== 'declickbait-fetch' || !sender.tab) return;
   let url;

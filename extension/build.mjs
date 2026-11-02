@@ -89,7 +89,9 @@ const targets = {
     browser_specific_settings: { gecko: { id: 'nothis@sedb.no', strict_min_version: '128.0', data_collection_permissions: { required: ['none'] } } },
   },
   // iOS only allows non-persistent background pages.
-  safari: { ...base, icons: icons([16, 32, 48, 96, 128, 256, 512, 1024]), background: { scripts: ['background.js'], persistent: false } },
+  // On an iPhone Safari didn't run the manifest's world: "MAIN" script in the page's world, so background.js registers it.
+  safari: { ...base, permissions: [...base.permissions, 'scripting'], content_scripts: base.content_scripts.filter(c => !c.world),
+    icons: icons([16, 32, 48, 96, 128, 256, 512, 1024]), background: { scripts: ['background.js'], persistent: false } },
 };
 
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : [...Object.keys(targets), 'userscript'];
