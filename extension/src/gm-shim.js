@@ -60,9 +60,9 @@
     });
     return;
   }
-  try { if (sessionStorage.getItem('declickbait-original') === host) return; } catch {} // "Original" was pressed
+  try { if (sessionStorage.getItem('declickbait-original') === host || location.hash === '#nothis-original') return; } catch {} // "Original" or "Read on the site" was pressed
   let path = location.pathname; try { path = decodeURIComponent(path); } catch {}
-  if (!/^\/(?:[\p{L}-]{1,30}\/?){0,2}$/u.test(path)) return; // "/", "/sport", "/nyheter/innenriks": not an article
+  const front = /^\/(?:[\p{L}-]{1,30}\/?){0,2}$/u.test(path); // "/", "/sport", "/nyheter/innenriks": not an article
   let cover = null;
   const put = () => {
     if (cover) return;
@@ -73,7 +73,7 @@
     (document.head || document.documentElement).appendChild(cover);
     setTimeout(() => cover.remove(), 12000);
   };
-  if (typeof listedHost === 'function' && listedHost(host)) put();
+  if (front && typeof listedHost === 'function' && listedHost(host)) put();
   api.storage.local.get(['level', 'siteLevels', 'disabledHosts', 'plainHosts']).then(s => {
     const chosen = (s.siteLevels || {})[host], level = chosen || s.level || 'pictures'; // 'pictures' is the default level
     if ((level !== 'plain' && level !== 'pictures') || (s.disabledHosts || []).includes(host)) { cover?.remove(); return; }

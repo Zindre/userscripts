@@ -33,6 +33,8 @@ const SITES = [
   { host: /(^|\.)spiegel\.de$/,      article: /-a-[0-9a-f-]{20,}$|^\/[a-z]+\/(?:[a-z]+\/)?[a-z0-9]+(-[a-z0-9]+){3,}/ },
   { host: /(^|\.)welt\.de$/,         article: /\/(?:article|plus)[0-9a-f]{16,}\//, strip: [/^[A-Za-zäöü]+ - (?=.{15})/] },
   // UK / US
+  // News Corp Australia: /section/slug/news-story/<hash>
+  { host: /(^|\.)(news\.com\.au|news24\.com\.au|theaustralian\.com\.au|dailytelegraph\.com\.au|heraldsun\.com\.au|couriermail\.com\.au|adelaidenow\.com\.au|ntnews\.com\.au|themercury\.com\.au|geelongadvertiser\.com\.au|goldcoastbulletin\.com\.au|cairnspost\.com\.au|townsvillebulletin\.com\.au)$/, article: /\/news-story\/[0-9a-f]{20,}/ },
   { host: /(^|\.)bbc\.(com|co\.uk)$/, article: /\/(news|sport)\/[a-z0-9-]*\d{6,}|\/articles\/[a-z0-9]{10,}/ },
   { host: /(^|\.)theguardian\.com$/, article: /\/\d{4}\/[a-z]{3}\/\d{2}\// },
   { host: /(^|\.)dailymail\.(co\.uk|com)$/, article: /\/article-\d{6,}\// },

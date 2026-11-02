@@ -270,23 +270,87 @@ const PLAIN_CSS = `
 
 
 let plainHost = null, plainCount = 0;
-async function plainView(withImages) {
-  let logo = null; try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
-  let items = frontPageItems();
-  for (let i = 0; i < 2 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
-  // Swallow the site: hide its body and keep its media silent. The body keeps its layout while
-  // harvest() scrolls it (lazy loading needs that), and is taken out of the page once it is done.
+// Hides the site's page and keeps its media silent. The body keeps its layout while harvest() scrolls
+// it (lazy loading needs that), and is taken out of the page once it is done. Returns how to give it back.
+function swallowSite() {
   const st = document.createElement('style');
   st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body,html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body{display:none!important}';
   document.head.appendChild(st);
   document.documentElement.classList.add('cb-plain');
   for (const m of document.querySelectorAll('video, audio')) try { m.pause(); m.muted = true; } catch {}
   document.addEventListener('play', e => { try { e.target.pause(); e.target.muted = true; } catch {} }, true);
+  return () => { document.documentElement.classList.remove('cb-plain'); st.remove(); };
+}
+// An article's address that shows it as the site publishes it (boot.js), not in the reader.
+const onSiteUrl = url => url.split('#')[0] + '#nothis-original';
+const readerEl = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+function readerContent(art, title, lede, url) {
+  const el = readerEl, out = [el('h1', title)];
+  if (lede) out.push(el('p', lede, 'lede'));
+  const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+  if (by) out.push(el('div', by, 'byline'));
+  for (const b of art?.blocks || []) {
+    if (b.t === 'p') out.push(el('p', b.text));
+    else if (b.t === 'h') out.push(el('h3', b.text));
+    else if (b.t === 'quote') out.push(el('blockquote', b.text));
+    else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); out.push(l); }
+    else if (b.t === 'img') {
+      const f = el('figure'), im = el('img');
+      im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
+      im.addEventListener('error', () => f.remove());
+      f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
+    }
+  }
+  if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
+  else if (art.partial) out.push(el('p', T.paidHere, 'note'));
+  else if (art.short) out.push(el('p', T.short, 'note')); // a story that has just broken, or a video with a caption
+  const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
+  site.href = onSiteUrl(url); close.dataset.act = 'close-reader';
+  end.append(site);
+  end.append(close); out.push(end);
+  return out;
+}
+// An article opened directly (a link from elsewhere, or a reload while reading): the same reader, on
+// its own over the hidden page. Close goes to the list. False when the page isn't an article that can
+// be read, and then it stays as it is.
+async function articleView(withImages) {
+  const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => s.textContent).join('');
+  if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"\w*Article"/.test(ld)) return false;
+  const url = location.href.split('#')[0], title = norm(document.querySelector('h1')?.textContent) || document.title;
+  const giveBack = swallowSite();
+  const art = await fetchArticle(url, withImages);
+  // A paid article can come with no text at all: its headline, lead and a note about the subscription.
+  if (!art || (!art.blocks.length && !art.partial)) { giveBack(); return false; }
+  const desc = norm(document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '');
+  const lede = desc && !art.blocks.some(b => b.text?.startsWith(desc.slice(0, 40))) ? desc : '';
+  document.documentElement.classList.add('cb-plain-done');
+  plainHost = document.createElement('div');
+  plainHost.id = 'declickbait-plain';
+  const sh = plainHost.attachShadow({ mode: 'open' });
+  sh.innerHTML = `<style>${PLAIN_CSS}</style><div class="view" role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="close-reader">✕ ${T.close}</button></div></div><article class="reader"></article></div>`;
+  sh.querySelector('.bar span').textContent = title;
+  sh.querySelector('.reader').replaceChildren(...readerContent(art, title, lede, url));
+  document.documentElement.appendChild(plainHost);
+  document.getElementById('nothis-cover')?.remove();
+  sh.querySelector('.view').focus({ preventScroll: true });
+  const close = () => { if (history.state?.nothis) history.back(); else location.assign(location.origin + '/'); };
+  sh.addEventListener('click', e => { if (e.target.closest('[data-act="close-reader"]')) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  // After a reload, the list's history entry can still count as this document: load what it points to.
+  window.addEventListener('popstate', () => location.reload());
+  return true;
+}
+async function plainView(withImages) {
+  const listUrl = location.href, listTitle = document.title;
+  let logo = null; try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
+  let items = frontPageItems();
+  for (let i = 0; i < 2 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
+  const giveBack = swallowSite();
   const known = new Map(items.map(it => [it.key, it]));
   if (items.length < 8) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
   if (items.length < 8) {
     // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
-    document.documentElement.classList.remove('cb-plain'); st.remove(); window.scrollTo(0, 0);
+    giveBack(); window.scrollTo(0, 0);
     return false;
   }
   rankItems(items);
@@ -386,12 +450,12 @@ async function plainView(withImages) {
 
   // Reading in place: a card opens its article full screen over the list, which stays where it was.
   // Close, Escape and the browser's back (swipe back on a phone) return to the list.
-  const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+  const el = readerEl;
   const view = sh.querySelector('.view'), reader = view.querySelector('.reader'), readKeys = new Set();
   view.querySelector('[data-act="close-reader"]').textContent = '✕ ' + T.close;
   let current = null; // the article on screen
   // replace: moving to the previous/next article, which shouldn't stack up in the history.
-  function openArticle(it, replace) {
+  function openArticle(it, replace, fromHistory) {
     const li = rows.get(it.key);
     current = it; readKeys.add(it.key); li?.classList.add('read');
     view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
@@ -400,7 +464,11 @@ async function plainView(withImages) {
     view.querySelector('[data-act="next"]').disabled = i < 0 || i >= list.length - 1;
     reader.replaceChildren(el('p', T.loading, 'note'));
     view.hidden = false; view.scrollTop = 0; view.focus({ preventScroll: true });
-    try { if (!replace || !history.state?.nothis) history.pushState({ nothis: it.key }, ''); } catch {}
+    // The address bar shows the article, so it can be copied or reloaded. A browser only allows that
+    // within the site: an article on another site keeps the list's address.
+    let url = listUrl; try { if (new URL(it.url).origin === location.origin) url = it.url; } catch {}
+    if (!fromHistory) try { history[replace ? 'replaceState' : 'pushState']({ nothis: it.key }, '', url); } catch {}
+    document.title = li?.querySelector('a.h').textContent || it.teaser;
     fillReader(it);
     // The neighbours are likely next: fetch them now.
     for (const n of [list[i + 1], list[i - 1]]) if (n) prefetch(n.dataset.key, true);
@@ -487,38 +555,20 @@ async function plainView(withImages) {
     if (!current) return;
     const key = current.key;
     current = null; view.hidden = true; reader.replaceChildren();
-    if (!fromHistory && history.state?.nothis) history.back();
+    document.title = listTitle;
+    if (!fromHistory) history.back();
     rows.get(key)?.querySelector('a.h')?.focus({ preventScroll: true });
   }
-  window.addEventListener('popstate', () => closeArticle(true));
+  // Back closes the article; forward opens it again. By address: a site's own router can replace history.state.
+  window.addEventListener('popstate', () => {
+    const it = location.href === listUrl ? null : [...byKey.values()].find(i => i.url === location.href) || byKey.get(history.state?.nothis);
+    if (it) openArticle(it, false, true); else closeArticle(true);
+  });
   async function fillReader(it) {
     const art = await fetchArticle(it.url, withImages, FRESH);
     if (current !== it) return; // closed, or another one opened meanwhile
     const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
-    const out = [el('h1', li?.querySelector('a.h').textContent || it.teaser)];
-    if (lede) out.push(el('p', lede, 'lede'));
-    const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
-    if (by) out.push(el('div', by, 'byline'));
-    for (const b of art?.blocks || []) {
-      if (b.t === 'p') out.push(el('p', b.text));
-      else if (b.t === 'h') out.push(el('h3', b.text));
-      else if (b.t === 'quote') out.push(el('blockquote', b.text));
-      else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); out.push(l); }
-      else if (b.t === 'img') {
-        const f = el('figure'), im = el('img');
-        im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
-        im.addEventListener('error', () => f.remove());
-        f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
-      }
-    }
-    if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
-    else if (art.partial) out.push(el('p', T.paidHere, 'note'));
-    else if (art.short) out.push(el('p', T.short, 'note')); // a story that has just broken, or a video with a caption
-    const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
-    site.href = it.url; close.dataset.act = 'close-reader';
-    end.append(site);
-    end.append(close); out.push(end);
-    reader.replaceChildren(...out);
+    reader.replaceChildren(...readerContent(art, li?.querySelector('a.h').textContent || it.teaser, lede, it.url));
   }
   function render() {
     // Keep the article at the top of the screen in place when the list changes around it.
@@ -587,6 +637,9 @@ async function plainView(withImages) {
       if (it) { e.preventDefault(); openArticle(it); }
       return;
     }
+    // Cmd/Ctrl/Shift-click on the headline: the site as published, in a new tab or window.
+    const head = e.target.closest('a.h');
+    if (head) { const url = head.href; head.href = onSiteUrl(url); setTimeout(() => { head.href = url; }); }
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.act === 'close-reader') closeArticle();
     else if (b.dataset.act === 'prev') step(-1);

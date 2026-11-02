@@ -23,6 +23,7 @@ async function main() {
   CFG.swipeAnimation = await gm.get('swipeAnimation', CFG.swipeAnimation);
   let original = false; // the plain view's "Original" button: show the site as published, once
   try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
+  if (location.hash === '#nothis-original') original = true; // "Read on the site" in the reader
   // The extension's popup talks to settingsAction/settingsState; the userscript build has its own panel.
   if (EXT) GM.exposeSettings(async ({ act, arg } = {}) => { if (act) await settingsAction(act, arg); return settingsState(); });
   else if (typeof startPanel === 'function') startPanel(off, disabled);
@@ -47,6 +48,7 @@ async function main() {
   const news = site || hostEnabled || isPublication();
   if ((level === 'plain' || level === 'pictures') && !original && news) {
     if (!onArticlePage()) { if (await plainView(level === 'pictures')) return; }
+    else if (await articleView(level === 'pictures')) return;
     else calmArticle(level === 'pictures');
   }
   uncover();
