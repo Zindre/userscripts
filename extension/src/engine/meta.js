@@ -24,8 +24,8 @@ const saveCache = (() => { let timer; return () => {
 // SVG and templates, often half the page (VG's inline player and state scripts). Parsing runs on the
 // page's main thread, so a front page fetching dozens of articles stays responsive to taps.
 function parseHtml(html) {
-  const lean = html.replace(/<script(?=[\s>])(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<(style|svg|template)(?=[\s>])[^>]*>[\s\S]*?<\/\1>/gi, '');
+  const lean = html.replace(/<script(?=[\s>])(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script\s*>/gi, '')
+    .replace(/<(style|svg|template)(?=[\s>])[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
   return new DOMParser().parseFromString(lean, 'text/html');
 }
 function extractMeta(html, url) {

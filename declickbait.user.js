@@ -247,6 +247,13 @@
   //          against the short labels in its first leaves (text or aria-label of 1-40 characters), so
   //          "Sponsored" or "Suggested for you" in the post's header, not in what someone wrote
   //   head   how many of an item's first leaf elements count as its header for drop's RegExps (default 40)
+  //   feed   for a feed without landmarks: marks a unit; the units are the children of the element that holds most of them
+  //   skip   leaves in these don't count as header (decoys)
+  //   label  where a unit's header says what it is, through aria-labelledby. It can arrive after the unit, so the unit
+  //          is looked at again until then; one with `unsure` in it waits unseen meanwhile, for at most 3 seconds
+  //   parts  boxes beside the feed: sel finds what marks one (with text, only if its text matches), and the box goes.
+  //          With an id and a label it is a choice in the settings instead, shown by default
+  //   within, heading  how far a part's box reaches: inside `within`, up to the next `heading`
   //   notices  offers with no stable markup, found by their text: the nearest box with a button around
   //          the text is hidden, and the layer it sits in if it covers the page
   //   block  extra URL tests for redirects the page makes by itself: to the app through the site's own
@@ -256,7 +263,8 @@
   const CALM_SITES = [
     // Keeps posts from friends and your groups, events, birthdays and Messenger; drops sponsored and
     // suggested posts, Reels and Stories, and the Watch, Marketplace and Gaming tabs. The header of a
-    // post you didn't ask for carries "Sponsored", "Suggested for you", or a Follow/Join button.
+    // post you didn't ask for carries "Ad", "Suggested for you", or a Follow/Join button. "Ad" sits outside
+    // the post (aria-labelledby), and each post starts with hidden decoys that say "Facebook".
     { name: 'Facebook', host: /(^|\.)facebook\.com$/,
       hide: [
         '[role="navigation"] a[href*="/watch"], [role="navigation"] a[href*="/marketplace"], [role="navigation"] a[href*="/gaming"], [role="navigation"] a[href*="/reel"]',
@@ -266,9 +274,16 @@
       ],
       // www: the units of div[role=feed]; m.facebook.com: the tracked feed units.
       items: 'div[role="feed"] > div, [data-pagelet^="FeedUnit"], div[aria-posinset], div[data-tracking-duration-id]',
+      feed: '[data-ad-rendering-role="profile_name"]', skip: '[aria-hidden="true"]',
+      label: 'a span[aria-labelledby]', unsure: '[data-ad-rendering-role^="cta"]',
+      within: '#right_rail_container', heading: 'h2, h3',
+      parts: [
+        { sel: '#right_rail_container h3', text: /^(?:Ad|Ads|Annonse|Annonser|Annons|Annonce|Reklame|Anzeige|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i },
+        { id: 'birthdays', label: 'Birthdays', sel: '#right_rail_container a[href*="/events/birthdays"]' },
+      ],
       drop: [
         'a[href*="/ads/about"], a[href*="ad_preferences"]',
-        /^(?:Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i,
+        /^(?:Ad|Annonse|Annons|Annonce|Reklame|Anzeige|Werbung|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i,
         /^(?:Suggested for you|Foreslått for deg|Förslag för dig|Forslag til dig|Vorschläge für dich|Suggested groups|Foreslåtte grupper|People you may know|Personer du kanskje kjenner|Reels|Reels and short videos|Reels og korte videoer)$/i,
         /^(?:Follow|Følg|Följ|Folgen|Join|Join group|Bli med|Bli med i gruppen|Gå med i gruppen|Deltag|Beitreten)$/i,
       ] },
@@ -531,7 +546,7 @@
     st.textContent = (s.hide?.length ? s.hide.join(',\n') + '{display:none!important}\n' : '') +
       // Google's "Sign in with Google" prompt, which many sites open by themselves.
       '#credential_picker_container,#credential_picker_iframe,' +
-      '[data-nothis-calm="off"]{display:none!important}\n' +
+      '[data-nothis-calm="off"]{display:none!important}\n[data-nothis-calm="wait"]{visibility:hidden!important}\n' +
       // overflow visible, not auto, on body: a body of fixed height (React Native Web) would scroll on its own instead of the window
       'html[data-nothis-unlock]{overflow:auto!important}html[data-nothis-unlock]>body{overflow:visible!important;position:static!important}';
     return st;
@@ -723,8 +738,8 @@
   // SVG and templates, often half the page (VG's inline player and state scripts). Parsing runs on the
   // page's main thread, so a front page fetching dozens of articles stays responsive to taps.
   function parseHtml(html) {
-    const lean = html.replace(/<script(?=[\s>])(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<(style|svg|template)(?=[\s>])[^>]*>[\s\S]*?<\/\1>/gi, '');
+    const lean = html.replace(/<script(?=[\s>])(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script\s*>/gi, '')
+      .replace(/<(style|svg|template)(?=[\s>])[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
     return new DOMParser().parseFromString(lean, 'text/html');
   }
   function extractMeta(html, url) {
@@ -826,7 +841,7 @@
   // ───────────────────────────── Reader ─────────────────────────────
   // Plain view opens an article in place: the page is fetched the way the browser would fetch it,
   // and only its text, subheadings, quotes, lists and pictures are kept. Nothing from the page runs
-  // or is inserted as HTML.
+  // or is inserted as HTML. A quiz or poll has no text to keep, so it stays as the frame it is on the site.
   // Paid articles: what the site sends is what you read, the same as the browser gets it. A logged-in
   // subscriber gets the whole text, and so does everyone where the site sends it all (VG); a paywall
   // is the publisher's to keep, not ours to add. When a paid article arrives short (the site held the
@@ -837,10 +852,18 @@
   // needs a real body, or plain view sends the reader to the site (a video, live page or app).
   const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
     '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
-    ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
+    ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author', 'reels']
       .map(c => `[class*="${c}" i]`)].join(', ');
   // Live pages ("Nyheter direkte"): a running feed of short news, each entry a story of its own.
   const LIVE_ENTRY = '[data-testid="liveblog-entry"], [itemtype$="/BlogPosting"]';
+  // A frame that is part of the story: a quiz, a poll or a survey (never an ad, a video or a social post).
+  const READER_EMBED = /quiz|\bpoll|survey|opinionstage|riddle\.com|playbuzz|apester|typeform|qualifio/i;
+  function readerEmbed(frame, base) {
+    try {
+      const src = new URL(frame.getAttribute('src') || frame.dataset.src || '', base);
+      return src.protocol === 'https:' && READER_EMBED.test(src.href) ? src.href : '';
+    } catch { return ''; }
+  }
   const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
   function readerImage(img, base) {
@@ -872,7 +895,7 @@
     return best;
   }
 
-  // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid, partial } or null
+  // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'embed', text, items, src, caption }], date, byline, paid, partial } or null
   // partial: a paid article that arrived with only its start. short: an article with little text.
   function readArticle(html, url, withImages) {
     const doc = parseHtml(html);
@@ -900,13 +923,15 @@
     const feed = !entry && live.length > 1 && root && live.some(e => e.contains(root) || root.contains(e)) ? live.slice(0, 30) : null;
     if (entry) article = true;
     if (feed) date = ''; // the feed's own date is when it was started
-    if (!root && !entry) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
+    const quizzes = [...doc.querySelectorAll('article iframe, main iframe')].filter(f => readerEmbed(f, url));
+    if (!root && !entry && !quizzes.length) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
     const blocks = [];
     const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
     const walk = el => {
       for (const c of el.children) {
-        if (c.matches(skip)) continue;
         const tag = c.tagName;
+        if (tag === 'IFRAME') { const src = readerEmbed(c, url); if (src) blocks.push({ t: 'embed', src }); continue; }
+        if (c.matches(skip)) continue;
         // A link around a picture and text is a card for another story (BT's live entries end with one).
         if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
         if (tag === 'P') {
@@ -930,7 +955,19 @@
         } else walk(c);
       }
     };
-    if (entry) walk(entry); else if (feed) feed.forEach(walk); else walk(root);
+    if (entry) walk(entry); else if (feed) feed.forEach(walk);
+    else {
+      if (root) walk(root);
+      // A quiz can sit beside the element with the text (Amedia puts the week's quiz above it): keep that order.
+      const above = [];
+      for (const f of quizzes) {
+        const src = readerEmbed(f, url);
+        if (blocks.some(b => b.src === src)) continue;
+        if (root && root.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_PRECEDING) above.push({ t: 'embed', src });
+        else blocks.push({ t: 'embed', src });
+      }
+      blocks.unshift(...above);
+    }
     // The entry's own heading is the reader's headline already.
     if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
     // Headings with nothing after them are links to other stories (BBC's "more on this").
@@ -939,14 +976,14 @@
     if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
       try {
         const og = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
-        if (og) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
+        if (og && !/logo/i.test(og)) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
       } catch {}
     }
     const words = blocks.reduce((n, b) => n + (b.text || '').length + (b.items || []).join(' ').length, 0);
     // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
     if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
     if (words >= 200) return { blocks, date, byline, paid, partial: false };
-    return article ? { blocks, date, byline, paid, partial: false, short: true } : null;
+    return article ? { blocks, date, byline, paid, partial: false, short: !blocks.some(b => b.t === 'embed') } : null;
   }
 
   // Articles fetched so far (url → { at: when fetched, raw: promise of { html, finalUrl } or null,
@@ -962,12 +999,16 @@
   function articleFetched(url, html, finalUrl) {
     if (readerFor && !readerCache.has(url)) readerCache.set(url, { at: Date.now(), raw: Promise.resolve({ html, finalUrl }) });
   }
+  const SAYS_ARTICLE = /"@type"\s*:\s*\[?\s*"\w*Article"|<meta[^>]*og:type[^>]*content="article"/;
   async function fetchPage(url) {
     const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
     try {
       const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
       const finalUrl = r.finalUrl || r.responseURL || '';
-      if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
+      // A redirect to another domain is usually a login or a landing page. A paper can also send an article
+      // on to a sister site (VG to Tek.no): that page says it is an article.
+      const moved = finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url);
+      if (r.status >= 200 && r.status < 400 && (!moved || SAYS_ARTICLE.test(r.responseText)))
         return { html: r.responseText, finalUrl };
     } catch {}
     return null;
@@ -977,7 +1018,7 @@
     let e = readerCache.get(url);
     if (!(Date.now() - e?.at <= maxAge)) readerCache.set(url, e = { at: Date.now(), raw: fetchPage(url) });
     if (!read) return e.raw;
-    if (!e.p) { e.p = e.raw.then(r => r && readArticle(r.html, r.finalUrl || url, withImages)); e.raw = e.p; }
+    if (!e.p) { e.p = e.raw.then(r => { const art = r && readArticle(r.html, r.finalUrl || url, withImages); if (art) art.finalUrl = r.finalUrl; return art; }); e.raw = e.p; }
     return e.p;
   }
 
@@ -1663,6 +1704,7 @@
     .reader li{padding:0 0 .3em;border:0;box-shadow:none}
     .reader figure{margin:0 0 1em}
     .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
+    .reader iframe{display:block;width:100%;height:600px;margin:0 0 1em;border:0;border-radius:6px;background:#fff}
     .reader figcaption{font-size:14px;color:var(--muted);margin-top:4px}
     .reader .byline{font-size:14px;color:var(--muted);margin-bottom:14px}
     .reader .end{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:8px;border-top:1px solid var(--line)}
@@ -1704,6 +1746,21 @@
   }
   // An article's address that shows it as the site publishes it (boot.js), not in the reader.
   const onSiteUrl = url => url.split('#')[0] + '#nothis-original';
+  // An embedded quiz tells its page how tall it is (Amedia's smart embeds); until then it has a height of its own.
+  const readerFrames = new Set();
+  function readerFrame(src) {
+    if (!readerFrames.size) window.addEventListener('message', e => {
+      if (e.data?.type !== 'amedia:mnemonic-iframe-resize' || !(e.data.value > 0)) return;
+      for (const f of readerFrames) {
+        if (!f.isConnected) readerFrames.delete(f);
+        else if (f.contentWindow === e.source) f.style.height = Math.max(200, Math.min(+e.data.value, 5000)) + 'px';
+      }
+    });
+    const f = document.createElement('iframe');
+    f.title = 'Quiz'; f.loading = 'lazy'; f.src = src;
+    readerFrames.add(f);
+    return f;
+  }
   const readerEl = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
   function readerContent(art, title, lede, url) {
     const el = readerEl, out = [el('h1', title)];
@@ -1721,12 +1778,21 @@
         im.addEventListener('error', () => f.remove());
         f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
       }
+      else if (b.t === 'embed') out.push(readerFrame(b.src));
     }
     if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
     else if (art.partial) out.push(el('p', T.paidHere, 'note'));
     else if (art.short) out.push(el('p', T.short, 'note')); // a story that has just broken, or a video with a caption
-    const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
+    let at = host; try { at = new URL(art.finalUrl).hostname.replace(/^www\./, ''); } catch {} // a sister site the article moved to
+    const end = el('div', '', 'end'), site = el('a', T.onSite(at)), close = el('button', T.close);
     site.href = onSiteUrl(url); close.dataset.act = 'close-reader';
+    // The address bar can already show this article, and then the link would only change the hash: load the page.
+    site.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || location.href.split('#')[0] !== url.split('#')[0]) return;
+      e.preventDefault();
+      history.replaceState(null, '', site.href);
+      location.reload();
+    });
     end.append(site);
     end.append(close); out.push(end);
     return out;
@@ -2249,7 +2315,7 @@
   // Runs instead of the news engine on a site in CALM_SITES (calm-sites.js) at the Calm level: the
   // site's hide list as a style sheet, feed items checked as they come in, and pop-ups that push the
   // app or a login taken away again. Counts what it hid, for the popup.
-  let calmCount = 0;
+  let calmCount = 0, calmPartsOff = [];
 
   function runCalm(s) {
     // Some sites swap out <head> or the whole <html> while they boot, so the sheet is put back when it goes.
@@ -2266,12 +2332,15 @@
     const off = el => { if (el.dataset.nothisCalm !== 'off') { el.dataset.nothisCalm = 'off'; calmCount++; } };
     if (s.unlock) document.documentElement.dataset.nothisUnlock = ''; // the site's own hide list takes a wall away
 
+    const labelOf = e => { const id = e.getAttribute('aria-labelledby'); return id ? (document.getElementById(id)?.textContent || '').trim() : ''; };
     const leaves = (el, n) => {
       const out = [];
-      const walk = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT);
+      const walk = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, s.skip ? { acceptNode: e => e.matches(s.skip) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT } : null);
       for (let e = walk.nextNode(); e && out.length < n; e = walk.nextNode()) {
         const al = e.getAttribute('aria-label');
         if (al && al.length <= 40) out.push(al.trim());
+        const by = labelOf(e);
+        if (by && by.length <= 40) out.push(by);
         // A label may be split into several elements (one per word, or per letter on Facebook).
         const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
         if (t && t.length <= 40 && (!e.childElementCount || !e.parentElement || (e.parentElement.textContent || '').trim().length > t.length)) out.push(t);
@@ -2350,15 +2419,51 @@
       }
     };
 
+    // The feed when it has no landmarks: the element whose children hold most of the units.
+    const feedUnits = () => {
+      if (!s.feed) return [];
+      const holds = new Map(); let most = 2, feedEl = null;
+      for (const u of document.querySelectorAll(s.feed)) for (let e = u; e.parentElement && e.parentElement !== document.body; e = e.parentElement) {
+        const n = (holds.get(e.parentElement) || new Set()).add(e); holds.set(e.parentElement, n);
+        if (n.size > most) { most = n.size; feedEl = e.parentElement; }
+      }
+      return feedEl ? [...feedEl.children] : [];
+    };
+    const labelled = it => { const l = it.querySelector(s.label); return !!l && !!labelOf(l); };
+    const waiting = new WeakMap();
+    const waitFor = it => {
+      const r = it.getBoundingClientRect();
+      if (r.top > innerHeight) return; // not on screen yet: its time hasn't started
+      if (!waiting.has(it)) waiting.set(it, Date.now());
+      if (Date.now() - waiting.get(it) < 3000) it.dataset.nothisCalm = 'wait';
+      else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+    };
+
     const pass = () => {
       sheet();
-      if (s.items) for (const it of document.querySelectorAll(s.items)) {
-        // Feeds reuse their elements: look again when an item's text has changed.
+      if (s.items) for (const it of new Set([...document.querySelectorAll(s.items), ...feedUnits()])) {
+        // Feeds reuse their elements: look again when an item's text has changed, or until its label is there.
         const len = String(it.textContent.length);
-        if (it.dataset.nothisLen === len) continue;
-        it.dataset.nothisLen = len;
-        if (dropped(it)) { off(it); if (fixed(it) && big(it)) document.documentElement.dataset.nothisUnlock = ''; } // a wall in the feed
-        else if (it.dataset.nothisCalm === 'off') { delete it.dataset.nothisCalm; calmCount--; }
+        const told = !s.label || !it.querySelector(s.feed) || labelled(it);
+        if (told && it.dataset.nothisLen === len) continue;
+        if (told) it.dataset.nothisLen = len;
+        if (dropped(it)) {
+          if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+          off(it); if (fixed(it) && big(it)) document.documentElement.dataset.nothisUnlock = ''; // a wall in the feed
+        }
+        // A feed empties what is off screen: what was hidden stays so until something else is there for sure.
+        else if (it.dataset.nothisCalm === 'off') { if (told && it.textContent.trim()) { delete it.dataset.nothisCalm; calmCount--; } }
+        else if (!told && s.unsure && it.querySelector(s.unsure)) waitFor(it);
+        else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+      }
+      for (const p of s.parts || []) {
+        if (p.id && !calmPartsOff.includes(p.id)) continue;
+        for (const m of document.querySelectorAll(p.sel)) {
+          if (p.text && !p.text.test(m.textContent.trim())) continue;
+          let box = m;
+          while (box.parentElement && !box.parentElement.matches(s.within) && box.parentElement.querySelectorAll(s.heading).length <= 1) box = box.parentElement;
+          off(box);
+        }
       }
       pushes();
       appBars();
@@ -2395,6 +2500,11 @@
     else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
     else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
     else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
+    else if (act === 'calmPart') {
+      const [id, show] = arg, all = (await gm.get('calmParts', {})) || {}, partsOff = (all[calmSite.name] || []).filter(p => p !== id);
+      await gm.set('calmParts', { ...all, [calmSite.name]: show ? partsOff : [...partsOff, id] });
+      location.reload();
+    }
     else if (act === 'generic') { await gm.set('genericSites', !CFG.genericSites); location.reload(); }
   }
 
@@ -2402,6 +2512,7 @@
     const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
     return { host, off: hostOff, level, calm: calmSite?.name || null, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
       genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
+      calmParts: (calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label, show: !calmPartsOff.includes(p.id) })),
       topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
       disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
   }
@@ -2449,6 +2560,8 @@
         <button data-mode="rewrite" class="${CFG.display === 'rewrite' ? 'on' : ''}">Rewrite headlines</button>
         <button data-mode="reveal" class="${CFG.display === 'reveal' ? 'on' : ''}">Keep headlines, reveal on hover/tap</button>
         <button data-mode="stack" class="${CFG.display === 'stack' ? 'on' : ''}">Keep headlines, show article headline + lead below</button></div>
+      ${(calmSite?.parts || []).some(p => p.id) && !hostOff ? `<div class="row"><div class="lbl">Show on this site</div>
+        ${calmSite.parts.filter(p => p.id).map(p => `<button data-part="${p.id}" class="${calmPartsOff.includes(p.id) ? '' : 'on'}">${p.label}</button>`).join('')}</div>` : ''}
       <div class="row"><div class="lbl">Options</div>
         <button data-act="orig">Toggle originals (Alt+Shift+U)</button>
         <button data-act="swipe" class="${CFG.swipeAnimation ? 'on' : ''}">Animate swiping between articles: ${CFG.swipeAnimation ? 'on' : 'off'}</button>
@@ -2463,6 +2576,7 @@
       else if (b.dataset.unset) { await settingsAction('unset', b.dataset.unset.split(' ')); listSites(); }
       else if (b.dataset.mode) settingsAction('display', b.dataset.mode);
       else if (b.dataset.level) settingsAction('level', b.dataset.level);
+      else if (b.dataset.part) settingsAction('calmPart', [b.dataset.part, calmPartsOff.includes(b.dataset.part)]);
       else if (b.dataset.topic) { const next = new Set(muted); next.has(b.dataset.topic) ? next.delete(b.dataset.topic) : next.add(b.dataset.topic); settingsAction('topics', [...next]); }
       else if (b.dataset.act === 'swipe') { await settingsAction('swipeAnim', !CFG.swipeAnimation); b.classList.toggle('on', CFG.swipeAnimation); b.textContent = `Animate swiping between articles: ${CFG.swipeAnimation ? 'on' : 'off'}`; }
       else if (b.dataset.act === 'defaultLevel') { await settingsAction('defaultLevel', level); b.textContent = '✓ Default for all sites'; }
@@ -2560,7 +2674,8 @@
     CFG.swipeAnimation = await gm.get('swipeAnimation', CFG.swipeAnimation);
     let original = false; // the plain view's "Original" button: show the site as published, once
     try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
-    if (location.hash === '#nothis-original') original = true; // "Read on the site" in the reader
+    // "Read on the site" in the reader. Back can land on an entry that still counts as this document: load it.
+    if (location.hash === '#nothis-original') { original = true; window.addEventListener('popstate', () => location.reload()); }
     // The extension's popup talks to settingsAction/settingsState; the userscript build has its own panel.
     if (EXT) GM.exposeSettings(async ({ act, arg } = {}) => { if (act) await settingsAction(act, arg); return settingsState(); });
     else if (typeof startPanel === 'function') startPanel(off, disabled);
@@ -2568,7 +2683,7 @@
     // cover itself once it is up, every other path lifts it here.
     const uncover = () => document.getElementById('nothis-cover')?.remove();
     if (off) { uncover(); return; } // settings still open here, so the site can be switched back on
-    if (calmSite) { uncover(); runCalm(calmSite); return; }
+    if (calmSite) { calmPartsOff = ((await gm.get('calmParts', {})) || {})[calmSite.name] || []; uncover(); runCalm(calmSite); return; }
     await loadCache();
     if (CFG.marker) {
       const st = document.createElement('style');

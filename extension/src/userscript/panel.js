@@ -41,6 +41,8 @@ function openPanel() {
       <button data-mode="rewrite" class="${CFG.display === 'rewrite' ? 'on' : ''}">Rewrite headlines</button>
       <button data-mode="reveal" class="${CFG.display === 'reveal' ? 'on' : ''}">Keep headlines, reveal on hover/tap</button>
       <button data-mode="stack" class="${CFG.display === 'stack' ? 'on' : ''}">Keep headlines, show article headline + lead below</button></div>
+    ${(calmSite?.parts || []).some(p => p.id) && !hostOff ? `<div class="row"><div class="lbl">Show on this site</div>
+      ${calmSite.parts.filter(p => p.id).map(p => `<button data-part="${p.id}" class="${calmPartsOff.includes(p.id) ? '' : 'on'}">${p.label}</button>`).join('')}</div>` : ''}
     <div class="row"><div class="lbl">Options</div>
       <button data-act="orig">Toggle originals (Alt+Shift+U)</button>
       <button data-act="swipe" class="${CFG.swipeAnimation ? 'on' : ''}">Animate swiping between articles: ${CFG.swipeAnimation ? 'on' : 'off'}</button>
@@ -55,6 +57,7 @@ function openPanel() {
     else if (b.dataset.unset) { await settingsAction('unset', b.dataset.unset.split(' ')); listSites(); }
     else if (b.dataset.mode) settingsAction('display', b.dataset.mode);
     else if (b.dataset.level) settingsAction('level', b.dataset.level);
+    else if (b.dataset.part) settingsAction('calmPart', [b.dataset.part, calmPartsOff.includes(b.dataset.part)]);
     else if (b.dataset.topic) { const next = new Set(muted); next.has(b.dataset.topic) ? next.delete(b.dataset.topic) : next.add(b.dataset.topic); settingsAction('topics', [...next]); }
     else if (b.dataset.act === 'swipe') { await settingsAction('swipeAnim', !CFG.swipeAnimation); b.classList.toggle('on', CFG.swipeAnimation); b.textContent = `Animate swiping between articles: ${CFG.swipeAnimation ? 'on' : 'off'}`; }
     else if (b.dataset.act === 'defaultLevel') { await settingsAction('defaultLevel', level); b.textContent = '✓ Default for all sites'; }

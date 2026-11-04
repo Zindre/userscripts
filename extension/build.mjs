@@ -68,7 +68,7 @@ const base = {
   manifest_version: 3,
   name: 'NoThis',
   version,
-  description: "News without the bait: clear headlines, synopses, or a calm plain view of the site without ads. No tracking.",
+  description: "News and social media without the bait. For everyone, and maybe especially useful with ADHD or autism. No tracking.",
   homepage_url: 'https://github.com/Zindre/userscripts',
   icons: icons([16, 32, 48, 96, 128, 256, 512]),
   action: { default_title: 'NoThis', default_popup: 'popup.html', default_icon: icons([16, 19, 32, 38, 48]) },

@@ -23,7 +23,8 @@ async function main() {
   CFG.swipeAnimation = await gm.get('swipeAnimation', CFG.swipeAnimation);
   let original = false; // the plain view's "Original" button: show the site as published, once
   try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
-  if (location.hash === '#nothis-original') original = true; // "Read on the site" in the reader
+  // "Read on the site" in the reader. Back can land on an entry that still counts as this document: load it.
+  if (location.hash === '#nothis-original') { original = true; window.addEventListener('popstate', () => location.reload()); }
   // The extension's popup talks to settingsAction/settingsState; the userscript build has its own panel.
   if (EXT) GM.exposeSettings(async ({ act, arg } = {}) => { if (act) await settingsAction(act, arg); return settingsState(); });
   else if (typeof startPanel === 'function') startPanel(off, disabled);
@@ -31,7 +32,7 @@ async function main() {
   // cover itself once it is up, every other path lifts it here.
   const uncover = () => document.getElementById('nothis-cover')?.remove();
   if (off) { uncover(); return; } // settings still open here, so the site can be switched back on
-  if (calmSite) { uncover(); runCalm(calmSite); return; }
+  if (calmSite) { calmPartsOff = ((await gm.get('calmParts', {})) || {})[calmSite.name] || []; uncover(); runCalm(calmSite); return; }
   await loadCache();
   if (CFG.marker) {
     const st = document.createElement('style');

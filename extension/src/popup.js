@@ -61,6 +61,14 @@ function show(s) {
     r.closest('label').hidden = !!s.calm !== (r.value === 'calm') && r.value !== 'vanilla';
   }
   $('news-box').hidden = !!s.calm;
+  $('calm-box').hidden = s.off || !s.calmParts?.length;
+  $('calm-parts').replaceChildren(...(s.calmParts || []).map(p => {
+    const l = document.createElement('label'), t = document.createElement('span'), cb = document.createElement('input');
+    l.className = 'switch'; t.textContent = p.label; cb.type = 'checkbox'; cb.checked = p.show;
+    cb.addEventListener('change', () => actAndReload('calmPart', [p.id, cb.checked]));
+    l.append(t, cb);
+    return l;
+  }));
   const isDefault = s.level === s.defaultLevel;
   $('default').textContent = isDefault ? '✓ Default for all sites' : 'Use this level on all sites';
   $('default').disabled = isDefault;

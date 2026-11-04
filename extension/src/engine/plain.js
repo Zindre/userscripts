@@ -242,6 +242,7 @@ const PLAIN_CSS = `
   .reader li{padding:0 0 .3em;border:0;box-shadow:none}
   .reader figure{margin:0 0 1em}
   .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
+  .reader iframe{display:block;width:100%;height:600px;margin:0 0 1em;border:0;border-radius:6px;background:#fff}
   .reader figcaption{font-size:14px;color:var(--muted);margin-top:4px}
   .reader .byline{font-size:14px;color:var(--muted);margin-bottom:14px}
   .reader .end{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:8px;border-top:1px solid var(--line)}
@@ -283,6 +284,21 @@ function swallowSite() {
 }
 // An article's address that shows it as the site publishes it (boot.js), not in the reader.
 const onSiteUrl = url => url.split('#')[0] + '#nothis-original';
+// An embedded quiz tells its page how tall it is (Amedia's smart embeds); until then it has a height of its own.
+const readerFrames = new Set();
+function readerFrame(src) {
+  if (!readerFrames.size) window.addEventListener('message', e => {
+    if (e.data?.type !== 'amedia:mnemonic-iframe-resize' || !(e.data.value > 0)) return;
+    for (const f of readerFrames) {
+      if (!f.isConnected) readerFrames.delete(f);
+      else if (f.contentWindow === e.source) f.style.height = Math.max(200, Math.min(+e.data.value, 5000)) + 'px';
+    }
+  });
+  const f = document.createElement('iframe');
+  f.title = 'Quiz'; f.loading = 'lazy'; f.src = src;
+  readerFrames.add(f);
+  return f;
+}
 const readerEl = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
 function readerContent(art, title, lede, url) {
   const el = readerEl, out = [el('h1', title)];
@@ -300,12 +316,21 @@ function readerContent(art, title, lede, url) {
       im.addEventListener('error', () => f.remove());
       f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
     }
+    else if (b.t === 'embed') out.push(readerFrame(b.src));
   }
   if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
   else if (art.partial) out.push(el('p', T.paidHere, 'note'));
   else if (art.short) out.push(el('p', T.short, 'note')); // a story that has just broken, or a video with a caption
-  const end = el('div', '', 'end'), site = el('a', T.onSite(host)), close = el('button', T.close);
+  let at = host; try { at = new URL(art.finalUrl).hostname.replace(/^www\./, ''); } catch {} // a sister site the article moved to
+  const end = el('div', '', 'end'), site = el('a', T.onSite(at)), close = el('button', T.close);
   site.href = onSiteUrl(url); close.dataset.act = 'close-reader';
+  // The address bar can already show this article, and then the link would only change the hash: load the page.
+  site.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || location.href.split('#')[0] !== url.split('#')[0]) return;
+    e.preventDefault();
+    history.replaceState(null, '', site.href);
+    location.reload();
+  });
   end.append(site);
   end.append(close); out.push(end);
   return out;

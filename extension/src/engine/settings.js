@@ -22,6 +22,11 @@ async function settingsAction(act, arg) {
   else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
   else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
   else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
+  else if (act === 'calmPart') {
+    const [id, show] = arg, all = (await gm.get('calmParts', {})) || {}, partsOff = (all[calmSite.name] || []).filter(p => p !== id);
+    await gm.set('calmParts', { ...all, [calmSite.name]: show ? partsOff : [...partsOff, id] });
+    location.reload();
+  }
   else if (act === 'generic') { await gm.set('genericSites', !CFG.genericSites); location.reload(); }
 }
 
@@ -29,6 +34,7 @@ async function settingsState() {
   const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
   return { host, off: hostOff, level, calm: calmSite?.name || null, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
     genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
+    calmParts: (calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label, show: !calmPartsOff.includes(p.id) })),
     topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
     disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
 }

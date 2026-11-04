@@ -2,7 +2,7 @@
 // Runs instead of the news engine on a site in CALM_SITES (calm-sites.js) at the Calm level: the
 // site's hide list as a style sheet, feed items checked as they come in, and pop-ups that push the
 // app or a login taken away again. Counts what it hid, for the popup.
-let calmCount = 0;
+let calmCount = 0, calmPartsOff = [];
 
 function runCalm(s) {
   // Some sites swap out <head> or the whole <html> while they boot, so the sheet is put back when it goes.
@@ -19,12 +19,15 @@ function runCalm(s) {
   const off = el => { if (el.dataset.nothisCalm !== 'off') { el.dataset.nothisCalm = 'off'; calmCount++; } };
   if (s.unlock) document.documentElement.dataset.nothisUnlock = ''; // the site's own hide list takes a wall away
 
+  const labelOf = e => { const id = e.getAttribute('aria-labelledby'); return id ? (document.getElementById(id)?.textContent || '').trim() : ''; };
   const leaves = (el, n) => {
     const out = [];
-    const walk = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT);
+    const walk = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, s.skip ? { acceptNode: e => e.matches(s.skip) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT } : null);
     for (let e = walk.nextNode(); e && out.length < n; e = walk.nextNode()) {
       const al = e.getAttribute('aria-label');
       if (al && al.length <= 40) out.push(al.trim());
+      const by = labelOf(e);
+      if (by && by.length <= 40) out.push(by);
       // A label may be split into several elements (one per word, or per letter on Facebook).
       const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
       if (t && t.length <= 40 && (!e.childElementCount || !e.parentElement || (e.parentElement.textContent || '').trim().length > t.length)) out.push(t);
@@ -103,15 +106,51 @@ function runCalm(s) {
     }
   };
 
+  // The feed when it has no landmarks: the element whose children hold most of the units.
+  const feedUnits = () => {
+    if (!s.feed) return [];
+    const holds = new Map(); let most = 2, feedEl = null;
+    for (const u of document.querySelectorAll(s.feed)) for (let e = u; e.parentElement && e.parentElement !== document.body; e = e.parentElement) {
+      const n = (holds.get(e.parentElement) || new Set()).add(e); holds.set(e.parentElement, n);
+      if (n.size > most) { most = n.size; feedEl = e.parentElement; }
+    }
+    return feedEl ? [...feedEl.children] : [];
+  };
+  const labelled = it => { const l = it.querySelector(s.label); return !!l && !!labelOf(l); };
+  const waiting = new WeakMap();
+  const waitFor = it => {
+    const r = it.getBoundingClientRect();
+    if (r.top > innerHeight) return; // not on screen yet: its time hasn't started
+    if (!waiting.has(it)) waiting.set(it, Date.now());
+    if (Date.now() - waiting.get(it) < 3000) it.dataset.nothisCalm = 'wait';
+    else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+  };
+
   const pass = () => {
     sheet();
-    if (s.items) for (const it of document.querySelectorAll(s.items)) {
-      // Feeds reuse their elements: look again when an item's text has changed.
+    if (s.items) for (const it of new Set([...document.querySelectorAll(s.items), ...feedUnits()])) {
+      // Feeds reuse their elements: look again when an item's text has changed, or until its label is there.
       const len = String(it.textContent.length);
-      if (it.dataset.nothisLen === len) continue;
-      it.dataset.nothisLen = len;
-      if (dropped(it)) { off(it); if (fixed(it) && big(it)) document.documentElement.dataset.nothisUnlock = ''; } // a wall in the feed
-      else if (it.dataset.nothisCalm === 'off') { delete it.dataset.nothisCalm; calmCount--; }
+      const told = !s.label || !it.querySelector(s.feed) || labelled(it);
+      if (told && it.dataset.nothisLen === len) continue;
+      if (told) it.dataset.nothisLen = len;
+      if (dropped(it)) {
+        if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+        off(it); if (fixed(it) && big(it)) document.documentElement.dataset.nothisUnlock = ''; // a wall in the feed
+      }
+      // A feed empties what is off screen: what was hidden stays so until something else is there for sure.
+      else if (it.dataset.nothisCalm === 'off') { if (told && it.textContent.trim()) { delete it.dataset.nothisCalm; calmCount--; } }
+      else if (!told && s.unsure && it.querySelector(s.unsure)) waitFor(it);
+      else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+    }
+    for (const p of s.parts || []) {
+      if (p.id && !calmPartsOff.includes(p.id)) continue;
+      for (const m of document.querySelectorAll(p.sel)) {
+        if (p.text && !p.text.test(m.textContent.trim())) continue;
+        let box = m;
+        while (box.parentElement && !box.parentElement.matches(s.within) && box.parentElement.querySelectorAll(s.heading).length <= 1) box = box.parentElement;
+        off(box);
+      }
     }
     pushes();
     appBars();

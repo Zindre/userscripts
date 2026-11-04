@@ -1,7 +1,7 @@
 // ───────────────────────────── Reader ─────────────────────────────
 // Plain view opens an article in place: the page is fetched the way the browser would fetch it,
 // and only its text, subheadings, quotes, lists and pictures are kept. Nothing from the page runs
-// or is inserted as HTML.
+// or is inserted as HTML. A quiz or poll has no text to keep, so it stays as the frame it is on the site.
 // Paid articles: what the site sends is what you read, the same as the browser gets it. A logged-in
 // subscriber gets the whole text, and so does everyone where the site sends it all (VG); a paywall
 // is the publisher's to keep, not ours to add. When a paid article arrives short (the site held the
@@ -12,10 +12,18 @@
 // needs a real body, or plain view sends the reader to the site (a video, live page or app).
 const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
   '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
-  ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author']
+  ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author', 'reels']
     .map(c => `[class*="${c}" i]`)].join(', ');
 // Live pages ("Nyheter direkte"): a running feed of short news, each entry a story of its own.
 const LIVE_ENTRY = '[data-testid="liveblog-entry"], [itemtype$="/BlogPosting"]';
+// A frame that is part of the story: a quiz, a poll or a survey (never an ad, a video or a social post).
+const READER_EMBED = /quiz|\bpoll|survey|opinionstage|riddle\.com|playbuzz|apester|typeform|qualifio/i;
+function readerEmbed(frame, base) {
+  try {
+    const src = new URL(frame.getAttribute('src') || frame.dataset.src || '', base);
+    return src.protocol === 'https:' && READER_EMBED.test(src.href) ? src.href : '';
+  } catch { return ''; }
+}
 const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
 function readerImage(img, base) {
@@ -47,7 +55,7 @@ function readerRoot(doc, skip) {
   return best;
 }
 
-// → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img', text, items, src, caption }], date, byline, paid, partial } or null
+// → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'embed', text, items, src, caption }], date, byline, paid, partial } or null
 // partial: a paid article that arrived with only its start. short: an article with little text.
 function readArticle(html, url, withImages) {
   const doc = parseHtml(html);
@@ -75,13 +83,15 @@ function readArticle(html, url, withImages) {
   const feed = !entry && live.length > 1 && root && live.some(e => e.contains(root) || root.contains(e)) ? live.slice(0, 30) : null;
   if (entry) article = true;
   if (feed) date = ''; // the feed's own date is when it was started
-  if (!root && !entry) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
+  const quizzes = [...doc.querySelectorAll('article iframe, main iframe')].filter(f => readerEmbed(f, url));
+  if (!root && !entry && !quizzes.length) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
   const blocks = [];
   const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
   const walk = el => {
     for (const c of el.children) {
-      if (c.matches(skip)) continue;
       const tag = c.tagName;
+      if (tag === 'IFRAME') { const src = readerEmbed(c, url); if (src) blocks.push({ t: 'embed', src }); continue; }
+      if (c.matches(skip)) continue;
       // A link around a picture and text is a card for another story (BT's live entries end with one).
       if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
       if (tag === 'P') {
@@ -105,7 +115,19 @@ function readArticle(html, url, withImages) {
       } else walk(c);
     }
   };
-  if (entry) walk(entry); else if (feed) feed.forEach(walk); else walk(root);
+  if (entry) walk(entry); else if (feed) feed.forEach(walk);
+  else {
+    if (root) walk(root);
+    // A quiz can sit beside the element with the text (Amedia puts the week's quiz above it): keep that order.
+    const above = [];
+    for (const f of quizzes) {
+      const src = readerEmbed(f, url);
+      if (blocks.some(b => b.src === src)) continue;
+      if (root && root.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_PRECEDING) above.push({ t: 'embed', src });
+      else blocks.push({ t: 'embed', src });
+    }
+    blocks.unshift(...above);
+  }
   // The entry's own heading is the reader's headline already.
   if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
   // Headings with nothing after them are links to other stories (BBC's "more on this").
@@ -114,14 +136,14 @@ function readArticle(html, url, withImages) {
   if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
     try {
       const og = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
-      if (og) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
+      if (og && !/logo/i.test(og)) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
     } catch {}
   }
   const words = blocks.reduce((n, b) => n + (b.text || '').length + (b.items || []).join(' ').length, 0);
   // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
   if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
   if (words >= 200) return { blocks, date, byline, paid, partial: false };
-  return article ? { blocks, date, byline, paid, partial: false, short: true } : null;
+  return article ? { blocks, date, byline, paid, partial: false, short: !blocks.some(b => b.t === 'embed') } : null;
 }
 
 // Articles fetched so far (url → { at: when fetched, raw: promise of { html, finalUrl } or null,
@@ -137,12 +159,16 @@ let readerFor = false; // true while plain view is up
 function articleFetched(url, html, finalUrl) {
   if (readerFor && !readerCache.has(url)) readerCache.set(url, { at: Date.now(), raw: Promise.resolve({ html, finalUrl }) });
 }
+const SAYS_ARTICLE = /"@type"\s*:\s*\[?\s*"\w*Article"|<meta[^>]*og:type[^>]*content="article"/;
 async function fetchPage(url) {
   const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
   try {
     const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
     const finalUrl = r.finalUrl || r.responseURL || '';
-    if (r.status >= 200 && r.status < 400 && !(finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url)))
+    // A redirect to another domain is usually a login or a landing page. A paper can also send an article
+    // on to a sister site (VG to Tek.no): that page says it is an article.
+    const moved = finalUrl && domainOf(finalUrl) && domainOf(finalUrl) !== domainOf(url);
+    if (r.status >= 200 && r.status < 400 && (!moved || SAYS_ARTICLE.test(r.responseText)))
       return { html: r.responseText, finalUrl };
   } catch {}
   return null;
@@ -152,6 +178,6 @@ function fetchArticle(url, withImages, maxAge = Infinity, read = true) {
   let e = readerCache.get(url);
   if (!(Date.now() - e?.at <= maxAge)) readerCache.set(url, e = { at: Date.now(), raw: fetchPage(url) });
   if (!read) return e.raw;
-  if (!e.p) { e.p = e.raw.then(r => r && readArticle(r.html, r.finalUrl || url, withImages)); e.raw = e.p; }
+  if (!e.p) { e.p = e.raw.then(r => { const art = r && readArticle(r.html, r.finalUrl || url, withImages); if (art) art.finalUrl = r.finalUrl; return art; }); e.raw = e.p; }
   return e.p;
 }

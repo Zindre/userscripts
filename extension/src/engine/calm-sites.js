@@ -13,6 +13,13 @@
 //          against the short labels in its first leaves (text or aria-label of 1-40 characters), so
 //          "Sponsored" or "Suggested for you" in the post's header, not in what someone wrote
 //   head   how many of an item's first leaf elements count as its header for drop's RegExps (default 40)
+//   feed   for a feed without landmarks: marks a unit; the units are the children of the element that holds most of them
+//   skip   leaves in these don't count as header (decoys)
+//   label  where a unit's header says what it is, through aria-labelledby. It can arrive after the unit, so the unit
+//          is looked at again until then; one with `unsure` in it waits unseen meanwhile, for at most 3 seconds
+//   parts  boxes beside the feed: sel finds what marks one (with text, only if its text matches), and the box goes.
+//          With an id and a label it is a choice in the settings instead, shown by default
+//   within, heading  how far a part's box reaches: inside `within`, up to the next `heading`
 //   notices  offers with no stable markup, found by their text: the nearest box with a button around
 //          the text is hidden, and the layer it sits in if it covers the page
 //   block  extra URL tests for redirects the page makes by itself: to the app through the site's own
@@ -22,7 +29,8 @@
 const CALM_SITES = [
   // Keeps posts from friends and your groups, events, birthdays and Messenger; drops sponsored and
   // suggested posts, Reels and Stories, and the Watch, Marketplace and Gaming tabs. The header of a
-  // post you didn't ask for carries "Sponsored", "Suggested for you", or a Follow/Join button.
+  // post you didn't ask for carries "Ad", "Suggested for you", or a Follow/Join button. "Ad" sits outside
+  // the post (aria-labelledby), and each post starts with hidden decoys that say "Facebook".
   { name: 'Facebook', host: /(^|\.)facebook\.com$/,
     hide: [
       '[role="navigation"] a[href*="/watch"], [role="navigation"] a[href*="/marketplace"], [role="navigation"] a[href*="/gaming"], [role="navigation"] a[href*="/reel"]',
@@ -32,9 +40,16 @@ const CALM_SITES = [
     ],
     // www: the units of div[role=feed]; m.facebook.com: the tracked feed units.
     items: 'div[role="feed"] > div, [data-pagelet^="FeedUnit"], div[aria-posinset], div[data-tracking-duration-id]',
+    feed: '[data-ad-rendering-role="profile_name"]', skip: '[aria-hidden="true"]',
+    label: 'a span[aria-labelledby]', unsure: '[data-ad-rendering-role^="cta"]',
+    within: '#right_rail_container', heading: 'h2, h3',
+    parts: [
+      { sel: '#right_rail_container h3', text: /^(?:Ad|Ads|Annonse|Annonser|Annons|Annonce|Reklame|Anzeige|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i },
+      { id: 'birthdays', label: 'Birthdays', sel: '#right_rail_container a[href*="/events/birthdays"]' },
+    ],
     drop: [
       'a[href*="/ads/about"], a[href*="ad_preferences"]',
-      /^(?:Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i,
+      /^(?:Ad|Annonse|Annons|Annonce|Reklame|Anzeige|Werbung|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i,
       /^(?:Suggested for you|Foreslått for deg|Förslag för dig|Forslag til dig|Vorschläge für dich|Suggested groups|Foreslåtte grupper|People you may know|Personer du kanskje kjenner|Reels|Reels and short videos|Reels og korte videoer)$/i,
       /^(?:Follow|Følg|Följ|Folgen|Join|Join group|Bli med|Bli med i gruppen|Gå med i gruppen|Deltag|Beitreten)$/i,
     ] },
@@ -297,7 +312,7 @@ function calmStyle(s) {
   st.textContent = (s.hide?.length ? s.hide.join(',\n') + '{display:none!important}\n' : '') +
     // Google's "Sign in with Google" prompt, which many sites open by themselves.
     '#credential_picker_container,#credential_picker_iframe,' +
-    '[data-nothis-calm="off"]{display:none!important}\n' +
+    '[data-nothis-calm="off"]{display:none!important}\n[data-nothis-calm="wait"]{visibility:hidden!important}\n' +
     // overflow visible, not auto, on body: a body of fixed height (React Native Web) would scroll on its own instead of the window
     'html[data-nothis-unlock]{overflow:auto!important}html[data-nothis-unlock]>body{overflow:visible!important;position:static!important}';
   return st;
