@@ -68,7 +68,7 @@ const base = {
   manifest_version: 3,
   name: 'NoThis',
   version,
-  description: "News and social media without the bait. For everyone, and maybe especially useful with ADHD or autism. No tracking.",
+  description: "News and social media without bait. For everyone, maybe especially useful with ADHD or autism. No tracking.",
   homepage_url: 'https://github.com/Zindre/userscripts',
   icons: icons([16, 32, 48, 96, 128, 256, 512]),
   action: { default_title: 'NoThis', default_popup: 'popup.html', default_icon: icons([16, 19, 32, 38, 48]) },
@@ -80,6 +80,8 @@ const base = {
     // In the page's own world: Snapchat for Web on a phone (src/snapchat-web.js).
     { matches: ['https://www.snapchat.com/web*', 'https://snapchat.com/web*'], js: ['snapchat-web.js'], run_at: 'document_start', world: 'MAIN' }],
 };
+// App Store Connect refuses a Safari extension with a longer description, after the whole build.
+if (base.description.length > 112) throw new Error(`description is ${base.description.length} characters; the limit is 112`);
 
 const targets = {
   chrome: { ...base, background: { service_worker: 'background.js' } },
