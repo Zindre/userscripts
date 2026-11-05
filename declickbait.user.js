@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Declickbait
 // @namespace    no.sedb.declickbait
-// @version      1.20.0
+// @version      1.21.0
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT

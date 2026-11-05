@@ -26,6 +26,9 @@ on:
       build:
         description: TestFlight build number to give to the beta testers (only that job runs then)
         required: false
+      app_name:
+        description: New App Store name, set on the iOS version in extension/package.json (made if needed)
+        required: false
 
 jobs:
   build:
@@ -173,6 +176,33 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           BUILD: ${{ inputs.build || needs.build.outputs.build }}
         run: node extension/safari/beta-testers.mjs
+      - name: Remove API key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc"
+
+  # By hand only:  gh workflow run nothis.yml -R Zindre/userscripts -f app_name="Web Detox"
+  app-store-name:
+    name: Set the App Store name
+    if: ${{ inputs.app_name != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Write App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc/AuthKey.p8"
+      - name: Set the name
+        env:
+          ASC_KEY_PATH: ${{ runner.temp }}/asc/AuthKey.p8
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_NAME: ${{ inputs.app_name }}
+        run: VERSION=$(node -p "require('./extension/package.json').version") node extension/safari/app-store-name.mjs
       - name: Remove API key
         if: always()
         run: rm -rf "$RUNNER_TEMP/asc"
