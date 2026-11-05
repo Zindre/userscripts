@@ -38,7 +38,8 @@ function runCalm(s) {
     }
     return out;
   };
-  const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : heading(it).some(t => d.test(t)) || leaves(it, s.head || 40).some(t => d.test(t)));
+  const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : heading(it).some(t => d.test(t)) || leaves(it, s.head || 40).some(t => d.test(t))) ||
+    (s.parts || []).some(p => p.post && calmPartsOff.includes(p.id) && [...it.querySelectorAll(p.sel)].some(m => p.post.test(bare(m.textContent))));
 
   // The outermost fixed layer over most of the screen around el (the backdrop, not just the box), or
   // a fixed bar at the top or bottom; else a fixed layer like that inside el.
@@ -149,7 +150,7 @@ function runCalm(s) {
     // A box taken away before the box beside it had come may hold that one too by now: it comes back and is measured again.
     if (s.parts) for (const b of document.querySelectorAll('[data-nothis-part]')) if (b.querySelectorAll(s.heading).length > 1) { delete b.dataset.nothisPart; delete b.dataset.nothisCalm; calmCount--; }
     for (const p of s.parts || []) {
-      if (p.id && !calmPartsOff.includes(p.id)) continue;
+      if (p.post || (p.id && !calmPartsOff.includes(p.id))) continue;
       for (const m of document.querySelectorAll(p.sel)) {
         if (p.text && !p.text.test(bare(m.textContent))) continue;
         let box = m;

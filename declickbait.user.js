@@ -254,7 +254,8 @@
   //          long that takes (Facebook: often half a minute), and a label inside `unsure` doesn't count
   //   known  a unit that isn't dropped and has this in it needs no label to be shown: it doesn't have to wait
   //   parts  boxes beside the feed: sel finds what marks one (with text, only if its text matches), and the box goes.
-  //          With an id and a label it is a choice in the settings instead, shown by default
+  //          With an id and a label it is a choice in the settings instead, shown by default. With post, a RegExp,
+  //          it is a choice about feed items instead: an item goes when the text of sel in it matches and you chose so
   //   within, heading  how far a part's box reaches: inside `within`, up to the next `heading`
   //   notices  offers with no stable markup, found by their text: the nearest box with a button around
   //          the text is hidden, and the layer it sits in if it covers the page
@@ -284,6 +285,10 @@
       parts: [
         { sel: '#right_rail_container h3, [role="complementary"] h3', text: /^(?:Ad|Ads|Annonse|Annonser|Annons|Annonce|Reklame|Anzeige|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i },
         { id: 'birthdays', label: 'Birthdays', sel: '#right_rail_container a[href*="/events/birthdays"], [role="complementary"] a[href*="/events/birthdays"]' },
+        // Posts in groups you are in, written to get reactions: the point is kept for the comments, or the sentence stops
+        // short ("If your veins show, it means you are..."). A long post that Facebook cuts ends in "See more" and doesn't count.
+        { id: 'bait', label: 'Bait posts ("see the comments")', sel: '[data-ad-rendering-role="story_message"]',
+          post: /(?:\.{2,}|…)$|(?<!\p{L})(?:i|in|in the|på|in den|im) (?:første |first |ersten )?(?:kommentar(?:en|ene|er|ane|feltet|erna|erne|fältet)?|comments?|comment section)[^\p{L}]*$|(?<!\p{L})A (?:eller|or|oder) B\s*\?|(?<!\p{L})(?:det første ordet|the first word|första ordet)(?!\p{L})|(?<!\p{L})(?:hvis du vil fortsette å få|if you want to keep (?:getting|seeing)|om du vill fortsätta få)(?!\p{L})/iu },
       ],
       drop: [
         'a[href*="/ads/about"], a[href*="ad_preferences"]',
@@ -2358,7 +2363,8 @@
       }
       return out;
     };
-    const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : heading(it).some(t => d.test(t)) || leaves(it, s.head || 40).some(t => d.test(t)));
+    const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : heading(it).some(t => d.test(t)) || leaves(it, s.head || 40).some(t => d.test(t))) ||
+      (s.parts || []).some(p => p.post && calmPartsOff.includes(p.id) && [...it.querySelectorAll(p.sel)].some(m => p.post.test(bare(m.textContent))));
 
     // The outermost fixed layer over most of the screen around el (the backdrop, not just the box), or
     // a fixed bar at the top or bottom; else a fixed layer like that inside el.
@@ -2469,7 +2475,7 @@
       // A box taken away before the box beside it had come may hold that one too by now: it comes back and is measured again.
       if (s.parts) for (const b of document.querySelectorAll('[data-nothis-part]')) if (b.querySelectorAll(s.heading).length > 1) { delete b.dataset.nothisPart; delete b.dataset.nothisCalm; calmCount--; }
       for (const p of s.parts || []) {
-        if (p.id && !calmPartsOff.includes(p.id)) continue;
+        if (p.post || (p.id && !calmPartsOff.includes(p.id))) continue;
         for (const m of document.querySelectorAll(p.sel)) {
           if (p.text && !p.text.test(bare(m.textContent))) continue;
           let box = m;
