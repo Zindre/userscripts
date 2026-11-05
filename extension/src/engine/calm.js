@@ -19,19 +19,21 @@ function runCalm(s) {
   const off = el => { if (el.dataset.nothisCalm !== 'off') { el.dataset.nothisCalm = 'off'; calmCount++; } };
   if (s.unlock) document.documentElement.dataset.nothisUnlock = ''; // the site's own hide list takes a wall away
 
-  const labelOf = e => { const id = e.getAttribute('aria-labelledby'); return id ? (document.getElementById(id)?.textContent || '').trim() : ''; };
+  // Facebook hides invisible characters in its labels ("Sponsored" + U+200B), so a plain comparison misses them.
+  const bare = t => (t || '').replace(/[­​-‍⁠﻿]/g, '').replace(/\s+/g, ' ').trim();
+  const labelOf = e => { const id = e.getAttribute('aria-labelledby'); return id ? bare(document.getElementById(id)?.textContent) : ''; };
   // What the post's own header says. A button's label ("See details") can come first and tells nothing.
   const heading = it => s.label ? [...it.querySelectorAll(s.label)].filter(l => !(s.unsure && l.closest(s.unsure))).map(labelOf).filter(Boolean) : [];
   const leaves = (el, n) => {
     const out = [];
     const walk = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, s.skip ? { acceptNode: e => e.matches(s.skip) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT } : null);
     for (let e = walk.nextNode(); e && out.length < n; e = walk.nextNode()) {
-      const al = e.getAttribute('aria-label');
-      if (al && al.length <= 40) out.push(al.trim());
+      const al = bare(e.getAttribute('aria-label'));
+      if (al && al.length <= 40) out.push(al);
       const by = labelOf(e);
       if (by && by.length <= 40) out.push(by);
       // A label may be split into several elements (one per word, or per letter on Facebook).
-      const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
+      const t = bare(e.textContent);
       if (t && t.length <= 40 && (!e.childElementCount || !e.parentElement || (e.parentElement.textContent || '').trim().length > t.length)) out.push(t);
     }
     return out;
@@ -95,7 +97,9 @@ function runCalm(s) {
   };
 
   // A fixed bar that holds nothing but an "Open app" button (m.facebook.com when logged in). A bar
-  // with more in it, like a header with the logo and "Log in", keeps its small button.
+  // with more in it, like a header with the logo and "Log in", keeps its small button. Icons have no
+  // text, so other buttons count too (Facebook's top right: Menu, Messenger, Notifications, Account);
+  // one other is allowed, the bar's own close button.
   const appBars = () => {
     for (const b of document.querySelectorAll('a, button, [role="button"]')) {
       const t = (b.textContent.trim() || b.getAttribute('aria-label') || '').trim();
@@ -103,6 +107,7 @@ function runCalm(s) {
       let bar = b;
       while (bar && bar !== document.body && !fixed(bar)) bar = bar.parentElement;
       if (!bar || bar === document.body || bar.innerText.replace(/\s+/g, ' ').trim().length > t.length + 3) continue;
+      if ([...bar.querySelectorAll('a, button, [role="button"]')].filter(o => !o.contains(b) && !b.contains(o)).length > 1) continue;
       bar.dataset.nothisPush = '';
       off(bar);
     }
@@ -137,12 +142,15 @@ function runCalm(s) {
       else if (!told && s.unsure && it.querySelector(s.unsure)) it.dataset.nothisCalm = 'wait';
       else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
     }
+    // A box taken away before the box beside it had come may hold that one too by now: it comes back and is measured again.
+    if (s.parts) for (const b of document.querySelectorAll('[data-nothis-part]')) if (b.querySelectorAll(s.heading).length > 1) { delete b.dataset.nothisPart; delete b.dataset.nothisCalm; calmCount--; }
     for (const p of s.parts || []) {
       if (p.id && !calmPartsOff.includes(p.id)) continue;
       for (const m of document.querySelectorAll(p.sel)) {
-        if (p.text && !p.text.test(m.textContent.trim())) continue;
+        if (p.text && !p.text.test(bare(m.textContent))) continue;
         let box = m;
         while (box.parentElement && !box.parentElement.matches(s.within) && box.parentElement.querySelectorAll(s.heading).length <= 1) box = box.parentElement;
+        box.dataset.nothisPart = '';
         off(box);
       }
     }

@@ -43,10 +43,10 @@ const CALM_SITES = [
     items: 'div[role="feed"] > div, [data-pagelet^="FeedUnit"], div[aria-posinset], div[data-tracking-duration-id]',
     feed: '[data-ad-rendering-role="profile_name"]', skip: '[aria-hidden="true"]',
     label: 'a span[aria-labelledby]', unsure: '[data-ad-rendering-role^="cta"]',
-    within: '#right_rail_container', heading: 'h2, h3',
+    within: '#right_rail_container, [role="complementary"]', heading: 'h2, h3',
     parts: [
-      { sel: '#right_rail_container h3', text: /^(?:Ad|Ads|Annonse|Annonser|Annons|Annonce|Reklame|Anzeige|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i },
-      { id: 'birthdays', label: 'Birthdays', sel: '#right_rail_container a[href*="/events/birthdays"]' },
+      { sel: '#right_rail_container h3, [role="complementary"] h3', text: /^(?:Ad|Ads|Annonse|Annonser|Annons|Annonce|Reklame|Anzeige|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i },
+      { id: 'birthdays', label: 'Birthdays', sel: '#right_rail_container a[href*="/events/birthdays"], [role="complementary"] a[href*="/events/birthdays"]' },
     ],
     drop: [
       'a[href*="/ads/about"], a[href*="ad_preferences"]',
