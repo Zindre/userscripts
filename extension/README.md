@@ -50,6 +50,8 @@ node build.mjs
 
 This writes `dist/chrome/`, `dist/firefox/` and `dist/safari/` with a zip of each for store upload, and regenerates `../declickbait.user.js`. The version comes from `package.json`. Rebuild after every change in `src/`, and commit the regenerated userscript with it.
 
+The icon (a browser window with a leaf in it) is drawn in `tools/icons.sh`, which writes `src/icons/` and the Safari apps' icons in every size. To change it, edit the drawing there and run the script.
+
 ## Which sites count as news
 
 Web Detox only changes pages on news sites. A site counts when:

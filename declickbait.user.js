@@ -543,6 +543,28 @@
         // display ads around the player
         '[data-a-target="ads-banner"]', '.stream-display-ad__wrapper', '[data-test-selector="sda-wrapper"]',
       ] },
+    // VG's video site, where links to VG's news videos land (vg.no itself is a news site with the reader). A video page
+    // is cut down to the logo, the player, the title and the text: the menu, the tags, the footer and the shelves of
+    // other videos go, except a series' episode list (the shelf with the season picker). The front page and the section
+    // pages are all shelves and keep them, but not the advertisers' shelf. The ads in front of a video are blocked in
+    // background.js. A video page is one whose <main> starts with the publication time.
+    { name: 'VGTV', host: /^tv\.vg\.no$/,
+      hide: [
+        // "Se dine favoritter rett på storskjermen! Last ned VGTV-appen" bar at the top
+        '#page > div:first-child:has(a[href="/storskjerm"])',
+        // a video page: the menu (desktop in the header, phone under it), "Logg inn", the tags, the footer and Schibsted's bar
+        'html:has(#page main > time) #page nav', 'html:has(#page main > time) #page header aside',
+        'html:has(#page main > time) #page main div:has(> a[href^="/tag/"])',
+        'html:has(#page main > time) #page > footer', 'html:has(#page main > time) #page > footer ~ *',
+        // the shelves. A shelf is filled in once it scrolls into view, so it can't be told by its contents: a series' page
+        // (its og:url) keeps the first shelf, its episodes.
+        'html:not(:has(meta[property="og:url"][content*="/serier/"])) #page main:has(> time) ~ div',
+        '#page main:has(> time) ~ div > div:has(h2 [role="option"]) ~ div',
+      ],
+      // front and section pages: "Annonsørinnhold", the advertisers' shelf. The box stops at the list of shelves (shelf >
+      // slider > h2), not at the next heading: the shelves below are empty until they scroll into view.
+      within: '#page, #page div:has(> div > div > h2)', heading: 'h2',
+      parts: [{ sel: '#page h2', text: /^(?:Annonsørinnhold|Annonse|Reklame|Sponset)/i }] },
   ];
 
   // Pop-ups that push the app, in the languages the extension is used in. Word edges are written as

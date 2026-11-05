@@ -72,7 +72,8 @@ const base = {
   homepage_url: 'https://github.com/Zindre/userscripts',
   icons: icons([16, 32, 48, 96, 128, 256, 512]),
   action: { default_title: 'Web Detox', default_popup: 'popup.html', default_icon: icons([16, 19, 32, 38, 48]) },
-  permissions: ['storage'],
+  // declarativeNetRequest: background.js blocks the ads video players fetch before a video
+  permissions: ['storage', 'declarativeNetRequest'],
   host_permissions: sites,
   // gm-shim.js runs before the page is drawn (it covers plain-view sites against a flash of the
   // original); the engine runs once the page has loaded. Both share the content script's scope.
