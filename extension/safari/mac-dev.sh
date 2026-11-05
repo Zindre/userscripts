@@ -14,19 +14,27 @@ export PATH="/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DERIVED="$HERE/build/dev"
-APP="$DERIVED/Build/Products/Debug/NoThis.app"
+APP="$DERIVED/Build/Products/Debug/Web Detox.app"
 APPEX="$APP/Contents/PlugIns/NoThis Extension.appex"
-INSTALLED="/Applications/NoThis.app"
+# The TestFlight app; called NoThis.app before the rename to Web Detox.
+INSTALLED="/Applications/Web Detox.app"
+[[ -d "$INSTALLED" ]] || INSTALLED="/Applications/NoThis.app"
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 ID=no.sedb.NoThis.Extension
 using() { pluginkit -mAvvv -i "$ID" 2>/dev/null | sed -n 's/^[[:space:]]*Path = //p'; }
+# Unregisters the local builds, also one from before the rename.
+forget() {
+  for app in "$DERIVED"/Build/Products/Debug/*.app; do
+    [[ -d "$app" ]] || continue
+    pluginkit -r "$app/Contents/PlugIns/NoThis Extension.appex" || true
+    "$LSREGISTER" -u "$app" || true
+    rm -rf "$app"
+  done
+}
 
 if [[ "${1:-}" == "--off" ]]; then
-  if [[ -d "$APP" ]]; then
-    pluginkit -r "$APPEX" || true
-    "$LSREGISTER" -u "$APP" || true
-    rm -rf "$DERIVED"
-  fi
+  forget
+  rm -rf "$DERIVED"
   if [[ -d "$INSTALLED" ]]; then
     "$LSREGISTER" -f "$INSTALLED"
     pluginkit -a "$INSTALLED/Contents/PlugIns/NoThis Extension.appex"
@@ -36,6 +44,7 @@ if [[ "${1:-}" == "--off" ]]; then
 fi
 
 node "$HERE/../build.mjs" safari
+forget
 xcodebuild build -quiet \
   -project "$HERE/NoThis/NoThis.xcodeproj" -scheme "NoThis (macOS)" -configuration Debug \
   -destination "platform=macOS,arch=$(uname -m)" -derivedDataPath "$DERIVED" \

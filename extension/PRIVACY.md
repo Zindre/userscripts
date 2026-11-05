@@ -1,10 +1,10 @@
-# NoThis: privacy policy
+# Web Detox: privacy policy
 
 _Last updated: 1 November 2026_
 
-NoThis is made by Sindre Sørensen. It is designed to collect nothing about you.
+Web Detox is made by Sindre Sørensen. It is designed to collect nothing about you.
 
-## What NoThis does not do
+## What Web Detox does not do
 
 - It has no account, no sign-in and no servers of its own.
 - It collects no personal data, no usage statistics and no analytics, and it contains no tracking or advertising code.
@@ -13,19 +13,19 @@ NoThis is made by Sindre Sørensen. It is designed to collect nothing about you.
 ## What stays on your device
 
 - **Settings:** your reading levels, the topics you have switched off, section choices and sort order are saved in your browser's extension storage on your own device.
-- **Article cache:** to show an article's own headline and lead, NoThis stores the headline, lead, share image address, section and keywords of articles it has looked up, for up to 12 hours, in the same local storage. It is never sent anywhere.
+- **Article cache:** to show an article's own headline and lead, Web Detox stores the headline, lead, share image address, section and keywords of articles it has looked up, for up to 12 hours, in the same local storage. It is never sent anywhere.
 
 You can remove all of it by removing the extension, or by clearing its data in your browser's settings.
 
-## Which requests NoThis makes
+## Which requests Web Detox makes
 
-To find an article's real headline and lead, NoThis loads the article pages and RSS feeds of the news sites you visit, directly from your device to those sites, the same way your browser would if you opened them. When you open an article in plain view, NoThis loads that article the same way. Those requests go only to the sites whose links are on the page you are reading. The news sites receive them as ordinary visits and handle them under their own privacy policies.
+To find an article's real headline and lead, Web Detox loads the article pages and RSS feeds of the news sites you visit, directly from your device to those sites, the same way your browser would if you opened them. When you open an article in plain view, Web Detox loads that article the same way. Those requests go only to the sites whose links are on the page you are reading. The news sites receive them as ordinary visits and handle them under their own privacy policies.
 
-NoThis needs permission to read the websites you visit for these reasons only: to find news teasers on the page and replace or rearrange them on your screen, and on social media sites to hide ads, suggestions and pop-ups on your screen. On those sites it makes no requests of its own and reads nothing beyond the page in front of you.
+Web Detox needs permission to read the websites you visit for these reasons only: to find news teasers on the page and replace or rearrange them on your screen, and on social media sites to hide ads, suggestions and pop-ups on your screen. On those sites it makes no requests of its own and reads nothing beyond the page in front of you.
 
 ## Apple, TestFlight and the browser stores
 
-If you install NoThis through TestFlight or the App Store, Apple may collect crash reports and the feedback you choose to send, under Apple's own privacy policy. The developer can see what Apple shares from TestFlight (crash reports and feedback), and nothing else. The same goes for the Chrome Web Store, Microsoft Edge Add-ons and Firefox Add-ons.
+If you install Web Detox through TestFlight or the App Store, Apple may collect crash reports and the feedback you choose to send, under Apple's own privacy policy. The developer can see what Apple shares from TestFlight (crash reports and feedback), and nothing else. The same goes for the Chrome Web Store, Microsoft Edge Add-ons and Firefox Add-ons.
 
 ## Contact
 
@@ -35,4 +35,4 @@ Questions about privacy: sindre@sedb.no
 
 ## Kort på norsk
 
-NoThis samler ingen data om deg. Det finnes ingen konto, ingen egne servere, ingen sporing og ingen statistikk. Innstillingene dine og et midlertidig lager av overskrifter og ingresser (inntil 12 timer) ligger bare i nettleseren på din egen enhet. For å finne artiklenes egne overskrifter henter NoThis artikkelsider og RSS-feeder direkte fra nyhetsnettstedene du besøker, slik nettleseren ellers ville gjort. På sosiale medier skjuler NoThis reklame, forslag og oppsprett på skjermen din, uten egne forespørsler. Installerer du via TestFlight eller App Store, kan Apple samle krasjrapporter og tilbakemeldinger du selv sender, etter Apples egne regler. Spørsmål: sindre@sedb.no
+Web Detox samler ingen data om deg. Det finnes ingen konto, ingen egne servere, ingen sporing og ingen statistikk. Innstillingene dine og et midlertidig lager av overskrifter og ingresser (inntil 12 timer) ligger bare i nettleseren på din egen enhet. For å finne artiklenes egne overskrifter henter Web Detox artikkelsider og RSS-feeder direkte fra nyhetsnettstedene du besøker, slik nettleseren ellers ville gjort. På sosiale medier skjuler Web Detox reklame, forslag og oppsprett på skjermen din, uten egne forespørsler. Installerer du via TestFlight eller App Store, kan Apple samle krasjrapporter og tilbakemeldinger du selv sender, etter Apples egne regler. Spørsmål: sindre@sedb.no

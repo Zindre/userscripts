@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Sets the app's name on the App Store. Apple only lets the name change on an App Store version that
-// is still being prepared, so this makes that iOS version first if there is none. Saving the name also
-// reserves it; App Store Connect refuses a name another app already uses, and that error is printed.
-// The new name goes live only when that version has been through App Review and is released.
+// is still being prepared: this uses the one there is (such as the draft 1.0 of an app not yet on the
+// App Store), and only makes iOS VERSION when there is none. Saving the name also reserves it; App Store
+// Connect refuses a name another app already uses, and that error is printed. Nothing goes to App
+// Review; the name shows on the App Store once that version has been reviewed and released.
 //
 //   APP_NAME="Web Detox" VERSION=1.21.0 node app-store-name.mjs
 //

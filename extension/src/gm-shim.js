@@ -9,7 +9,7 @@
   const fetches = { ok: 0, failed: 0 }; // shown in the popup, so a site that blocks fetches is visible
 
   globalThis.GM = {
-    info: { script: { name: api.runtime.getManifest().name, version: api.runtime.getManifest().version }, scriptHandler: 'NoThis extension' },
+    info: { script: { name: api.runtime.getManifest().name, version: api.runtime.getManifest().version }, scriptHandler: 'Web Detox extension' },
     async getValue(k, d) { const r = await api.storage.local.get(k); return k in r ? r[k] : d; },
     async setValue(k, v) { await api.storage.local.set({ [k]: v }); },
     xmlHttpRequest(o) {

@@ -619,7 +619,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "NoThis Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -627,7 +627,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -653,7 +653,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "NoThis Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -661,7 +661,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -690,7 +690,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = NoThis;
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -701,7 +701,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -731,7 +731,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = NoThis;
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -742,7 +742,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -774,7 +774,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "NoThis Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -782,7 +782,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -810,7 +810,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "NoThis Extension";
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -818,7 +818,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -849,7 +849,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = NoThis;
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -857,7 +857,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -865,7 +865,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = no.sedb.NoThis;
-				PRODUCT_NAME = NoThis;
+				PRODUCT_NAME = "Web Detox";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -891,7 +891,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "macOS (App)/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = NoThis;
+				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -899,7 +899,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.21.0;
+				MARKETING_VERSION = 1.20.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -907,7 +907,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = no.sedb.NoThis;
-				PRODUCT_NAME = NoThis;
+				PRODUCT_NAME = "Web Detox";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

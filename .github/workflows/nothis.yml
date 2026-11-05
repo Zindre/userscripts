@@ -27,7 +27,7 @@ on:
         description: TestFlight build number to give to the beta testers (only that job runs then)
         required: false
       app_name:
-        description: New App Store name, set on the iOS version in extension/package.json (made if needed)
+        description: New App Store name, set on the App Store version being prepared (iOS version from extension/package.json is made only if there is none)
         required: false
 
 jobs:

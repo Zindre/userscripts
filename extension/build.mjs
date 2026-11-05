@@ -66,12 +66,12 @@ const icons = sizes => Object.fromEntries(sizes.map(s => [s, `icons/icon-${s}.pn
 const sites = ['http://*/*', 'https://*/*'];
 const base = {
   manifest_version: 3,
-  name: 'NoThis',
+  name: 'Web Detox',
   version,
   description: "News and social media without bait. For everyone, maybe especially useful with ADHD or autism. No tracking.",
   homepage_url: 'https://github.com/Zindre/userscripts',
   icons: icons([16, 32, 48, 96, 128, 256, 512]),
-  action: { default_title: 'NoThis', default_popup: 'popup.html', default_icon: icons([16, 19, 32, 38, 48]) },
+  action: { default_title: 'Web Detox', default_popup: 'popup.html', default_icon: icons([16, 19, 32, 38, 48]) },
   permissions: ['storage'],
   host_permissions: sites,
   // gm-shim.js runs before the page is drawn (it covers plain-view sites against a flash of the

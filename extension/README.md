@@ -1,6 +1,8 @@
-# NoThis browser extension
+# Web Detox browser extension
 
-NoThis is a Manifest V3 web extension for Safari (macOS and iOS), Chrome, Edge and Firefox. What it is for, and the principles behind it, are in [PURPOSE.md](PURPOSE.md).
+Web Detox is a Manifest V3 web extension for Safari (macOS and iOS), Chrome, Edge and Firefox. What it is for, and the principles behind it, are in [PURPOSE.md](PURPOSE.md).
+
+It was called NoThis, and the code still is: the bundle ID `no.sedb.NoThis`, the Xcode project and targets, file names, the `nothis-v*` tags and the `data-nothis-*` attributes keep that name. Only what people see says Web Detox.
 
 Settings live in the toolbar popup: the reading level for the current site (Vanilla, Clear headlines, + synopsis, Plain view with images, Plain view), a default for all sites, the topics you never want, and the headline style. On iPhone the popup is under the page menu at the left of the address bar.
 
@@ -50,7 +52,7 @@ This writes `dist/chrome/`, `dist/firefox/` and `dist/safari/` with a zip of eac
 
 ## Which sites count as news
 
-NoThis only changes pages on news sites. A site counts when:
+Web Detox only changes pages on news sites. A site counts when:
 
 1. it has its own entry in `SITES` or `NEWS_HOSTS` in `src/engine/sites.js` (hand-picked, always news);
 2. it is on the generated list, `src/engine/news-hosts.json`, and the page is not a shop or a wiki (`notNewsPage()`);
@@ -80,7 +82,7 @@ node build.mjs
 - **Chrome and Edge:** open `chrome://extensions` (or `edge://extensions`), turn on Developer mode, choose **Load unpacked** and pick `dist/chrome`.
 - **Firefox:** open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on…** and pick `dist/firefox/manifest.json`. To check it for the add-on store, run `npx web-ext lint --source-dir dist/firefox`.
 - **Safari on the Mac:** open `safari/NoThis/NoThis.xcodeproj`, choose the **NoThis (macOS)** scheme and run it. Then turn the extension on under Safari → Settings → Extensions.
-- **Safari on iPhone or iPad:** choose the **NoThis (iOS)** scheme and run it on a simulator or a connected device. In Safari, open the page menu, choose **Manage Extensions** and turn NoThis on.
+- **Safari on iPhone or iPad:** choose the **NoThis (iOS)** scheme and run it on a simulator or a connected device. In Safari, open the page menu, choose **Manage Extensions** and turn Web Detox on.
 
 ## TestFlight
 
