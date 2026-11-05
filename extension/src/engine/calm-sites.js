@@ -16,7 +16,8 @@
 //   feed   for a feed without landmarks: marks a unit; the units are the children of the element that holds most of them
 //   skip   leaves in these don't count as header (decoys)
 //   label  where a unit's header says what it is, through aria-labelledby. It can arrive after the unit, so the unit
-//          is looked at again until then; one with `unsure` in it waits unseen meanwhile, for at most 3 seconds
+//          is looked at again until then; one with `unsure` in it stays away until the label has come, however
+//          long that takes (Facebook: often half a minute), and a label inside `unsure` doesn't count
 //   parts  boxes beside the feed: sel finds what marks one (with text, only if its text matches), and the box goes.
 //          With an id and a label it is a choice in the settings instead, shown by default
 //   within, heading  how far a part's box reaches: inside `within`, up to the next `heading`
@@ -312,7 +313,7 @@ function calmStyle(s) {
   st.textContent = (s.hide?.length ? s.hide.join(',\n') + '{display:none!important}\n' : '') +
     // Google's "Sign in with Google" prompt, which many sites open by themselves.
     '#credential_picker_container,#credential_picker_iframe,' +
-    '[data-nothis-calm="off"]{display:none!important}\n[data-nothis-calm="wait"]{visibility:hidden!important}\n' +
+    '[data-nothis-calm="off"]{display:none!important}\n[data-nothis-calm="wait"]{visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}\n' +
     // overflow visible, not auto, on body: a body of fixed height (React Native Web) would scroll on its own instead of the window
     'html[data-nothis-unlock]{overflow:auto!important}html[data-nothis-unlock]>body{overflow:visible!important;position:static!important}';
   return st;

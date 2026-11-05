@@ -250,7 +250,8 @@
   //   feed   for a feed without landmarks: marks a unit; the units are the children of the element that holds most of them
   //   skip   leaves in these don't count as header (decoys)
   //   label  where a unit's header says what it is, through aria-labelledby. It can arrive after the unit, so the unit
-  //          is looked at again until then; one with `unsure` in it waits unseen meanwhile, for at most 3 seconds
+  //          is looked at again until then; one with `unsure` in it stays away until the label has come, however
+  //          long that takes (Facebook: often half a minute), and a label inside `unsure` doesn't count
   //   parts  boxes beside the feed: sel finds what marks one (with text, only if its text matches), and the box goes.
   //          With an id and a label it is a choice in the settings instead, shown by default
   //   within, heading  how far a part's box reaches: inside `within`, up to the next `heading`
@@ -546,7 +547,7 @@
     st.textContent = (s.hide?.length ? s.hide.join(',\n') + '{display:none!important}\n' : '') +
       // Google's "Sign in with Google" prompt, which many sites open by themselves.
       '#credential_picker_container,#credential_picker_iframe,' +
-      '[data-nothis-calm="off"]{display:none!important}\n[data-nothis-calm="wait"]{visibility:hidden!important}\n' +
+      '[data-nothis-calm="off"]{display:none!important}\n[data-nothis-calm="wait"]{visibility:hidden!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}\n' +
       // overflow visible, not auto, on body: a body of fixed height (React Native Web) would scroll on its own instead of the window
       'html[data-nothis-unlock]{overflow:auto!important}html[data-nothis-unlock]>body{overflow:visible!important;position:static!important}';
     return st;
@@ -2333,6 +2334,8 @@
     if (s.unlock) document.documentElement.dataset.nothisUnlock = ''; // the site's own hide list takes a wall away
 
     const labelOf = e => { const id = e.getAttribute('aria-labelledby'); return id ? (document.getElementById(id)?.textContent || '').trim() : ''; };
+    // What the post's own header says. A button's label ("See details") can come first and tells nothing.
+    const heading = it => s.label ? [...it.querySelectorAll(s.label)].filter(l => !(s.unsure && l.closest(s.unsure))).map(labelOf).filter(Boolean) : [];
     const leaves = (el, n) => {
       const out = [];
       const walk = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT, s.skip ? { acceptNode: e => e.matches(s.skip) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT } : null);
@@ -2347,7 +2350,7 @@
       }
       return out;
     };
-    const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : leaves(it, s.head || 40).some(t => d.test(t)));
+    const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : heading(it).some(t => d.test(t)) || leaves(it, s.head || 40).some(t => d.test(t)));
 
     // The outermost fixed layer over most of the screen around el (the backdrop, not just the box), or
     // a fixed bar at the top or bottom; else a fixed layer like that inside el.
@@ -2429,22 +2432,14 @@
       }
       return feedEl ? [...feedEl.children] : [];
     };
-    const labelled = it => { const l = it.querySelector(s.label); return !!l && !!labelOf(l); };
-    const waiting = new WeakMap();
-    const waitFor = it => {
-      const r = it.getBoundingClientRect();
-      if (r.top > innerHeight) return; // not on screen yet: its time hasn't started
-      if (!waiting.has(it)) waiting.set(it, Date.now());
-      if (Date.now() - waiting.get(it) < 3000) it.dataset.nothisCalm = 'wait';
-      else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
-    };
-
     const pass = () => {
       sheet();
       if (s.items) for (const it of new Set([...document.querySelectorAll(s.items), ...feedUnits()])) {
-        // Feeds reuse their elements: look again when an item's text has changed, or until its label is there.
-        const len = String(it.textContent.length);
-        const told = !s.label || !it.querySelector(s.feed) || labelled(it);
+        // Feeds reuse their elements: look again when an item's text or label has changed (the label's
+        // text lies outside the item), or until its label is there.
+        const head = heading(it);
+        const len = it.textContent.length + head.join();
+        const told = !s.label || !it.querySelector(s.feed) || head.length > 0;
         if (told && it.dataset.nothisLen === len) continue;
         if (told) it.dataset.nothisLen = len;
         if (dropped(it)) {
@@ -2453,7 +2448,7 @@
         }
         // A feed empties what is off screen: what was hidden stays so until something else is there for sure.
         else if (it.dataset.nothisCalm === 'off') { if (told && it.textContent.trim()) { delete it.dataset.nothisCalm; calmCount--; } }
-        else if (!told && s.unsure && it.querySelector(s.unsure)) waitFor(it);
+        else if (!told && s.unsure && it.querySelector(s.unsure)) it.dataset.nothisCalm = 'wait';
         else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
       }
       for (const p of s.parts || []) {
