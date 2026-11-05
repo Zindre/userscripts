@@ -18,6 +18,7 @@
 //   label  where a unit's header says what it is, through aria-labelledby. It can arrive after the unit, so the unit
 //          is looked at again until then; one with `unsure` in it stays away until the label has come, however
 //          long that takes (Facebook: often half a minute), and a label inside `unsure` doesn't count
+//   known  a unit that isn't dropped and has this in it needs no label to be shown: it doesn't have to wait
 //   parts  boxes beside the feed: sel finds what marks one (with text, only if its text matches), and the box goes.
 //          With an id and a label it is a choice in the settings instead, shown by default
 //   within, heading  how far a part's box reaches: inside `within`, up to the next `heading`
@@ -35,14 +36,16 @@ const CALM_SITES = [
   { name: 'Facebook', host: /(^|\.)facebook\.com$/,
     hide: [
       '[role="navigation"] a[href*="/watch"], [role="navigation"] a[href*="/marketplace"], [role="navigation"] a[href*="/gaming"], [role="navigation"] a[href*="/reel"]',
-      '[role="banner"] a[href*="/watch"], [role="banner"] a[href*="/marketplace"], [role="banner"] a[href*="/gaming"], [role="banner"] a[href*="/reel"]',
+      // The notifications panel sits in the banner too: "X posted a new reel" is a notification, not a tab, and without
+      // its link the row collapses and leaves its unread dot behind.
+      ':is([role="banner"] a[href*="/watch"], [role="banner"] a[href*="/marketplace"], [role="banner"] a[href*="/gaming"], [role="banner"] a[href*="/reel"]):not([role="dialog"] [role="listitem"] a)',
       '[data-pagelet="Stories"], [aria-label="Stories" i][role="region"], [aria-label="Historier" i][role="region"]',
       '[aria-label="Reels" i][role="region"], [data-pagelet*="Reels"]',
     ],
     // www: the units of div[role=feed]; m.facebook.com: the tracked feed units.
     items: 'div[role="feed"] > div, [data-pagelet^="FeedUnit"], div[aria-posinset], div[data-tracking-duration-id]',
     feed: '[data-ad-rendering-role="profile_name"]', skip: '[aria-hidden="true"]',
-    label: 'a span[aria-labelledby]', unsure: '[data-ad-rendering-role^="cta"]',
+    label: 'a span[aria-labelledby]', unsure: '[data-ad-rendering-role^="cta"]', known: 'a[href^="?__cft__"][href*="__tn__"]',
     within: '#right_rail_container, [role="complementary"]', heading: 'h2, h3',
     parts: [
       { sel: '#right_rail_container h3, [role="complementary"] h3', text: /^(?:Ad|Ads|Annonse|Annonser|Annons|Annonce|Reklame|Anzeige|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i },

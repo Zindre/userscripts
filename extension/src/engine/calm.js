@@ -114,34 +114,38 @@ function runCalm(s) {
   };
 
   // The feed when it has no landmarks: the element whose children hold most of the units.
-  const feedUnits = () => {
-    if (!s.feed) return [];
-    const holds = new Map(); let most = 2, feedEl = null;
+  let feedEl = null;
+  const feedHolder = () => {
+    const holds = new Map(); let most = 2, found = null;
     for (const u of document.querySelectorAll(s.feed)) for (let e = u; e.parentElement && e.parentElement !== document.body; e = e.parentElement) {
       const n = (holds.get(e.parentElement) || new Set()).add(e); holds.set(e.parentElement, n);
-      if (n.size > most) { most = n.size; feedEl = e.parentElement; }
+      if (n.size > most) { most = n.size; found = e.parentElement; }
     }
+    return found;
+  };
+  const feedUnits = () => {
+    if (!s.feed) return [];
+    feedEl = feedHolder();
     return feedEl ? [...feedEl.children] : [];
   };
-  const pass = () => {
-    sheet();
-    if (s.items) for (const it of new Set([...document.querySelectorAll(s.items), ...feedUnits()])) {
-      // Feeds reuse their elements: look again when an item's text or label has changed (the label's
-      // text lies outside the item), or until its label is there.
-      const head = heading(it);
-      const len = it.textContent.length + head.join();
-      const told = !s.label || !it.querySelector(s.feed) || head.length > 0;
-      if (told && it.dataset.nothisLen === len) continue;
-      if (told) it.dataset.nothisLen = len;
-      if (dropped(it)) {
-        if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
-        off(it); if (fixed(it) && big(it)) document.documentElement.dataset.nothisUnlock = ''; // a wall in the feed
-      }
-      // A feed empties what is off screen: what was hidden stays so until something else is there for sure.
-      else if (it.dataset.nothisCalm === 'off') { if (told && it.textContent.trim()) { delete it.dataset.nothisCalm; calmCount--; } }
-      else if (!told && s.unsure && it.querySelector(s.unsure)) it.dataset.nothisCalm = 'wait';
-      else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+  const look = it => {
+    // Feeds reuse their elements: look again when an item's text or label has changed (the label's
+    // text lies outside the item), or until its label is there.
+    const head = heading(it);
+    const len = it.textContent.length + head.join();
+    const told = !s.label || !it.querySelector(s.feed) || head.length > 0 || !!(s.known && it.querySelector(s.known));
+    if (told && it.dataset.nothisLen === len) return;
+    if (told) it.dataset.nothisLen = len;
+    if (dropped(it)) {
+      if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+      off(it); if (fixed(it) && big(it)) document.documentElement.dataset.nothisUnlock = ''; // a wall in the feed
     }
+    // A feed empties what is off screen: what was hidden stays so until something else is there for sure.
+    else if (it.dataset.nothisCalm === 'off') { if (told && it.textContent.trim()) { delete it.dataset.nothisCalm; calmCount--; } }
+    else if (!told && s.unsure && it.querySelector(s.unsure)) it.dataset.nothisCalm = 'wait';
+    else if (it.dataset.nothisCalm === 'wait') delete it.dataset.nothisCalm;
+  };
+  const parts = () => {
     // A box taken away before the box beside it had come may hold that one too by now: it comes back and is measured again.
     if (s.parts) for (const b of document.querySelectorAll('[data-nothis-part]')) if (b.querySelectorAll(s.heading).length > 1) { delete b.dataset.nothisPart; delete b.dataset.nothisCalm; calmCount--; }
     for (const p of s.parts || []) {
@@ -154,13 +158,33 @@ function runCalm(s) {
         off(box);
       }
     }
+  };
+  const pass = () => {
+    sheet();
+    if (s.items) for (const it of new Set([...document.querySelectorAll(s.items), ...feedUnits()])) look(it);
+    parts();
     pushes();
     appBars();
     if (s.notices) notices();
   };
+  // A mutation observer runs before the page is drawn, so what is judged here is gone before it was ever on
+  // screen, and nothing jumps. So only the units that changed, and what beside the feed; the rest can wait for pass.
+  const early = ms => {
+    const todo = new Set();
+    if (s.items) {
+      if (s.feed && !feedEl?.isConnected && (feedEl = feedHolder())) for (const c of feedEl.children) todo.add(c);
+      const up = n => { let any = false; for (; n && n !== document.body; n = n.parentElement) if ((feedEl && n.parentElement === feedEl) || n.matches(s.items)) { todo.add(n); any = true; } return any; };
+      for (const m of ms) {
+        up(m.target);
+        for (const a of m.addedNodes) if (a.nodeType === 1 && !up(a)) for (const i of a.querySelectorAll(s.items)) todo.add(i);
+      }
+    }
+    for (const it of todo) look(it);
+    parts();
+  };
   let queued = false;
   const later = () => { if (queued) return; queued = true; setTimeout(() => { queued = false; requestAnimationFrame(pass); }, 250); };
-  new MutationObserver(later).observe(document.documentElement, { childList: true, subtree: true });
+  new MutationObserver(ms => { early(ms); later(); }).observe(document.documentElement, { childList: true, subtree: true });
   setInterval(later, 2000); // some sites reopen their dialogs without a DOM change we would see
   pass();
 }
