@@ -50,6 +50,9 @@ const CALM_SITES = [
     ],
     drop: [
       'a[href*="/ads/about"], a[href*="ad_preferences"]',
+      // The link where a post has its time and an ad has "Ad": on an ad it has no __tn__. It is there from the
+      // start, where the word "Ad" can take half a minute, and an ad needs no button to be found by it.
+      'a[href^="?__cft__"]:not([href*="__tn__"])',
       /^(?:Ad|Annonse|Annons|Annonce|Reklame|Anzeige|Werbung|Sponsored|Sponset|Sponsrad|Sponsoreret|Gesponsert)$/i,
       /^(?:Suggested for you|Foreslått for deg|Förslag för dig|Forslag til dig|Vorschläge für dich|Suggested groups|Foreslåtte grupper|People you may know|Personer du kanskje kjenner|Reels|Reels and short videos|Reels og korte videoer)$/i,
       /^(?:Follow|Følg|Följ|Folgen|Join|Join group|Bli med|Bli med i gruppen|Gå med i gruppen|Deltag|Beitreten)$/i,
