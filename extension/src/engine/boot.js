@@ -2,6 +2,10 @@
 // Runs last: reads the settings, hands them to the popup (extension) or the panel (userscript),
 // then lays out plain view or starts rewriting the page.
 async function main() {
+  // One engine per page. Safari can run two (two copies of the extension, or the extension and the userscript); both
+  // then laid a list over the page, and the keys moved the one underneath, so nothing seemed to happen.
+  if (document.documentElement.hasAttribute('data-nothis-engine')) return;
+  document.documentElement.setAttribute('data-nothis-engine', '');
   const disabled = (await gm.get('disabledHosts', [])) || [];
   const enabled = (await gm.get('enabledHosts', [])) || [];
   CFG.genericSites = await gm.get('genericSites', CFG.genericSites);

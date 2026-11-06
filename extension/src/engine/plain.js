@@ -217,7 +217,7 @@ const PLAIN_CSS = `
   .keys{display:none;color:var(--muted);font-size:13px;padding-top:6px}
   @media (hover: hover) and (pointer: fine){.keys{display:block}}
   main a.h:focus-visible{outline:none}
-  main li[data-key]:focus-within{background:var(--paper);box-shadow:inset 0 0 0 2px var(--accent)}
+  main li[data-key]:focus-within,main li[data-key].kb{background:var(--paper);box-shadow:inset 0 0 0 2px var(--accent)}
   /* The whole card opens the article. */
   main li[data-key]{cursor:pointer;scroll-margin-top:110px}
   main li[data-key]:hover{background:var(--paper)}
@@ -338,6 +338,13 @@ function readerContent(art, title, lede, url) {
 // An article opened directly (a link from elsewhere, or a reload while reading): the same reader, on
 // its own over the hidden page. Close goes to the list. False when the page isn't an article that can
 // be read, and then it stays as it is.
+// One list over the page. Another copy of the engine (an older userscript still installed, say) lays its own, and its
+// key handler, which ran first, moved the list underneath while this one stood still: its list goes, as soon as it comes.
+function onlyList() {
+  const drop = () => { for (const h of document.querySelectorAll('#declickbait-plain')) if (h !== plainHost) h.remove(); };
+  drop();
+  new MutationObserver(drop).observe(document.documentElement, { childList: true });
+}
 async function articleView(withImages) {
   const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => s.textContent).join('');
   if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"\w*Article"/.test(ld)) return false;
@@ -356,6 +363,7 @@ async function articleView(withImages) {
   sh.querySelector('.bar span').textContent = title;
   sh.querySelector('.reader').replaceChildren(...readerContent(art, title, lede, url));
   document.documentElement.appendChild(plainHost);
+  onlyList();
   document.getElementById('nothis-cover')?.remove();
   sh.querySelector('.view').focus({ preventScroll: true });
   const close = () => { if (history.state?.nothis) history.back(); else location.assign(location.origin + '/'); };
@@ -400,6 +408,7 @@ async function plainView(withImages) {
   } else h1.textContent = pageMeta.site || host;
   sh.querySelector('.keys').textContent = T.keys;
   document.documentElement.appendChild(plainHost);
+  onlyList();
   document.getElementById('nothis-cover')?.remove();
   // Remember the site, so next time the extension covers it before the original is drawn.
   gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
@@ -411,6 +420,17 @@ async function plainView(withImages) {
   const order = () => [...layout.order.filter(id => sections.has(id)), ...[...sections.keys()].filter(id => !layout.order.includes(id))];
 
   const main = sh.querySelector('main'), nav = sh.querySelector('nav'), rows = new Map(), want = [];
+  // What has the keyboard focus in the list. Safari leaves shadowRoot.activeElement empty in an extension's world, so the
+  // arrow keys and j/k always started again from the top there: the focus is followed by its events as well.
+  let lastFocus = null;
+  sh.addEventListener('focusin', e => { lastFocus = e.target; });
+  sh.addEventListener('focusout', e => { if (lastFocus === e.target) lastFocus = null; });
+  const focused = () => sh.activeElement || (lastFocus?.isConnected ? lastFocus : null);
+  // The keyboard's place in the list, kept here and marked with .kb: in Safari's extension world focus() doesn't reliably
+  // land in the list, so the arrow keys, j/k, Enter and o go by this, not by the focus. A click on a card moves it there.
+  let cursorKey = null;
+  const cursor = () => { const li = cursorKey && rows.get(cursorKey); return li?.isConnected ? li : null; };
+  const mark = li => { for (const o of main.querySelectorAll('li.kb')) if (o !== li) o.classList.remove('kb'); li?.classList.add('kb'); };
   function fill(it, li) {
     const m = cache[it.key];
     if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
@@ -446,6 +466,9 @@ async function plainView(withImages) {
   function row(it, withSection) {
     const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
     a.href = it.url; a.className = 'h'; a.dataset.key = it.key; p.className = 'lead'; li.dataset.key = it.key;
+    // Safari on a Mac only lets a link take focus when "Press Tab to highlight each item" is on, so without this the
+    // arrow keys, j/k, Enter and o found no headline to start from or open.
+    a.tabIndex = 0;
     if (it.tier > 1) {
       // The front page's own sense of importance, as a quiet bar instead of big type.
       li.dataset.tier = it.tier;
@@ -549,7 +572,7 @@ async function plainView(withImages) {
   };
   view.addEventListener('touchend', () => endSwipe(false));
   view.addEventListener('touchcancel', () => endSwipe(true));
-  function focusCard(li) { li.querySelector('a.h')?.focus({ preventScroll: true }); li.scrollIntoView({ block: 'nearest' }); }
+  function focusCard(li) { cursorKey = li.dataset.key; mark(li); li.querySelector('a.h')?.focus({ preventScroll: true }); li.scrollIntoView({ block: 'nearest' }); }
 
   // Articles are fetched ahead so they open at once: the ones on screen (a few at a time, up to 40
   // per visit), and right away the one under the pointer or keyboard focus and the neighbours of the
@@ -573,6 +596,8 @@ async function plainView(withImages) {
       fetchArticle(it.url, withImages, Infinity, false).finally(() => { aheadRunning--; pumpAhead(); });
     }
   }
+  // A click or tap on a card puts the keyboard's place there, so the arrow keys go on from it.
+  main.addEventListener('pointerdown', e => { const li = e.target.closest?.('li[data-key]'); if (li) { cursorKey = li.dataset.key; mark(li); } }, { capture: true, passive: true });
   for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
     const li = e.target.closest?.('li[data-key]'); if (li) prefetch(li.dataset.key, true);
   }, { capture: true, passive: true });
@@ -582,7 +607,7 @@ async function plainView(withImages) {
     current = null; view.hidden = true; reader.replaceChildren();
     document.title = listTitle;
     if (!fromHistory) history.back();
-    rows.get(key)?.querySelector('a.h')?.focus({ preventScroll: true });
+    const li = rows.get(key); if (li) { cursorKey = key; mark(li); li.querySelector('a.h')?.focus({ preventScroll: true }); }
   }
   // Back closes the article; forward opens it again. By address: a site's own router can replace history.state.
   window.addEventListener('popstate', () => {
@@ -600,6 +625,8 @@ async function plainView(withImages) {
     const y = plainHost.scrollTop, top = sh.querySelector('header').getBoundingClientRect().bottom;
     const anchor = [...main.querySelectorAll('li[data-key]')].find(li => li.getBoundingClientRect().bottom > top);
     const anchorKey = anchor?.dataset.key, anchorTop = anchor?.getBoundingClientRect().top;
+    // The headline that has the keyboard focus keeps it: the list is built anew, and the arrow keys and j/k go on from there.
+    const focusKey = focused()?.closest?.('main li[data-key]')?.dataset.key;
     main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect();
     sh.querySelector('[data-act="sort"]').textContent = sortMode === 'importance' ? T.siteOrder : T.byImportance;
     if (sortMode === 'importance') {
@@ -630,6 +657,8 @@ async function plainView(withImages) {
     plainHost.scrollTop = y;
     const again = y > 0 && anchorKey && rows.get(anchorKey); // at the top, the top it stays
     if (again) plainHost.scrollTop += again.getBoundingClientRect().top - anchorTop;
+    if (focusKey) rows.get(focusKey)?.querySelector('a.h')?.focus({ preventScroll: true });
+    if (cursor()) mark(cursor());
     pumpPlain();
   }
 
@@ -700,30 +729,34 @@ async function plainView(withImages) {
   // Keyboard: the arrow keys move between the cards as they lie on screen, j/k in list order,
   // Enter (on the focused headline) or o opens; while reading, →/j and ←/k go to the next and
   // previous article and Esc closes.
-  document.addEventListener('keydown', e => {
+  // On the window, before the page: an older copy of the engine still listening on the document then lets it be.
+  window.addEventListener('keydown', e => {
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !editor.hidden) return;
     const t = e.composedPath()[0];
     if (t && (/^(?:INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
     const k = e.key;
+    // The headline the key comes from: the event's own target, which Safari gives right where shadowRoot.activeElement
+    // is empty; else the one that has the focus.
+    const here = t?.closest?.('li[data-key]') || focused()?.closest?.('li[data-key]');
     if (current) {
       if (k === 'Escape') closeArticle();
       else if (k === 'ArrowRight' || k === 'j') step(1);
       else if (k === 'ArrowLeft' || k === 'k') step(-1);
       else return;
     } else if (/^(?:Arrow(?:Down|Up|Left|Right)|j|k)$/.test(k)) {
-      const list = cards(), cur = list.find(li => li.contains(sh.activeElement));
+      const list = cards(), cur = cursor() || (list.includes(here) ? here : undefined);
       let next;
       if (!cur) { const top = sh.querySelector('header').getBoundingClientRect().bottom; next = list.find(li => li.getBoundingClientRect().top >= top) || list[0]; }
       else if (k === 'j' || k === 'k') next = list[list.indexOf(cur) + (k === 'j' ? 1 : -1)];
       else next = nearby(list, cur, k === 'ArrowRight' ? 1 : k === 'ArrowLeft' ? -1 : 0, k === 'ArrowDown' ? 1 : k === 'ArrowUp' ? -1 : 0);
       if (!next) return;
       focusCard(next); prefetch(next.dataset.key, true);
-    } else if (k === 'o') {
-      const li = cards().find(li => li.contains(sh.activeElement)); if (!li) return;
+    } else if (k === 'o' || (k === 'Enter' && cursor() && !t?.closest?.('button, input, [data-act]'))) {
+      const li = cursor() || (cards().includes(here) ? here : null); if (!li) return;
       openArticle(byKey.get(li.dataset.key));
     } else return;
     e.preventDefault();
-  });
+  }, true);
 
   render();
   feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });

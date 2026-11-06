@@ -97,14 +97,48 @@ const targets = {
     icons: icons([16, 32, 48, 96, 128, 256, 512, 1024]), background: { scripts: ['background.js'], persistent: false } },
 };
 
-const wanted = process.argv.slice(2).length ? process.argv.slice(2) : [...Object.keys(targets), 'userscript'];
+// chrome-dev: the Chrome build in dist/chrome-dev/ for loading unpacked in your own Chrome (chrome://extensions, Load
+// unpacked). It reloads itself within half a minute after each build, so new files only need a page reload. Built when
+// asked for, and by a plain `node build.mjs` once the folder is there. Never zipped or published.
+const DEV_RELOAD = `
+// chrome-dev only (build.mjs): reload when build.mjs has written new files. The build's stamp is kept in session
+// storage, which a reload clears, since the service worker sleeps between the checks.
+const devStamp = () => fetch(chrome.runtime.getURL('stamp.txt'), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').catch(() => '');
+const devCheck = async () => {
+  const now = await devStamp(); if (!now) return; // in the middle of a build
+  const { devBuilt } = await chrome.storage.session.get('devBuilt');
+  if (!devBuilt) await chrome.storage.session.set({ devBuilt: now });
+  else if (devBuilt !== now) chrome.runtime.reload();
+};
+chrome.alarms.create('dev-reload', { periodInMinutes: 0.5 });
+chrome.alarms.onAlarm.addListener(a => { if (a.name === 'dev-reload') devCheck(); });
+devCheck();
+`;
+const devDir = join(root, 'dist', 'chrome-dev');
+const wanted = process.argv.slice(2).length ? process.argv.slice(2) : [...Object.keys(targets), 'userscript', ...(existsSync(devDir) ? ['chrome-dev'] : [])];
 for (const t of wanted) {
+  if (t === 'chrome-dev') {
+    const tmp = join(root, 'dist', '.chrome-dev-tmp');
+    rmSync(tmp, { recursive: true, force: true });
+    execFileSync(process.execPath, [fileURLToPath(import.meta.url), 'chrome'], { stdio: 'ignore' });
+    cpSync(join(root, 'dist', 'chrome'), tmp, { recursive: true });
+    writeFileSync(join(tmp, 'manifest.json'), JSON.stringify({ ...targets.chrome, name: 'Web Detox (dev)', permissions: [...targets.chrome.permissions, 'alarms'] }, null, 2) + '\n');
+    writeFileSync(join(tmp, 'background.js'), readFileSync(join(tmp, 'background.js'), 'utf8') + DEV_RELOAD);
+    // Files are replaced one by one, not the folder, so Chrome never finds it gone; the stamp is written last.
+    mkdirSync(devDir, { recursive: true });
+    rmSync(join(devDir, 'stamp.txt'), { force: true });
+    cpSync(tmp, devDir, { recursive: true });
+    rmSync(tmp, { recursive: true, force: true });
+    writeFileSync(join(devDir, 'stamp.txt'), String(Date.now()));
+    console.log('chrome-dev: dist/chrome-dev/ (reloads itself in Chrome within 30 s)');
+    continue;
+  }
   if (t === 'userscript') {
     writeFileSync(join(root, '..', 'declickbait.user.js'), USERSCRIPT_HEADER + assemble([...ENGINE, ...USERSCRIPT_ONLY]));
     console.log('userscript: ../declickbait.user.js');
     continue;
   }
-  if (!targets[t]) throw new Error(`unknown target ${t}; use ${[...Object.keys(targets), 'userscript'].join(', ')}`);
+  if (!targets[t]) throw new Error(`unknown target ${t}; use ${[...Object.keys(targets), 'userscript', 'chrome-dev'].join(', ')}`);
   const out = join(root, 'dist', t);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
