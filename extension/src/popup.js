@@ -50,11 +50,13 @@ function show(s) {
   const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
   const checked = s.fetches?.ok ? ` Checked ${plural(s.fetches.ok, 'article')}.` : '';
   const failed = s.fetches?.failed ? ` ${plural(s.fetches.failed, 'article')} could not be loaded.` : '';
+  const until = s.fetchPausedUntil && new Date(s.fetchPausedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const paused = until ? ` ${s.host} asked for a robot check, so Web Detox fetches no articles from it until ${until}.` : '';
   $('status').textContent = s.off ? `Showing ${s.host} as published.`
     : s.calm ? `${s.calm} without distractions: ${s.rewritten ? `${plural(s.rewritten, 'thing')} hidden on this page.` : 'nothing to hide on this page yet.'}`
-    : s.plain ? `Plain view: ${plural(s.rewritten, 'article')}.` + checked + failed
+    : s.plain ? `Plain view: ${plural(s.rewritten, 'article')}.` + checked + failed + paused
     : ((s.level === 'plain' || s.level === 'pictures') && s.onArticle ? 'Plain view is for front pages; this article shows clear headlines + synopsis. ' : '')
-      + (s.rewritten ? `Changed ${plural(s.rewritten, 'headline')} on this page.` : 'No clickbait headlines found on this page yet.') + checked + failed;
+      + (s.rewritten ? `Changed ${plural(s.rewritten, 'headline')} on this page.` : 'No clickbait headlines found on this page yet.') + checked + failed + paused;
   // A calm site (social media) has two levels, Vanilla and Calm; a news site the others.
   for (const r of document.querySelectorAll('input[name=level]')) {
     r.checked = r.value === s.level;

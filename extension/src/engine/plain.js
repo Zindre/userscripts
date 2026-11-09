@@ -26,8 +26,8 @@ function sectionOf(url) {
 // The site's own name for a section, from a menu link to it ("/vestfoldogtelemark" → "Vestfold og Telemark").
 const sectionNames = new Map();
 // Menu links first: their text is the section's name, where body links say "see all …".
-function readSectionNames() {
-  const links = [...document.querySelectorAll('a[href]')];
+function readSectionNames(root = document) {
+  const links = [...root.querySelectorAll('a[href]')];
   for (const a of [...links.filter(a => a.closest(SKIP_CONTAINERS)), ...links.filter(a => !a.closest(SKIP_CONTAINERS))]) {
     let u; try { u = new URL(a.href); } catch { continue; }
     const m = u.pathname.replace(/^\/(?:aktuell|aktuelles)(?=\/.)/i, '').match(/^\/([^/]+)\/?$/);
@@ -85,7 +85,8 @@ function teaserImage(a) {
 // its card and how high up it sits. Measured before plain view hides the page.
 function prominence(a, el) {
   let fs = 0;
-  for (const x of [el, ...el.querySelectorAll('*')].slice(0, 30)) fs = Math.max(fs, parseFloat(getComputedStyle(x).fontSize) || 0);
+  // At most 8 elements: on nytimes.com's thousand links, 30 each took Safari 1.5 s before the list could show.
+  for (const x of [el, ...el.querySelectorAll('*')].slice(0, 8)) fs = Math.max(fs, parseFloat(getComputedStyle(x).fontSize) || 0);
   const r = (a.closest('article') || a).getBoundingClientRect();
   return { fs, area: r.width * r.height, y: r.top + scrollY };
 }
@@ -104,24 +105,27 @@ function rankItems(items) {
 }
 
 // known: articles already collected, skipped without measuring (harvest() calls this repeatedly).
-function frontPageItems(known) {
+// measure false: without prominence(), which needs the page laid out (the heavy-page path at the end of plainView); the
+// headline's level stands in for its size. root: a downloaded copy of the page instead (plainView, a stopped heavy page).
+const LEVEL_SIZE = { H1: 40, H2: 32, H3: 26, H4: 22 };
+function frontPageItems(known, measure = true, root = document) {
   const items = new Map();
-  for (const a of document.querySelectorAll('a[href]')) {
+  for (const a of root.querySelectorAll('a[href]')) {
     if (skipLink(a)) continue;
     const url = isArticleLink(a); if (!url) continue;
     const key = url.replace(/[?#].*$/, '');
     if (known?.has(key) || isAd(a) || AD_SECTION.test(sectionOf(url))) continue;
     const el = headlineEl(a), teaser = el ? textOf(el) : '';
     const it = items.get(key);
-    const m = el ? prominence(a, el) : { fs: 0, area: 0, y: Infinity };
+    const m = el && measure ? prominence(a, el) : { fs: (el && LEVEL_SIZE[el.tagName]) || 0, area: 0, y: Infinity };
     if (it) { it.teaser ||= teaser; it.paid ||= isPaid(a); it.img ||= teaserImage(a); if (m.fs * Math.sqrt(m.area) > it.m.fs * Math.sqrt(it.m.area)) it.m = { ...m, y: Math.min(m.y, it.m.y) }; }
     else items.set(key, { url, key, teaser, paid: isPaid(a), section: sectionOf(url), img: teaserImage(a), m });
   }
   return [...items.values()].filter(it => it.teaser.length >= CFG.minTeaserLen && !isGame(it.url, it.teaser) && !mutedTopicOf(it.url, it.teaser));
 }
 
-async function feedItems() {
-  const link = document.querySelector('link[rel="alternate"][type*="rss"], link[rel="alternate"][type*="atom"]');
+async function feedItems(root = document) {
+  const link = root.querySelector('link[rel="alternate"][type*="rss"], link[rel="alternate"][type*="atom"]');
   if (!link || !CFG.fetch) return [];
   try {
     const r = await gm.xhr({ url: new URL(link.getAttribute('href'), location.href).href, headers: { Accept: 'application/rss+xml, application/atom+xml, text/xml;q=0.9, */*;q=0.5' } });
@@ -136,21 +140,56 @@ async function feedItems() {
   } catch { return []; }
 }
 
+// The engine starts as soon as the HTML is parsed, before the site's own scripts have run: a front page they build
+// gets its links a moment later. Read again as the page changes, until there are enough or ms have passed.
+async function frontPageSoon(enough, ms) {
+  let items = frontPageItems();
+  if (items.length >= enough) return items;
+  // Still arriving (an early start, see build.mjs): each read forces a layout of the half-loaded page, so it waits for
+  // the HTML to be in (or ms) and reads once.
+  if (document.readyState === 'loading') {
+    await new Promise(r => { document.addEventListener('readystatechange', r, { once: true }); setTimeout(r, ms); });
+    items = frontPageItems();
+    if (items.length >= enough || document.readyState === 'loading') return items;
+  }
+  await new Promise(res => {
+    let t = null;
+    const done = () => { clearTimeout(end); clearTimeout(t); watch.disconnect(); res(); };
+    const end = setTimeout(() => { items = frontPageItems(); done(); }, ms);
+    const watch = new MutationObserver(() => { t ||= setTimeout(() => { t = null; items = frontPageItems(); if (items.length >= enough) done(); }, 200); });
+    watch.observe(document.documentElement, { childList: true, subtree: true });
+  });
+  return items;
+}
+
 // Front pages that fill in as they are scrolled (VG) are read by scrolling the hidden page, so the
 // site's own lazy loading adds the rest. Stops after six screens without new articles, at the end of
 // the page, when done() says so, or after 40 screens.
 // hold: while true the scrolling waits (someone is using plain view; see the end of plainView).
 async function harvest(known, onNew, done = () => false, hold = () => false) {
+  // Each pass reads every link on the page and measures the new ones, which makes the browser lay the page out: on
+  // nytimes.com in Safari a pass took over a second, and passes every quarter second kept the page frozen for 24 s, so a
+  // click in the list waited. So it rests four times as long as its last pass took, keeping it to a fifth of the time.
+  // While the page is still loading (plain view can start before, see build.mjs), it waits for the loading to end.
+  let rest = 250, passes = 0, spent = 0;
   for (let i = 0, idle = 0; i < 40 && idle < 6 && !done(); i++) {
     while (hold()) await new Promise(r => setTimeout(r, 400));
+    if (document.readyState === 'loading') {
+      await new Promise(r => { document.addEventListener('readystatechange', r, { once: true }); setTimeout(r, 3000); });
+      i--; continue;
+    }
     window.scrollBy(0, innerHeight * 1.5);
-    await new Promise(r => setTimeout(r, 250));
+    await new Promise(r => setTimeout(r, rest));
+    const t0 = performance.now();
     const fresh = frontPageItems(known);
+    const took = performance.now() - t0; passes++; spent += took;
+    rest = Math.max(250, took * 4);
     fresh.forEach(it => known.set(it.key, it));
     if (fresh.length) { idle = 0; onNew(fresh); }
     else if (scrollY + innerHeight >= document.documentElement.scrollHeight - 2) idle += 3;
     else idle++;
   }
+  timeMark(`harvest-${passes}-passes-${Math.round(spent)}ms`);
 }
 
 // The site's own logo for plain view's header: the first picture in a link to the front page near
@@ -187,7 +226,7 @@ function siteLogo() {
 }
 
 const PLAIN_CSS = `
-  :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;-webkit-text-size-adjust:100%;
+  :host{all:initial;position:fixed;inset:0;z-index:2147483645;overflow:auto;overflow-anchor:none;-webkit-text-size-adjust:100%;
     --bg:#fbfbf9;--paper:#fff;--fg:#1d1d1b;--muted:#5f635f;--line:#e2e2dd;--accent:#2f5f8f;background:var(--bg);color:var(--fg);font:17px/1.5 -apple-system,system-ui,sans-serif}
   @media (prefers-color-scheme: dark){:host{--bg:#1a1b1a;--paper:#222422;--fg:#e8e8e5;--muted:#a3a7a3;--line:#333532;--accent:#7fa8d6}}
   *{box-sizing:border-box;animation:none!important;transition:none!important}
@@ -243,6 +282,10 @@ const PLAIN_CSS = `
   .reader figure{margin:0 0 1em}
   .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
   .reader iframe{display:block;width:100%;height:600px;margin:0 0 1em;border:0;border-radius:6px;background:#fff}
+  .reader .term{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+  .reader .term[aria-expanded="true"]{text-decoration-style:solid}
+  .reader .explain{display:block;margin:8px 0 0;padding:8px 12px;font-size:15px;line-height:1.4;color:var(--muted);border-left:3px solid var(--line);background:color-mix(in srgb,var(--line) 35%,transparent);border-radius:0 6px 6px 0}
+  .reader .explain[hidden]{display:none}
   .reader figcaption{font-size:14px;color:var(--muted);margin-top:4px}
   .reader .byline{font-size:14px;color:var(--muted);margin-bottom:14px}
   .reader .end{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:8px;border-top:1px solid var(--line)}
@@ -275,7 +318,9 @@ let plainHost = null, plainCount = 0;
 // it (lazy loading needs that), and is taken out of the page once it is done. Returns how to give it back.
 function swallowSite() {
   const st = document.createElement('style');
-  st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body,html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body{display:none!important}';
+  // The body itself stays visible and in the layout, emptied: Safari paints nothing while a page loads unless its body is
+  // visible (see the cover in gm-shim.js), and on a page that never finishes loading the list was never painted.
+  st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body>*{display:none!important}';
   document.head.appendChild(st);
   document.documentElement.classList.add('cb-plain');
   for (const m of document.querySelectorAll('video, audio')) try { m.pause(); m.muted = true; } catch {}
@@ -300,13 +345,31 @@ function readerFrame(src) {
   return f;
 }
 const readerEl = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+// A paragraph with explained words (VG's "mistenkt", an <abbr>): the word, the first time it comes, is
+// marked, and a tap shows what it means under the paragraph, so the sentence isn't split.
+function readerTermsP(b) {
+  const p = readerEl('p'), notes = [];
+  const at = b.terms.map(t => ({ ...t, i: b.text.indexOf(t.w) })).filter(t => t.i >= 0).sort((x, y) => x.i - y.i);
+  let pos = 0;
+  for (const t of at) {
+    if (t.i < pos) continue;
+    p.append(b.text.slice(pos, t.i));
+    const w = readerEl('button', t.w, 'term'), n = readerEl('span', '', 'explain');
+    n.append(readerEl('b', t.w), ' ' + t.n); n.hidden = true;
+    w.type = 'button'; w.setAttribute('aria-expanded', 'false');
+    w.addEventListener('click', e => { e.stopPropagation(); n.hidden = !n.hidden; w.setAttribute('aria-expanded', String(!n.hidden)); });
+    p.append(w); notes.push(n); pos = t.i + t.w.length;
+  }
+  p.append(b.text.slice(pos), ...notes);
+  return p;
+}
 function readerContent(art, title, lede, url) {
   const el = readerEl, out = [el('h1', title)];
   if (lede) out.push(el('p', lede, 'lede'));
   const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
   if (by) out.push(el('div', by, 'byline'));
   for (const b of art?.blocks || []) {
-    if (b.t === 'p') out.push(el('p', b.text));
+    if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
     else if (b.t === 'h') out.push(el('h3', b.text));
     else if (b.t === 'quote') out.push(el('blockquote', b.text));
     else if (b.t === 'list') { const l = el(b.ordered ? 'ol' : 'ul'); for (const t of b.items) l.append(el('li', t)); out.push(l); }
@@ -350,7 +413,13 @@ async function articleView(withImages) {
   if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"\w*Article"/.test(ld)) return false;
   const url = location.href.split('#')[0], title = norm(document.querySelector('h1')?.textContent) || document.title;
   const giveBack = swallowSite();
-  const art = await fetchArticle(url, withImages);
+  // The article is in this page already: read it from here, at once. Only when that finds no text (a page that adds
+  // its text with scripts later) is it fetched again, which in Safari could keep the screen blank for many seconds.
+  let art = null;
+  try { art = readArticle(document.documentElement.outerHTML, url, withImages); } catch {}
+  timeMark('article-here-' + (art?.blocks.length || 0));
+  if (!art || (!art.blocks.length && !art.partial)) art = await fetchArticle(url, withImages);
+  timeMark('article');
   // A paid article can come with no text at all: its headline, lead and a note about the subscription.
   if (!art || (!art.blocks.length && !art.partial)) { giveBack(); return false; }
   const desc = norm(document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '');
@@ -364,7 +433,7 @@ async function articleView(withImages) {
   sh.querySelector('.reader').replaceChildren(...readerContent(art, title, lede, url));
   document.documentElement.appendChild(plainHost);
   onlyList();
-  document.getElementById('nothis-cover')?.remove();
+  for (const id of ['nothis-cover', 'nothis-shot']) document.getElementById(id)?.remove();
   sh.querySelector('.view').focus({ preventScroll: true });
   const close = () => { if (history.state?.nothis) history.back(); else location.assign(location.origin + '/'); };
   sh.addEventListener('click', e => { if (e.target.closest('[data-act="close-reader"]')) close(); });
@@ -374,22 +443,44 @@ async function articleView(withImages) {
   return true;
 }
 async function plainView(withImages) {
+  timeMark('plain-view');
+  // A heavy front page that gm-shim.js stopped before its scripts ran: its links come from a downloaded copy, read without
+  // running anything (no layout either, so nothing is measured), and the logo from the list shown meanwhile.
+  const stopped = !!globalThis.__wdStopped;
+  let src = document;
+  if (stopped) {
+    try { src = parseHtml((await gm.xhr({ url: location.href, headers: { Accept: 'text/html' } })).responseText); } catch { return false; }
+    Object.assign(pageMeta, readPageMeta(src));
+    if (src.title) document.title = norm(src.title);
+    timeMark('copy-read');
+  }
   const listUrl = location.href, listTitle = document.title;
-  let logo = null; try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
-  let items = frontPageItems();
-  for (let i = 0; i < 2 && items.length < 8; i++) { await new Promise(r => setTimeout(r, 1200)); items = frontPageItems(); }
+  // The logo is the first thing here that needs the page laid out, so it pays for the first layout: on nytimes.com in
+  // Safari 1.2 s. It counts towards the first pass, which decides whether the page is heavy (the end of plainView).
+  const t0 = performance.now();
+  let logo = null;
+  if (stopped) {
+    const chip = document.getElementById('nothis-shot')?.shadowRoot?.querySelector('h1 .logo');
+    if (chip?.firstElementChild) logo = { el: chip.firstElementChild.cloneNode(true), bg: chip.style.background };
+  } else try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
+  let items = frontPageItems(undefined, !stopped, src);
+  const firstPass = performance.now() - t0;
+  timeMark('first-pass-' + Math.round(firstPass) + 'ms');
+  if (items.length < 8 && !stopped) items = await frontPageSoon(8, 2400);
+  const toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
+  timeMark('links');
   const giveBack = swallowSite();
   const known = new Map(items.map(it => [it.key, it]));
-  if (items.length < 8) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
+  if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
   if (items.length < 8) {
     // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
     giveBack(); window.scrollTo(0, 0);
     return false;
   }
   rankItems(items);
-  let sortMode = (await gm.get('plainSort', 'site')) === 'importance' ? 'importance' : 'site';
-  const layout = ((await gm.get('plainLayout', {})) || {})[host] || { hidden: [], order: [] };
-  readSectionNames();
+  let sortMode = startup.plainSort === 'importance' ? 'importance' : 'site';
+  const layout = (startup.plainLayout || {})[host] || { hidden: [], order: [] };
+  readSectionNames(src);
 
   plainHost = document.createElement('div');
   plainHost.id = 'declickbait-plain';
@@ -431,6 +522,22 @@ async function plainView(withImages) {
   let cursorKey = null;
   const cursor = () => { const li = cursorKey && rows.get(cursorKey); return li?.isConnected ? li : null; };
   const mark = li => { for (const o of main.querySelectorAll('li.kb')) if (o !== li) o.classList.remove('kb'); li?.classList.add('kb'); };
+  // The list fills in after it is shown: leads, better headlines, rows dropped for a muted topic. Safari has no scroll
+  // anchoring, so a row growing above the screen pushed the list down under the reader, and a click could land on the
+  // next card. The row at the top of the screen is held in place here instead, alike in every browser (overflow-anchor
+  // is off on the host). While a card is pressed nothing changes: the changes wait for the release.
+  function steady(change) {
+    if (pressed) { held.push(change); return; }
+    const top = sh.querySelector('header').getBoundingClientRect().bottom;
+    const anchor = plainHost.scrollTop > 0 && [...main.querySelectorAll('li[data-key]')].find(li => li.getBoundingClientRect().bottom > top);
+    const before = anchor && anchor.getBoundingClientRect().top;
+    change();
+    if (anchor?.isConnected) plainHost.scrollTop += anchor.getBoundingClientRect().top - before;
+  }
+  let pressed = null; const held = [];
+  const release = () => { if (!pressed) return; setTimeout(() => { pressed = null; const all = held.splice(0); if (all.length) steady(() => all.forEach(f => f())); }); };
+  window.addEventListener('pointerup', release, true);
+  window.addEventListener('pointercancel', release, true);
   function fill(it, li) {
     const m = cache[it.key];
     if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
@@ -460,7 +567,7 @@ async function plainView(withImages) {
     while (running < CFG.concurrency && want.length) {
       const key = want.shift(), it = byKey.get(key);
       running++;
-      getMeta(it.url).finally(() => { running--; const li = rows.get(key); if (li) fill(it, li); pumpPlain(); });
+      getMeta(it.url).finally(() => { running--; steady(() => { const li = rows.get(key); if (li?.isConnected) fill(it, li); }); pumpPlain(); });
     }
   }
   function row(it, withSection) {
@@ -593,11 +700,11 @@ async function plainView(withImages) {
     while (aheadRunning < 2 && ahead.length) {
       const it = byKey.get(ahead.shift()); if (!it) continue;
       aheadRunning++;
-      fetchArticle(it.url, withImages, Infinity, false).finally(() => { aheadRunning--; pumpAhead(); });
+      paced().then(() => fetchArticle(it.url, withImages, Infinity, false)).finally(() => { aheadRunning--; pumpAhead(); });
     }
   }
   // A click or tap on a card puts the keyboard's place there, so the arrow keys go on from it.
-  main.addEventListener('pointerdown', e => { const li = e.target.closest?.('li[data-key]'); if (li) { cursorKey = li.dataset.key; mark(li); } }, { capture: true, passive: true });
+  main.addEventListener('pointerdown', e => { const li = e.target.closest?.('li[data-key]'); if (li) { pressed = li; cursorKey = li.dataset.key; mark(li); } }, { capture: true, passive: true });
   for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
     const li = e.target.closest?.('li[data-key]'); if (li) prefetch(li.dataset.key, true);
   }, { capture: true, passive: true });
@@ -685,7 +792,9 @@ async function plainView(withImages) {
   }
   sh.addEventListener('click', e => {
     // The whole card opens the article; Cmd/Ctrl/Shift-click on the headline still opens the site.
-    const card = e.target.closest('main li[data-key]');
+    // The card that was pressed, also when the list moved under the pointer before the release (the click then goes to
+    // the list around both cards).
+    const card = e.target.closest('main li[data-key]') || (pressed?.isConnected && main.contains(e.target) ? pressed : null);
     if (card && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
       const it = byKey.get(card.dataset.key);
       if (it) { e.preventDefault(); openArticle(it); }
@@ -759,15 +868,47 @@ async function plainView(withImages) {
   }, true);
 
   render();
-  feedItems().then(feed => { if (!feed.length) return; feed.forEach(add); render(); });
+  timeMark('list');
+  // A copy of the list for the next visit: gm-shim.js shows it before the page has even loaded, until this list is up
+  // again (see there). Kept in the site's own localStorage, which is read at once, where extension storage keeps it
+  // waiting in Safari. Only the extension has gm-shim.js. It takes over the copy's scrolling.
+  const lastShot = document.getElementById('nothis-shot');
+  if (lastShot) { plainHost.scrollTop = lastShot.scrollTop; lastShot.remove(); }
+  if (EXT) {
+    const shotKey = 'nothis-shot:' + location.pathname;
+    let shotTimer = null;
+    // At most every 1.5 s: the list changes all the time while it fills in.
+    const saveShot = () => { shotTimer ||= setTimeout(() => { shotTimer = null; try {
+      const html = `<style>${PLAIN_CSS}</style>` + sh.querySelector('.wrap').outerHTML;
+      if (html.length < 400000) localStorage.setItem(shotKey, JSON.stringify({ at: Date.now(), html, title: listTitle }));
+    } catch {} }, 1500); };
+    new MutationObserver(saveShot).observe(main, { childList: true, subtree: true, characterData: true });
+    saveShot();
+  }
+  // New articles from the feed or further down the front page rebuild the list, which waits while it is in use: until
+  // a moment after the last touch, click, scroll or key, and while an article is open.
+  let later = null, quietAt = 0;
+  const renderSoon = (ms = 600) => { clearTimeout(later); later = setTimeout(() => (pressed || current || Date.now() < quietAt) ? renderSoon(500) : render(), ms); };
+  feedItems(src).then(feed => { if (!feed.length) return; feed.forEach(add); renderSoon(0); });
   // Read the rest of a lazily filled front page, a few articles at a time, then drop the site's body.
   // Each step makes the site load more (pictures, players, ads), work that holds up a tap, so it
   // waits while an article is open and for a moment after each touch, click, scroll or key.
-  let later = null, quietAt = 0;
-  for (const ev of ['pointerdown', 'touchstart', 'wheel', 'keydown']) plainHost.addEventListener(ev, () => { quietAt = Date.now() + 2500; }, { capture: true, passive: true });
-  harvest(known, fresh => {
-    items.push(...fresh); rankItems(items); fresh.forEach(add);
-    clearTimeout(later); later = setTimeout(render, 600);
-  }, undefined, () => !!current || Date.now() < quietAt).then(() => { window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); });
+  const busy = () => { quietAt = Date.now() + 2500; };
+  for (const ev of ['pointerdown', 'touchstart', 'wheel']) plainHost.addEventListener(ev, busy, { capture: true, passive: true });
+  window.addEventListener('keydown', busy, { capture: true, passive: true }); // in Safari the keys can come from outside the list
+  const finish = () => { timeMark('harvest-done'); window.scrollTo(0, 0); document.documentElement.classList.add('cb-plain-done'); };
+  const more = fresh => { items.push(...fresh); rankItems(items); fresh.forEach(add); renderSoon(); };
+  if (stopped) finish(); // a downloaded copy: all there is, and nothing to scroll
+  else if (toLinks > 400) {
+    // Next time this page is stopped before its scripts run (gm-shim.js), and read from a downloaded copy.
+    try { localStorage.setItem('nothis-heavy', String(Date.now())); } catch {}
+    // A heavy page (laying it out and one pass over its links took over 0.4 s; nytimes.com in Safari: 1.5 s) is not scrolled:
+    // while it stays laid out under the list, Safari lays the whole page out again each time its scripts change it, and
+    // the list froze for seconds at a time. It leaves the layout at once and is read once more, unmeasured, when its
+    // HTML is all in.
+    finish();
+    const rest = () => { const fresh = frontPageItems(known, false); fresh.forEach(it => known.set(it.key, it)); if (fresh.length) more(fresh); };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rest, { once: true }); else rest();
+  } else harvest(known, fresh => more(fresh), undefined, () => !!current || Date.now() < quietAt).then(finish);
   return true;
 }

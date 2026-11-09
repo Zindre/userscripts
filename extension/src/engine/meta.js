@@ -1,10 +1,14 @@
 // ───────────────────────────── Cache ─────────────────────────────
 const CACHE_KEY = 'cache_v2'; // bumped in 1.7.3: entries stored before the cross-site guard may be polluted
-let cache = null, cacheDirty = false;
-async function loadCache() {
-  cache = (await gm.get(CACHE_KEY, {})) || {};
-  const now = Date.now();
-  for (const k in cache) if (now - cache[k].t > CFG.cacheTtlMs) { delete cache[k]; cacheDirty = true; }
+// Read once; boot.js waits for it only briefly (the list fills in from it when it comes later) and getMeta() waits for it
+// in full, so nothing is fetched that is in the cache. Kept fresh: entries fetched meanwhile win.
+let cache = {}, cacheDirty = false, cacheRead = null, cacheIn = false;
+function loadCache() {
+  return cacheRead ||= gm.get(CACHE_KEY, {}).then(stored => {
+    cacheIn = true;
+    const now = Date.now();
+    for (const k in stored || {}) if (now - stored[k].t > CFG.cacheTtlMs) cacheDirty = true; else if (!(k in cache)) cache[k] = stored[k];
+  });
 }
 const saveCache = (() => { let timer; return () => {
   if (!cacheDirty) return;
@@ -66,11 +70,13 @@ function extractMeta(html, url) {
 // Site-wide boilerplate ("Fædrelandsvennen - Få siste nytt fra …") shows up as the title or
 // description of paywalled or shell pages. It is generic if it equals the front page's own
 // metadata, or if two different articles return the same text.
-const pageMeta = (() => {
-  const m = sel => norm(document.querySelector(sel)?.getAttribute('content'));
-  return { title: m('meta[property="og:title"]') || norm(document.title), desc: m('meta[property="og:description"]') || m('meta[name="description"]'),
+// From this page, or from the downloaded copy of a heavy front page (plainView reads it in again).
+function readPageMeta(doc = document) {
+  const m = sel => norm(doc.querySelector(sel)?.getAttribute('content'));
+  return { title: m('meta[property="og:title"]') || norm(doc.title), desc: m('meta[property="og:description"]') || m('meta[name="description"]'),
     site: m('meta[property="og:site_name"]') };
-})();
+}
+const pageMeta = readPageMeta();
 const seenText = new Map();   // text -> Set of article urls
 const generic = new Set();
 function isGeneric(text, url) {
@@ -101,9 +107,11 @@ const jobs = new Map();       // el -> { orig, url, key }
 const fetchCount = { n: 0 };
 async function getMeta(url) {
   const key = url.replace(/[?#].*$/, '');
+  if (!cache[key]) await loadCache();
   if (cache[key]) return cache[key];
   if (!CFG.fetch || fetchCount.n >= CFG.maxFetchesPerPage) return null;
   fetchCount.n++;
+  await paced();
   const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
   try {
     const r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
@@ -119,6 +127,7 @@ async function getMeta(url) {
     articleFetched(url, r.responseText, finalUrl); // plain view keeps it, so the article opens at once
     return cache[key];
   } catch (e) {
+    if (Date.now() < fetchPausedUntil) return null; // the site pushed back: not this article's fault, so it is tried again later
     cache[key] = { title: '', desc: '', t: Date.now(), err: 1 }; cacheDirty = true; saveCache();
     return null;
   }

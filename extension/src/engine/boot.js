@@ -1,14 +1,20 @@
 // ───────────────────────────── Boot ─────────────────────────────
 // Runs last: reads the settings, hands them to the popup (extension) or the panel (userscript),
 // then lays out plain view or starts rewriting the page.
+let startup = {}; // the settings read as the engine starts (main)
 async function main() {
+  timeMark('engine');
   // One engine per page. Safari can run two (two copies of the extension, or the extension and the userscript); both
   // then laid a list over the page, and the keys moved the one underneath, so nothing seemed to happen.
   if (document.documentElement.hasAttribute('data-nothis-engine')) return;
   document.documentElement.setAttribute('data-nothis-engine', '');
-  const disabled = (await gm.get('disabledHosts', [])) || [];
-  const enabled = (await gm.get('enabledHosts', [])) || [];
-  CFG.genericSites = await gm.get('genericSites', CFG.genericSites);
+  // Every setting the start needs, in one read (plain view's too: startup below).
+  startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
+    siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
+    plainSort: 'site', plainLayout: {} });
+  const disabled = startup.disabledHosts || [];
+  const enabled = startup.enabledHosts || [];
+  CFG.genericSites = startup.genericSites ?? CFG.genericSites;
   hostEnabled = enabled.includes(host);
   const excluded = CFG.excludeHosts.some(h => h instanceof RegExp ? h.test(host) : host === h || host.endsWith('.' + h));
   let off = disabled.includes(host) || (!hostEnabled && (excluded || (!site && !CFG.genericSites)));
@@ -16,15 +22,15 @@ async function main() {
   if (calmSite) off = disabled.includes(host);
   // Reading level: per host, else the default: plain view with images unless you chose otherwise
   // (versions before 1.11 stored only includeLead).
-  const legacy = await gm.get('includeLead', null);
-  defaultLevel = await gm.get('level', legacy === null ? 'pictures' : legacy ? 'synopsis' : 'headlines');
-  level = off ? 'vanilla' : calmSite ? 'calm' : ((await gm.get('siteLevels', {})) || {})[host] || defaultLevel;
+  const legacy = startup.includeLead;
+  defaultLevel = startup.level || (legacy === null || legacy === undefined ? 'pictures' : legacy ? 'synopsis' : 'headlines');
+  level = off ? 'vanilla' : calmSite ? 'calm' : (startup.siteLevels || {})[host] || defaultLevel;
   if (level === 'vanilla') off = true;
   hostOff = off;
   CFG.includeLead = level !== 'headlines';
-  setMuted((await gm.get('mutedTopics', [])) || []);
-  CFG.display = await gm.get('display', CFG.display);
-  CFG.swipeAnimation = await gm.get('swipeAnimation', CFG.swipeAnimation);
+  setMuted(startup.mutedTopics || []);
+  CFG.display = startup.display ?? CFG.display;
+  CFG.swipeAnimation = startup.swipeAnimation ?? CFG.swipeAnimation;
   let original = false; // the plain view's "Original" button: show the site as published, once
   try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
   // "Read on the site" in the reader. Back can land on an entry that still counts as this document: load it.
@@ -34,10 +40,26 @@ async function main() {
   else if (typeof startPanel === 'function') startPanel(off, disabled);
   // The extension may have covered the page before it was drawn (gm-shim.js); plain view lifts the
   // cover itself once it is up, every other path lifts it here.
-  const uncover = () => document.getElementById('nothis-cover')?.remove();
+  timeMark('engine-settings');
+  // gm-shim.js stopped this page (a heavy front page) for plain view to read a downloaded copy. Whenever plain view isn't
+  // what happens after all, the page is loaded as usual, and not stopped again until plain view has measured it heavy.
+  const unstop = () => {
+    try { sessionStorage.setItem('nothis-nostop', host); localStorage.removeItem('nothis-heavy'); } catch {}
+    location.reload();
+  };
+  const plainLevel = level === 'plain' || level === 'pictures';
+  if (globalThis.__wdStopped && (off || calmSite || !plainLevel || original || onArticlePage())) return unstop();
+  const uncover = () => { timeMark('uncover'); for (const id of ['nothis-cover', 'nothis-shot']) document.getElementById(id)?.remove(); };
   if (off) { uncover(); return; } // settings still open here, so the site can be switched back on
-  if (calmSite) { calmPartsOff = ((await gm.get('calmParts', {})) || {})[calmSite.name] || []; uncover(); runCalm(calmSite); return; }
-  await loadCache();
+  const paused = (startup.pausedHosts || {})[host];
+  if (paused > Date.now()) fetchPausedUntil = paused;
+  // A robot check instead of the front page: show it at once, under no cover, and fetch nothing from the site for now.
+  if (!calmSite && botWall()) { timeMark('robot-check'); pauseFetching(); uncover(); return; }
+  if (calmSite) { calmPartsOff = (startup.calmParts || {})[calmSite.name] || []; uncover(); runCalm(calmSite); return; }
+  // The article cache is large (up to 2,500 entries): Safari can take a while to hand it over while a heavy front page
+  // loads, and the list doesn't need it to appear; its leads and pictures fill in once it is read.
+  loadCache().then(() => timeMark('cache'));
+  if (!cacheIn) await Promise.race([loadCache(), new Promise(r => setTimeout(r, 300))]);
   if (CFG.marker) {
     const st = document.createElement('style');
     st.textContent = '.cb-rewritten{box-shadow:inset 3px 0 0 0 rgba(59,110,165,.75);padding-left:.25em}.cb-stack{box-shadow:inset 3px 0 0 0 rgba(59,110,165,.35);padding-left:.25em}.cb-hint{background-image:repeating-linear-gradient(to bottom,rgba(59,110,165,.75) 0 5px,transparent 5px 9px);background-size:3px 100%;background-position:left top;background-repeat:no-repeat;padding-left:.25em}.cb-rewritten,.cb-rewritten *{white-space:normal!important;overflow-wrap:break-word;line-height:1.15}.cb-inline{text-decoration:underline dotted rgba(59,110,165,.9);text-underline-offset:.15em}.cb-btn{display:inline-block;margin-left:.35em;padding:0 .4em;font-size:.6em;line-height:1.6;vertical-align:middle;border-radius:.3em;background:rgba(59,110,165,.18);color:rgb(59,110,165);cursor:pointer;user-select:none;-webkit-user-select:none}.cb-reveal{display:block;margin:.3em 0;padding:.4em .6em;border-left:3px solid rgba(59,110,165,.75);background:rgba(59,110,165,.08);font-weight:normal;font-size:clamp(14px,.75em,20px);line-height:1.35;white-space:normal}.cb-reveal b{font-weight:600}.cb-reveal[hidden],.cb-lead[hidden]{display:none!important}.cb-lead{display:block;margin-top:.35em;font-weight:normal;font-size:clamp(14px,.6em,20px);line-height:1.3;opacity:.85}';
@@ -56,6 +78,7 @@ async function main() {
     else if (await articleView(level === 'pictures')) return;
     else calmArticle(level === 'pictures');
   }
+  if (globalThis.__wdStopped) return unstop(); // the copy didn't make a list: the page as usual
   uncover();
   scan();
   let t;

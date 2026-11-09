@@ -24,6 +24,25 @@ function readerEmbed(frame, base) {
     return src.protocol === 'https:' && READER_EMBED.test(src.href) ? src.href : '';
   } catch { return ''; }
 }
+// What a reader of the page sees of an element's text: no hidden copies. VG explains a word inside the
+// word itself (<abbr title="…">mistenkt<span aria-hidden>mistenkt En person …</span></abbr>), and taken
+// whole that reads "mistenktmistenktEn person …".
+const HIDDEN_TEXT = 'script, style, noscript, template, button, svg, [aria-hidden="true"], [hidden], [role="tooltip"]';
+function readerText(el) {
+  if (!el.querySelector(HIDDEN_TEXT)) return norm(el.textContent);
+  const c = el.cloneNode(true);
+  for (const h of c.querySelectorAll(HIDDEN_TEXT)) h.remove();
+  return norm(c.textContent);
+}
+// The words a paragraph explains (VG's word explanations, <abbr title>, <dfn title>): [{ w: word, n: what it means }].
+function readerTerms(el) {
+  const terms = [];
+  for (const a of el.querySelectorAll('abbr[title], dfn[title]')) {
+    const w = readerText(a), n = norm(a.getAttribute('title'));
+    if (w && n && n.toLowerCase() !== w.toLowerCase() && !terms.some(t => t.w === w)) terms.push({ w, n });
+  }
+  return terms;
+}
 const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
 function readerImage(img, base) {
@@ -95,23 +114,26 @@ function readArticle(html, url, withImages) {
       // A link around a picture and text is a card for another story (BT's live entries end with one).
       if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
       if (tag === 'P') {
-        const t = norm(c.textContent);
-        if (t && !ALSO.test(t) && t !== lead) blocks.push({ t: 'p', text: t });
+        const t = readerText(c);
+        if (t && !ALSO.test(t) && t !== lead) {
+          const terms = readerTerms(c);
+          blocks.push(terms.length ? { t: 'p', text: t, terms } : { t: 'p', text: t });
+        }
       } else if (/^H[2-4]$/.test(tag)) {
-        const t = norm(c.textContent); if (t && t.length < 200) blocks.push({ t: 'h', text: t });
+        const t = readerText(c); if (t && t.length < 200) blocks.push({ t: 'h', text: t });
       } else if (tag === 'BLOCKQUOTE') {
-        const t = norm(c.textContent); if (t) blocks.push({ t: 'quote', text: t });
+        const t = readerText(c); if (t) blocks.push({ t: 'quote', text: t });
       } else if (tag === 'UL' || tag === 'OL') {
         const lis = [...c.children].filter(li => li.tagName === 'LI');
         // A list of nothing but links is a "read more" box, not part of the story.
-        if (lis.length && !lis.every(li => norm(li.textContent) === norm(li.querySelector('a')?.textContent || '-'))) {
-          const items = lis.map(li => norm(li.textContent)).filter(Boolean);
+        if (lis.length && !lis.every(li => readerText(li) === norm(li.querySelector('a')?.textContent || '-'))) {
+          const items = lis.map(readerText).filter(Boolean);
           if (items.length) blocks.push({ t: 'list', items, ordered: tag === 'OL' });
         }
       } else if (tag === 'FIGURE' || tag === 'IMG' || tag === 'PICTURE') {
         const img = tag === 'IMG' ? c : c.querySelector('img');
         const src = withImages && img ? readerImage(img, url) : '';
-        if (src) blocks.push({ t: 'img', src, caption: norm(c.querySelector('figcaption')?.textContent) });
+        if (src) blocks.push({ t: 'img', src, caption: (f => f ? readerText(f) : '')(c.querySelector('figcaption')) });
       } else walk(c);
     }
   };

@@ -1,1 +1,7 @@
-Mac: the keyboard shortcuts work again. In the list of stories, the arrow keys or j and k move from story to story, and Enter or o opens the one that is marked. In an open story, the left and right arrow keys (or j and k) go to the previous or next story, and Escape takes you back to the list.
+Faster, smoother news front pages, especially in Safari. The page no longer stays blank or black while it loads. When you come back to a front page you have opened before, the list you saw last time shows at once with a thin moving bar under the header, and is replaced by the fresh list as soon as it is ready. On heavy sites (try nytimes.com, opened twice), the second visit skips the site's own scripts, so the list comes up quickly and scrolling and tapping stay responsive. Original still shows the site as it is.
+
+Stories open more cleanly: words that a site explains (VG's underlined words, such as "mistenkt") no longer run into the text. Tap the word to see what it means.
+
+If a site shows a robot check, Web Detox stops fetching from that site for a while and says so in its menu, so it doesn't make things worse.
+
+Facebook: more bait posts are hidden (posts that only promise "the simple trick"), and so are shortened links in the comments that lead to such pages.

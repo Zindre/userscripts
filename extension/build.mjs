@@ -35,7 +35,39 @@ const NEWS_LIST = '${keys.join('')}';
 `;
 }
 const indent = s => s.split('\n').map(l => (l ? '  ' + l : l)).join('\n');
-const assemble = names => `(() => {\n  'use strict';\n\n${[...names, 'boot'].map(n => indent(read(n))).join('\n')}\n  main();\n})();\n`;
+// The engine waits for the page's HTML (and stylesheets) itself: the extension runs it at document_start (the manifest
+// below), since DOMContentLoaded, when document_idle and document_end scripts run, also waits for every deferred script
+// the site has: in WebKit 1.4 s after the HTML was parsed on nytimes.com and the Guardian. It starts once parsing is done
+// and the stylesheets are in, because the layout says which headlines are big; a stuck stylesheet holds it up 1.5 s at most.
+// A userscript manager runs it at document-idle, when the page is parsed already, so it starts at once there.
+const WHEN_PARSED = `
+let started = false;
+const parsed = () => {
+  if (started) return;
+  globalThis.__wdMark?.(document.readyState === 'loading' ? 'early' : 'parsed');
+  const wait = [...document.querySelectorAll('link[rel~="stylesheet"]')].filter(l => !l.sheet && !l.disabled && (!l.media || matchMedia(l.media).matches));
+  let n = wait.length;
+  const go = () => { if (!started) { started = true; start(); } };
+  if (!n) return go();
+  for (const l of wait) for (const ev of ['load', 'error']) l.addEventListener(ev, () => { if (--n <= 0) go(); }, { once: true });
+  setTimeout(go, 1500);
+};
+if (globalThis.__wdStopped) parsed(); // gm-shim.js stopped a heavy page: there is nothing more to wait for
+else if (document.readyState === 'loading') {
+  document.addEventListener('readystatechange', parsed, { once: true });
+  // A front page can have its headlines long before it is parsed: on nytimes.com the HTML was in after 0.5 s and parsed
+  // after 4.3 s, held up by the site's own scripts. A front page (no article: at most two plain path segments) starts
+  // once it has 60 links; plain view keeps reading the page as the rest comes in (harvest() in plain.js).
+  let path = location.pathname; try { path = decodeURIComponent(path); } catch {}
+  if (/^\\/(?:[\\p{L}-]{1,30}\\/?){0,2}$/u.test(path)) {
+    const early = setInterval(() => {
+      if (started || document.readyState !== 'loading') return clearInterval(early);
+      if (document.body && document.links.length >= 60) { clearInterval(early); parsed(); }
+    }, 100);
+  }
+}
+else parsed();`;
+const assemble = names => `(() => {\n  'use strict';\n  const start = () => {\n${[...names, 'boot'].map(n => indent(indent(read(n)))).join('\n')}\n    main().catch(e => { globalThis.__wdMark?.('error: ' + (e?.stack || e)); throw e; });\n  };\n${indent(WHEN_PARSED.trim())}\n})();\n`;
 
 const USERSCRIPT_HEADER = `// ==UserScript==
 // @name         Declickbait
@@ -75,9 +107,9 @@ const base = {
   // declarativeNetRequest: background.js blocks the ads video players fetch before a video
   permissions: ['storage', 'declarativeNetRequest'],
   host_permissions: sites,
-  // gm-shim.js runs before the page is drawn (it covers plain-view sites against a flash of the
-  // original); the engine runs once the page has loaded. Both share the content script's scope.
-  content_scripts: [{ matches: sites, js: ['gm-shim.js'], run_at: 'document_start' }, { matches: sites, js: ['nothis.js'], run_at: 'document_idle' },
+  // gm-shim.js runs before the page is drawn (it covers plain-view sites against a flash of the original); the engine
+  // is loaded with it but starts once the HTML is parsed (WHEN_PARSED above). Both share the content script's scope.
+  content_scripts: [{ matches: sites, js: ['gm-shim.js', 'nothis.js'], run_at: 'document_start' },
     // In the page's own world: Snapchat for Web on a phone (src/snapchat-web.js).
     { matches: ['https://www.snapchat.com/web*', 'https://snapchat.com/web*'], js: ['snapchat-web.js'], run_at: 'document_start', world: 'MAIN' }],
 };
@@ -152,7 +184,17 @@ for (const t of wanted) {
     if (!shim.includes(`// @include ${tag}`)) throw new Error(`gm-shim.js: missing "// @include ${tag}"`);
     shim = shim.replace(`  // @include ${tag}`, () => indent(names.map(read).join('')).replace(/^  /, ''));
   }
+  // WD_TIMING_URL=http://127.0.0.1:… node build.mjs safari: a build that sends each page's start-up times (gm-shim.js)
+  // to a logger on this Mac, through the background page. Never for a build that is published.
+  const timingUrl = /^http:\/\/(127\.0\.0\.1|localhost):\d+\//.test(process.env.WD_TIMING_URL || '') ? process.env.WD_TIMING_URL : '';
+  shim = shim.replace("'@timing-url'", JSON.stringify(timingUrl));
   writeFileSync(join(out, 'gm-shim.js'), shim);
+  if (timingUrl) writeFileSync(join(out, 'background.js'), readFileSync(join(out, 'background.js'), 'utf8') + `
+// Timing build only (WD_TIMING_URL): start-up times from the content script, to a logger on this Mac.
+api.runtime.onMessage.addListener(msg => {
+  if (msg?.type === 'wd-timing' && msg.url === ${JSON.stringify(timingUrl)}) fetch(msg.url, { method: 'POST', body: JSON.stringify(msg.data) }).catch(() => {});
+});
+`);
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(targets[t], null, 2) + '\n');
   const zip = join(root, 'dist', `nothis-${t}-${version}.zip`);
   rmSync(zip, { force: true });

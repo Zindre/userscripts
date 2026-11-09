@@ -53,11 +53,18 @@ const CALM_SITES = [
       { id: 'birthdays', label: 'Birthdays', sel: '#right_rail_container a[href*="/events/birthdays"], [role="complementary"] a[href*="/events/birthdays"]' },
       // Posts in groups you are in, written to get reactions: the point is kept for the comments, or the sentence stops
       // short ("If your veins show, it means you are..."). A long post that Facebook cuts ends in "See more" and doesn't count.
+      // Also a post that is only a promise, with the answer behind a link in the comments: "Slik holder du persille friskt
+      // året rundt – den enkle metoden", "Here's how you ...", "... – the simple trick".
       { id: 'bait', label: 'Bait posts ("see the comments")', sel: '[data-ad-rendering-role="story_message"]',
-        post: /(?:\.{2,}|…)$|(?<!\p{L})(?:i|in|in the|på|in den|im) (?:første |first |ersten )?(?:kommentar(?:en|ene|er|ane|feltet|erna|erne|fältet)?|comments?|comment section)[^\p{L}]*$|(?<!\p{L})A (?:eller|or|oder) B\s*\?|(?<!\p{L})(?:det første ordet|the first word|första ordet)(?!\p{L})|(?<!\p{L})(?:hvis du vil fortsette å få|if you want to keep (?:getting|seeing)|om du vill fortsätta få)(?!\p{L})/iu },
+        post: /^(?=.{0,140}$)(?:(?:slik|sånn|så här|sådan|so)\s+\p{L}+\s+(?:du|dere|ni|man)|(?:here'?s how|this is how)\s+(?:you|to))(?!\p{L})|[–—:-]\s*(?:(?:den|det|the|this|der|die|das)\s+)?(?:enkle|enkla|nemme|simple|easy|smarte|smarta|geniale|genius|clever|einfache)\s+(?:metoden|trikset|knepet|tricket|metode|method|trick|way|hack|methode)\s*[.!]*$|(?:\.{2,}|…)$|(?<!\p{L})(?:i|in|in the|på|in den|im) (?:første |first |ersten )?(?:kommentar(?:en|ene|er|ane|feltet|erna|erne|fältet)?|comments?|comment section)[^\p{L}]*$|(?<!\p{L})A (?:eller|or|oder) B\s*\?|(?<!\p{L})(?:det første ordet|the first word|första ordet)(?!\p{L})|(?<!\p{L})(?:hvis du vil fortsette å få|if you want to keep (?:getting|seeing)|om du vill fortsätta få)(?!\p{L})/iu },
     ],
     drop: [
       'a[href*="/ads/about"], a[href*="ad_preferences"]',
+      // A link through a URL shortener under a post, usually the first comment ("zipnly.com/s/H12Jahl"): the recipe or the
+      // "answer" a bait post promises, on a page that hides where it leads. Facebook sends the link through l.php with the
+      // address encoded, so the name of the shortener is matched anywhere in it.
+      ['zipnly.com', 'bit.ly', 'tinyurl.com', 'cutt.ly', 'shorturl.at', 'rb.gy', 'is.gd', 'ow.ly', 'tiny.cc', 't.ly', 'rebrand.ly', 'shorte.st', 'adf.ly', 'ouo.io', 'bit.do', 'short.gy', 'urlz.fr']
+        .map(d => `a[href*="%2F%2F${d}%2F"], a[href*="//${d}/"]`).join(', '),
       // The link where a post has its time and an ad has "Ad": on an ad it has no __tn__. It is there from the
       // start, where the word "Ad" can take half a minute, and an ad needs no button to be found by it.
       'a[href^="?__cft__"]:not([href*="__tn__"])',

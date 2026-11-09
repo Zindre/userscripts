@@ -35,6 +35,6 @@ async function settingsState() {
   return { host, off: hostOff, level, calm: calmSite?.name || null, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
     genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
     calmParts: (calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label, show: !calmPartsOff.includes(p.id) })),
-    topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
+    fetchPausedUntil: fetchPausedUntil > Date.now() ? fetchPausedUntil : 0, topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
     disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
 }
