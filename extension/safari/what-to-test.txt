@@ -1,3 +1,5 @@
+New icon: a soft sun resting on calm lines. On iPhone, front pages that load the fast way (such as nrk.no) now fill the screen width instead of showing as a narrow column.
+
 Faster, smoother news front pages, especially in Safari. The page no longer stays blank or black while it loads. When you come back to a front page you have opened before, the list you saw last time shows at once with a thin moving bar under the header, and is replaced by the fresh list as soon as it is ready. On heavy sites (try nytimes.com, opened twice), the second visit skips the site's own scripts, so the list comes up quickly and scrolling and tapping stay responsive. Original still shows the site as it is.
 
 Stories open more cleanly: words that a site explains (VG's underlined words, such as "mistenkt") no longer run into the text. Tap the word to see what it means.
