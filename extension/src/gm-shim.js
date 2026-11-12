@@ -177,6 +177,13 @@
     const de = document.documentElement || document.appendChild(document.createElement('html'));
     if (!document.head) de.prepend(document.createElement('head'));
     if (!document.body) de.append(document.createElement('body'));
+    // The site's own <meta name="viewport"> is often not parsed yet when the page is stopped, and without
+    // one a phone lays the page out 980 px wide and shrinks it: the list ends up a narrow column.
+    if (!document.querySelector('meta[name="viewport"]')) {
+      const vp = document.createElement('meta');
+      vp.name = 'viewport'; vp.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+      document.head.prepend(vp);
+    }
     if (shot.title) document.title = shot.title;
   }
   if (front && shot) {
