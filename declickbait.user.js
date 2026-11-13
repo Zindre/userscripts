@@ -2397,8 +2397,8 @@
       });
       editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
       // The card next to `from` on screen in direction dx/dy: ↑ ↓ the nearest card in the row above or
-      // below (closest to the same column), ← → the neighbour in the same row, else the previous/next
-      // card in list order (end of a row, or a single column).
+      // below (closest to the same column), ← → the neighbour in the same row. At the end of a row, and in
+      // a single column, ← → stay put: they never move the mark up or down (j/k go through the list in order).
       function nearby(list, from, dx, dy) {
         const r = from.getBoundingClientRect(), cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
         let best = null, score = Infinity;
@@ -2408,10 +2408,10 @@
           if (dy && !(dy > 0 ? q.top >= r.bottom - 2 : q.bottom <= r.top + 2)) continue;
           if (dx && !(dx > 0 ? q.left >= r.right - 2 : q.right <= r.left + 2)) continue;
           if (dx && (q.bottom <= r.top || q.top >= r.bottom)) continue; // same row only
-          const d = dy ? Math.abs(qy - cy) * 4 + Math.abs(qx - cx) : Math.abs(qx - cx);
+          const d = dy ? Math.abs(qy - cy) * 4 + Math.abs(qx - cx) : Math.abs(qx - cx) * 4 + Math.abs(qy - cy);
           if (d < score) { score = d; best = li; }
         }
-        return best || (dx ? list[list.indexOf(from) + dx] : null);
+        return best;
       }
       // Keyboard: the arrow keys move between the cards as they lie on screen, j/k in list order,
       // Enter (on the focused headline) or o opens; while reading, →/j and ←/k go to the next and
