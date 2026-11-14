@@ -6,8 +6,8 @@
 // level). Paid articles are marked; what the site sends for them is what the reader shows.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
 const T = NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul saker du har lest', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide articles you have read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -242,15 +242,17 @@ const PLAIN_CSS = `
   section{padding-top:20px;scroll-margin-top:110px}
   h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 2px}
   ol{list-style:none;margin:0;padding:0}
-  li{padding:12px 0 12px 12px;border-bottom:1px solid var(--line)}
+  li{padding:10px 0 10px 12px;border-bottom:1px solid var(--line)}
   li[data-tier="3"]{box-shadow:inset 3px 0 0 var(--accent)}
   li[data-tier="2"]{box-shadow:inset 3px 0 0 var(--muted)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .sec-label{display:inline-block;margin-left:6px;font-size:12px;color:var(--muted);vertical-align:2px}
-  a.h{color:var(--fg);text-decoration:none;font-weight:600;font-size:18px;line-height:1.3}
+  a.h{color:var(--fg);text-decoration:none;font-weight:600;font-size:17px;line-height:1.25}
   a.h:visited,li.read a.h{color:var(--muted)}
   a.h:hover{text-decoration:underline}
-  p.lead{margin:4px 0 0;color:var(--muted);font-size:16px}
+  p.lead{margin:3px 0 0;color:var(--muted);font-size:15px;line-height:1.33;min-height:5.32em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden}
+  p.lead[hidden]{display:none}
+  p.lead.wait{background:linear-gradient(var(--line),var(--line)) 0 .33em/92% .67em no-repeat,linear-gradient(var(--line),var(--line)) 0 1.66em/88% .67em no-repeat,linear-gradient(var(--line),var(--line)) 0 2.99em/90% .67em no-repeat,linear-gradient(var(--line),var(--line)) 0 4.32em/50% .67em no-repeat;border-radius:3px}
   .logo{display:inline-flex;align-items:center;padding:4px 8px;border-radius:6px;margin-left:-8px}
   .logo svg,.logo img{display:block;height:26px;width:auto;max-width:200px}
   .keys{display:none;color:var(--muted);font-size:13px;padding-top:6px}
@@ -298,9 +300,11 @@ const PLAIN_CSS = `
   }
   li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
   li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block}
-  @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 96px} li.pic .pic-img{width:96px;height:64px}}
+  @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 84px;gap:10px} li.pic .pic-img{width:84px;height:56px}}
   .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
   footer{color:var(--muted);font-size:13px;padding-top:24px}
+  footer button{font-size:13px;padding:2px 8px;margin-top:6px}
+  .sheet .opt{display:flex;gap:8px;align-items:center;padding:4px 0 14px;margin-bottom:12px;border-bottom:1px solid var(--line);font-size:15px}
   .editor{position:fixed;inset:0;z-index:2;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
   .editor[hidden]{display:none}
   .sheet{background:var(--bg);width:100%;max-width:28rem;max-height:80vh;overflow:auto;border-radius:12px 12px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px))}
@@ -480,6 +484,15 @@ async function plainView(withImages) {
   rankItems(items);
   let sortMode = startup.plainSort === 'importance' ? 'importance' : 'site';
   const layout = (startup.plainLayout || {})[host] || { hidden: [], order: [] };
+  // Articles opened here, kept for 30 days on every site. With "hide read" on, those read before this visit are left out
+  // of the list, like an inbox showing only unread mail; one read now stays (dimmed) until the next visit.
+  let hideRead = !!startup.plainHideRead, showReadNow = false;
+  const readBefore = new Set(Object.keys(startup.plainRead || {})), hiddenRead = new Set();
+  const skipRead = it => hideRead && !showReadNow && readBefore.has(it.key);
+  const saveRead = key => gm.get('plainRead', {}).then(all => {
+    const now = Date.now(), kept = Object.entries({ ...(all || {}), [key]: now }).filter(([, t]) => now - t < 30 * 864e5).sort((a, b) => b[1] - a[1]).slice(0, 3000);
+    return gm.set('plainRead', Object.fromEntries(kept));
+  });
   readSectionNames(src);
 
   plainHost = document.createElement('div');
@@ -489,7 +502,7 @@ async function plainView(withImages) {
     <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
     <main></main><footer></footer><div class="keys"></div></div>
     <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>
-    <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
+    <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><label class="opt"><input type="checkbox" data-opt="hide-read"><span>${T.hideRead}</span></label><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
   const h1 = sh.querySelector('h1');
   if (logo) {
     const chip = document.createElement('span'), name = document.createElement('span');
@@ -538,7 +551,10 @@ async function plainView(withImages) {
   const release = () => { if (!pressed) return; setTimeout(() => { pressed = null; const all = held.splice(0); if (all.length) steady(() => all.forEach(f => f())); }); };
   window.addEventListener('pointerup', release, true);
   window.addEventListener('pointercancel', release, true);
-  function fill(it, li) {
+  // A row whose article is still to be fetched keeps four lines free for its lead (p.lead.wait), and every lead takes
+  // those four lines, no more (the whole of it is in the article view): the cards are alike, and a lead coming in
+  // doesn't push the list down.
+  function fill(it, li, fetched = false) {
     const m = cache[it.key];
     if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
     const meta = m && !m.err ? cleanMeta(m, it.url) : it.desc ? { title: '', desc: it.desc } : null;
@@ -546,28 +562,45 @@ async function plainView(withImages) {
     const a = li.querySelector('a.h'), p = li.querySelector('p.lead');
     a.textContent = text;
     if (norm(text) !== norm(it.teaser)) a.title = 'Original: ' + it.teaser;
-    p.textContent = lead; p.hidden = !lead;
+    const waiting = !lead && !m && !fetched && CFG.fetch;
+    p.textContent = lead; p.hidden = !lead && !waiting; p.classList.toggle('wait', waiting);
     const im = li.querySelector('.pic-img');
     const src = im && (it.img || (m && !m.err && m.image) || '');
     if (src && im.getAttribute('src') !== src) im.src = src;
+  }
+  // The count, and how many read articles were left out, with a button that shows them on this visit.
+  function updateFooter() {
+    const f = sh.querySelector('footer');
+    f.replaceChildren(`${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`);
+    if (!hiddenRead.size) return;
+    const b = document.createElement('button'); b.dataset.act = 'show-read'; b.textContent = T.showRead;
+    f.append(document.createElement('br'), `${T.readHidden(hiddenRead.size)} · `, b);
   }
   // An article whose metadata reveals a muted topic leaves the page, and its section too once empty.
   function dropRow(key, li) {
     const sec = li.closest('section');
     li.remove(); rows.delete(key); plainCount = rows.size;
     if (sec && !sec.querySelector('li')) { nav.querySelector(`[data-sec="${sec.id}"]`)?.remove(); sec.remove(); }
-    sh.querySelector('footer').textContent = `${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`;
+    updateFooter();
   }
   const seenRows = new IntersectionObserver(es => {
     for (const e of es) if (e.isIntersecting) { const i = want.indexOf(e.target.dataset.key); if (i > 0) want.unshift(...want.splice(i, 1)); prefetch(e.target.dataset.key); }
     pumpPlain();
   }, { rootMargin: '400px' });
-  let running = 0;
+  // Fetched articles go into the list together, a few times a second, rather than one change after another.
+  let running = 0, fillTimer = null; const toFill = new Set();
+  const fillSoon = key => {
+    toFill.add(key);
+    fillTimer ||= setTimeout(() => {
+      fillTimer = null; const keys = [...toFill]; toFill.clear();
+      steady(() => { for (const k of keys) { const li = rows.get(k); if (li?.isConnected) fill(byKey.get(k), li, true); } });
+    }, 250);
+  };
   function pumpPlain() {
     while (running < CFG.concurrency && want.length) {
       const key = want.shift(), it = byKey.get(key);
       running++;
-      getMeta(it.url).finally(() => { running--; steady(() => { const li = rows.get(key); if (li?.isConnected) fill(it, li); }); pumpPlain(); });
+      getMeta(it.url).finally(() => { running--; fillSoon(key); pumpPlain(); });
     }
   }
   function row(it, withSection) {
@@ -606,13 +639,14 @@ async function plainView(withImages) {
   // Reading in place: a card opens its article full screen over the list, which stays where it was.
   // Close, Escape and the browser's back (swipe back on a phone) return to the list.
   const el = readerEl;
-  const view = sh.querySelector('.view'), reader = view.querySelector('.reader'), readKeys = new Set();
+  const view = sh.querySelector('.view'), reader = view.querySelector('.reader'), readKeys = new Set(readBefore);
   view.querySelector('[data-act="close-reader"]').textContent = '✕ ' + T.close;
   let current = null; // the article on screen
   // replace: moving to the previous/next article, which shouldn't stack up in the history.
   function openArticle(it, replace, fromHistory) {
     const li = rows.get(it.key);
-    current = it; readKeys.add(it.key); li?.classList.add('read');
+    current = it; li?.classList.add('read');
+    if (!readKeys.has(it.key)) { readKeys.add(it.key); saveRead(it.key); }
     view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
     const list = cards(), i = list.indexOf(li);
     view.querySelector('[data-act="prev"]').disabled = i <= 0;
@@ -734,13 +768,13 @@ async function plainView(withImages) {
     const anchorKey = anchor?.dataset.key, anchorTop = anchor?.getBoundingClientRect().top;
     // The headline that has the keyboard focus keeps it: the list is built anew, and the arrow keys and j/k go on from there.
     const focusKey = focused()?.closest?.('main li[data-key]')?.dataset.key;
-    main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect();
+    main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect(); hiddenRead.clear();
     sh.querySelector('[data-act="sort"]').textContent = sortMode === 'importance' ? T.siteOrder : T.byImportance;
     if (sortMode === 'importance') {
       // One list across the visible sections, loudest on the front page first; feed-only items last.
       const ol = document.createElement('ol'), seenKeys = new Set();
       const all = order().filter(id => !layout.hidden.includes(id)).flatMap(id => sections.get(id))
-        .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key)).sort((a, b) => (b.score || 0) - (a.score || 0));
+        .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key) && !(skipRead(it) && hiddenRead.add(it.key))).sort((a, b) => (b.score || 0) - (a.score || 0));
       for (const it of all) if (!rows.has(it.key)) { const li = row(it, true); if (li) ol.append(li); }
       const sec = document.createElement('section'), h2 = document.createElement('h2');
       sec.id = 's-importance'; h2.textContent = T.byImportance;
@@ -751,6 +785,7 @@ async function plainView(withImages) {
       const ol = document.createElement('ol');
       for (const it of sections.get(id)) {
         if (rows.has(it.key)) continue; // an article in two sections is shown once
+        if (skipRead(it)) { hiddenRead.add(it.key); continue; }
         const li = row(it, false); if (li) ol.append(li);
       }
       if (!ol.childElementCount) continue;
@@ -760,7 +795,7 @@ async function plainView(withImages) {
       sec.append(h2, ol); main.append(sec); nav.append(chip);
     }
     plainCount = rows.size;
-    sh.querySelector('footer').textContent = `${T.count(rows.size)} · ${host} · ${(typeof GM !== 'undefined' && GM.info?.script?.name) || 'Declickbait'}`;
+    updateFooter();
     plainHost.scrollTop = y;
     const again = y > 0 && anchorKey && rows.get(anchorKey); // at the top, the top it stays
     if (again) plainHost.scrollTop += again.getBoundingClientRect().top - anchorTop;
@@ -781,12 +816,15 @@ async function plainView(withImages) {
       li.querySelector('input').checked = !layout.hidden.includes(id);
       list.append(li);
     }
+    editor.querySelector('[data-opt="hide-read"]').checked = hideRead;
     editor.hidden = false;
   }
   async function saveEditor() {
     layout.order = [...list.children].map(li => li.dataset.id);
     layout.hidden = [...list.children].filter(li => !li.querySelector('input').checked).map(li => li.dataset.id);
     await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
+    const hr = editor.querySelector('[data-opt="hide-read"]').checked;
+    if (hr !== hideRead) { hideRead = hr; showReadNow = false; gm.set('plainHideRead', hideRead); }
     editor.hidden = true;
     render();
   }
@@ -810,6 +848,7 @@ async function plainView(withImages) {
     else if (b.dataset.act === 'sections') openEditor();
     else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
     else if (b.dataset.act === 'done') saveEditor();
+    else if (b.dataset.act === 'show-read') { showReadNow = true; render(); }
     else if (b.dataset.act === 'original') { try { sessionStorage.setItem('declickbait-original', host); } catch {} location.reload(); }
     else if (b.dataset.move) {
       const li = b.closest('li');
