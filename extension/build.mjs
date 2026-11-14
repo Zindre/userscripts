@@ -125,7 +125,8 @@ const targets = {
   },
   // iOS only allows non-persistent background pages.
   // On an iPhone Safari didn't run the manifest's world: "MAIN" script in the page's world, so background.js registers it.
-  safari: { ...base, permissions: [...base.permissions, 'scripting'], content_scripts: base.content_scripts.filter(c => !c.world),
+  // nativeMessaging: background.js tells the app whether it may run on all websites (the app's first screen).
+  safari: { ...base, permissions: [...base.permissions, 'scripting', 'nativeMessaging'], content_scripts: base.content_scripts.filter(c => !c.world),
     icons: icons([16, 32, 48, 96, 128, 256, 512, 1024]), background: { scripts: ['background.js'], persistent: false } },
 };
 

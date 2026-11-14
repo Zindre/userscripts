@@ -23,6 +23,22 @@ const blockVideoAds = async () => {
 };
 for (const ev of [api.runtime.onInstalled, api.runtime.onStartup]) ev.addListener(blockVideoAds);
 
+// Safari only (nativeMessaging): whether the extension may run on all websites, for the app's first screen, which can't
+// ask Safari that itself. Checked each time Safari starts this page; told to the app when it changed, or once an hour.
+const reportAccess = async force => {
+  if (!api.runtime.sendNativeMessage || !api.permissions) return;
+  try {
+    const all = await api.permissions.contains({ origins: ['http://*/*', 'https://*/*'] });
+    const { accessTold } = await api.storage.local.get('accessTold');
+    if (force !== true && accessTold?.all === all && Date.now() - accessTold.at < 3600e3) return;
+    await api.runtime.sendNativeMessage('no.sedb.NoThis', { type: 'access', all });
+    await api.storage.local.set({ accessTold: { all, at: Date.now() } });
+  } catch (e) { console.warn('Web Detox: access report', e); }
+};
+for (const ev of [api.permissions?.onAdded, api.permissions?.onRemoved]) ev?.addListener(() => reportAccess(true));
+reportAccess();
+api.runtime.onMessage.addListener(msg => { if (msg?.type === 'nothis-access') reportAccess(); });
+
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type !== 'declickbait-fetch' || !sender.tab) return;
   let url;

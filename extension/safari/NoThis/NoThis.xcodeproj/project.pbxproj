@@ -619,6 +619,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				CODE_SIGN_ENTITLEMENTS = "iOS (Extension)/NoThis Extension.entitlements";
 				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -653,6 +654,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				CODE_SIGN_ENTITLEMENTS = "iOS (Extension)/NoThis Extension.entitlements";
 				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -690,6 +692,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				CODE_SIGN_ENTITLEMENTS = "iOS (App)/NoThis.entitlements";
 				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -731,6 +734,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				CODE_SIGN_ENTITLEMENTS = "iOS (App)/NoThis.entitlements";
 				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
