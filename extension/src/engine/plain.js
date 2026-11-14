@@ -772,7 +772,16 @@ async function plainView(withImages) {
     current = null; view.hidden = true; reader.replaceChildren();
     document.title = listTitle;
     if (!fromHistory) history.back();
-    const li = rows.get(key); if (li) { cursorKey = key; mark(li); li.querySelector('a.h')?.focus({ preventScroll: true }); }
+    let back = key;
+    if (hideRead && !showReadNow) {
+      // With "hide read" on, what was read leaves the list on the way back to it, and the keyboard goes on from the next
+      // unread card (the one before, at the end). The cards around keep their place: render() holds the one on top.
+      const list = cards(), i = list.indexOf(rows.get(key)), unread = l => !readKeys.has(l.dataset.key);
+      back = (list.slice(i + 1).find(unread) || list.slice(0, Math.max(i, 0)).reverse().find(unread))?.dataset.key;
+      for (const k of readKeys) readBefore.add(k);
+      render();
+    }
+    const li = back && rows.get(back); if (li) { cursorKey = back; mark(li); li.querySelector('a.h')?.focus({ preventScroll: true }); }
   }
   // Back closes the article; forward opens it again. By address: a site's own router can replace history.state.
   window.addEventListener('popstate', () => {
