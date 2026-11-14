@@ -1584,8 +1584,8 @@
     // level). Paid articles are marked; what the site sends for them is what the reader shows.
     const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
     const T = NB
-      ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul saker du har lest', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
-      : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide articles you have read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
+      ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
+      : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
     const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
     // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
     const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -1811,12 +1811,18 @@
       .wrap{max-width:42rem;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom, 0px))}
       header{position:sticky;top:0;z-index:1;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(12px + env(safe-area-inset-top, 0px)) 0 8px}
       .top{display:flex;align-items:center;gap:8px}
-      h1{font-size:20px;margin:0 auto 0 0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      h1{font-size:20px;margin:0 auto 0 0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:56px}
+      h1:has(.logo){margin-left:-8px}
+      /* The buttons keep their size and one line; the site's name or logo gets what is left, and a logo shrinks to fit. */
+      .top button{flex:none;white-space:nowrap}
+      @media (max-width: 480px){.top{gap:6px} .top button{font-size:13px;padding:5px 8px}}
+      @media (max-width: 360px){.top{gap:4px} .top button{font-size:12px;padding:4px 6px}}
       button{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
       button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       nav{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
       nav::-webkit-scrollbar{display:none}
       nav button{white-space:nowrap;border-radius:999px}
+      nav button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
       section{padding-top:20px;scroll-margin-top:110px}
       h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 2px}
       ol{list-style:none;margin:0;padding:0}
@@ -1831,8 +1837,9 @@
       p.lead{margin:3px 0 0;color:var(--muted);font-size:15px;line-height:1.33;min-height:5.32em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden}
       p.lead[hidden]{display:none}
       p.lead.wait{background:linear-gradient(var(--line),var(--line)) 0 .33em/92% .67em no-repeat,linear-gradient(var(--line),var(--line)) 0 1.66em/88% .67em no-repeat,linear-gradient(var(--line),var(--line)) 0 2.99em/90% .67em no-repeat,linear-gradient(var(--line),var(--line)) 0 4.32em/50% .67em no-repeat;border-radius:3px}
-      .logo{display:inline-flex;align-items:center;padding:4px 8px;border-radius:6px;margin-left:-8px}
-      .logo svg,.logo img{display:block;height:26px;width:auto;max-width:200px}
+      .logo{display:inline-flex;align-items:center;padding:4px 8px;border-radius:6px;max-width:100%;box-sizing:border-box;vertical-align:middle}
+      .logo svg,.logo img{display:block;height:26px;width:auto;max-width:min(200px,100%);object-fit:contain}
+      @media (max-width: 480px){.logo svg,.logo img{height:22px}}
       .keys{display:none;color:var(--muted);font-size:13px;padding-top:6px}
       @media (hover: hover) and (pointer: fine){.keys{display:block}}
       main a.h:focus-visible{outline:none}
@@ -1882,7 +1889,6 @@
       .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
       footer{color:var(--muted);font-size:13px;padding-top:24px}
       footer button{font-size:13px;padding:2px 8px;margin-top:6px}
-      .sheet .opt{display:flex;gap:8px;align-items:center;padding:4px 0 14px;margin-bottom:12px;border-bottom:1px solid var(--line);font-size:15px}
       .editor{position:fixed;inset:0;z-index:2;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
       .editor[hidden]{display:none}
       .sheet{background:var(--bg);width:100%;max-width:28rem;max-height:80vh;overflow:auto;border-radius:12px 12px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px))}
@@ -2063,7 +2069,8 @@
       let sortMode = startup.plainSort === 'importance' ? 'importance' : 'site';
       const layout = (startup.plainLayout || {})[host] || { hidden: [], order: [] };
       // Articles opened here, kept for 30 days on every site. With "hide read" on, those read before this visit are left out
-      // of the list, like an inbox showing only unread mail; one read now stays (dimmed) until the next visit.
+      // of the list, like an inbox showing only unread mail; one read now stays (dimmed) until the next visit, or until the
+      // button is pressed.
       let hideRead = !!startup.plainHideRead, showReadNow = false;
       const readBefore = new Set(Object.keys(startup.plainRead || {})), hiddenRead = new Set();
       const skipRead = it => hideRead && !showReadNow && readBefore.has(it.key);
@@ -2080,7 +2087,7 @@
         <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
         <main></main><footer></footer><div class="keys"></div></div>
         <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>
-        <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><label class="opt"><input type="checkbox" data-opt="hide-read"><span>${T.hideRead}</span></label><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
+        <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
       const h1 = sh.querySelector('h1');
       if (logo) {
         const chip = document.createElement('span'), name = document.createElement('span');
@@ -2181,18 +2188,35 @@
           getMeta(it.url).finally(() => { running--; fillSoon(key); pumpPlain(); });
         }
       }
+      // The cards of the list being replaced (render): a card that would look the same is moved into the new list as it
+      // is, its importance mark brought up to date. Built anew, every picture went blank for a moment while it was decoded
+      // again, also the ones long loaded.
+      let oldRows = null;
+      const setTier = (li, tier) => {
+        li.querySelector(':scope > .sr')?.remove();
+        if (tier > 1) {
+          // The front page's own sense of importance, as a quiet bar instead of big type.
+          li.dataset.tier = tier;
+          const sr = document.createElement('span'); sr.className = 'sr'; sr.textContent = (tier === 3 ? T.top : T.important) + ': ';
+          li.prepend(sr);
+        } else delete li.dataset.tier;
+      };
       function row(it, withSection) {
+        const look = `${withSection ? 1 : 0}${it.paid ? 1 : 0}`, prev = oldRows?.get(it.key);
+        if (prev && prev.dataset.look === look) {
+          if ((+prev.dataset.tier || 1) !== (it.tier || 1)) setTier(prev, it.tier);
+          rows.set(it.key, prev);
+          if (prev.querySelector('p.lead.wait') && !want.includes(it.key)) want.push(it.key);
+          seenRows.observe(prev);
+          return prev;
+        }
         const li = document.createElement('li'), a = document.createElement('a'), p = document.createElement('p');
+        li.dataset.look = look;
         a.href = it.url; a.className = 'h'; a.dataset.key = it.key; p.className = 'lead'; li.dataset.key = it.key;
         // Safari on a Mac only lets a link take focus when "Press Tab to highlight each item" is on, so without this the
         // arrow keys, j/k, Enter and o found no headline to start from or open.
         a.tabIndex = 0;
-        if (it.tier > 1) {
-          // The front page's own sense of importance, as a quiet bar instead of big type.
-          li.dataset.tier = it.tier;
-          const sr = document.createElement('span'); sr.className = 'sr'; sr.textContent = (it.tier === 3 ? T.top : T.important) + ': ';
-          li.append(sr);
-        }
+        setTier(li, it.tier);
         const text = withImages ? document.createElement('div') : li;
         text.append(a);
         if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
@@ -2346,7 +2370,12 @@
         const anchorKey = anchor?.dataset.key, anchorTop = anchor?.getBoundingClientRect().top;
         // The headline that has the keyboard focus keeps it: the list is built anew, and the arrow keys and j/k go on from there.
         const focusKey = focused()?.closest?.('main li[data-key]')?.dataset.key;
+        oldRows = new Map(rows);
         main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect(); hiddenRead.clear();
+        // First in the row of section buttons: read articles in or out of the list, like unread-only mail.
+        const readChip = document.createElement('button');
+        readChip.dataset.act = 'hide-read'; readChip.textContent = T.hideRead; readChip.setAttribute('aria-pressed', String(hideRead && !showReadNow));
+        nav.append(readChip);
         sh.querySelector('[data-act="sort"]').textContent = sortMode === 'importance' ? T.siteOrder : T.byImportance;
         if (sortMode === 'importance') {
           // One list across the visible sections, loudest on the front page first; feed-only items last.
@@ -2379,6 +2408,7 @@
         if (again) plainHost.scrollTop += again.getBoundingClientRect().top - anchorTop;
         if (focusKey) rows.get(focusKey)?.querySelector('a.h')?.focus({ preventScroll: true });
         if (cursor()) mark(cursor());
+        oldRows = null;
         pumpPlain();
       }
 
@@ -2394,15 +2424,12 @@
           li.querySelector('input').checked = !layout.hidden.includes(id);
           list.append(li);
         }
-        editor.querySelector('[data-opt="hide-read"]').checked = hideRead;
         editor.hidden = false;
       }
       async function saveEditor() {
         layout.order = [...list.children].map(li => li.dataset.id);
         layout.hidden = [...list.children].filter(li => !li.querySelector('input').checked).map(li => li.dataset.id);
         await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
-        const hr = editor.querySelector('[data-opt="hide-read"]').checked;
-        if (hr !== hideRead) { hideRead = hr; showReadNow = false; gm.set('plainHideRead', hideRead); }
         editor.hidden = true;
         render();
       }
@@ -2427,6 +2454,12 @@
         else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
         else if (b.dataset.act === 'done') saveEditor();
         else if (b.dataset.act === 'show-read') { showReadNow = true; render(); }
+        else if (b.dataset.act === 'hide-read') {
+          // Turned on here, it also takes out what was read on this visit: that was asked for.
+          hideRead = !(hideRead && !showReadNow); showReadNow = false; gm.set('plainHideRead', hideRead);
+          if (hideRead) for (const k of readKeys) readBefore.add(k);
+          render();
+        }
         else if (b.dataset.act === 'original') { try { sessionStorage.setItem('declickbait-original', host); } catch {} location.reload(); }
         else if (b.dataset.move) {
           const li = b.closest('li');
