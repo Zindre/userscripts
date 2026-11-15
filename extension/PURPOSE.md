@@ -2,6 +2,23 @@
 
 News should tell you what happened. Many news sites are built to do something else: keep you clicking. Headlines hold back the point, ads and autoplay video compete for your eyes, and the front page is arranged for traffic rather than relevance. This app gives the reader control back. It reads the sites you already use, and lets you decide how much of their packaging you want to see.
 
+## How we got here
+
+The early web asked little of its readers. A page was text and links, and it stayed still. The first banner ad went up in 1994, on HotWired. Pop-up windows came a few years later. Twenty years on, the man who wrote the first pop-up code called advertising "the internet's original sin" (Ethan Zuckerman, 2014).
+
+Each new layer of packaging brought a tool to take it off again:
+
+- **Pop-ups:** browsers learned to block them, Opera first, then Mozilla and, by 2004, Firefox and Internet Explorer.
+- **Busy sites:** RSS (1999) and feed readers such as Google Reader (2005–2013) gave you the headlines and text from many sites in one calm list, read on your terms.
+- **Ads and tracking:** ad blockers, from Adblock (2002) and Adblock Plus (2006) to uBlock Origin (2014). On iPhone, Safari got content blockers in 2015.
+- **Cluttered article pages:** reader modes, from Readability (2009) to Safari Reader (2010) and Firefox Reader View (2015).
+
+Then the packaging moved to where those tools could not reach. The headline itself became the bait, written to make you click rather than to tell you what happened. Feeds became endless (infinite scroll, 2006) and chosen for you. Video started by itself. Sites answered ad blockers with adblock walls (Bild in 2015), and mobile sites kept asking you to get their app. Google Reader closed in 2013, and many publishers' feeds became an afterthought.
+
+An ad blocker takes away the ads, but leaves the bait headline. Reader mode cleans up one article, after you have already been pulled in. RSS gave a calm list, but few sites still feed it well, and it cannot tell bait from news.
+
+Web Detox picks up from there. It does what RSS did, on the sites as they are today: it reads the front page you already visit and shows its articles as a calm list, with their real headlines and leads, in the sections and order you choose. It does what reader mode did, for every article you open from that list. On social media, it does what ad blockers never tried: it takes away what is built to keep you scrolling, and keeps the people you follow. All of it runs in your browser.
+
 ## Principles
 
 1. **The news, straight.** A headline should say what the article is about. When a teaser is bait, we show the article's own headline and lead instead. The publisher's real headline and lead are already in the page metadata.
