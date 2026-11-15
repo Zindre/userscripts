@@ -1,9 +1,11 @@
-New icon: a soft sun resting on calm lines. On iPhone, front pages that load the fast way (such as nrk.no) now fill the screen width instead of showing as a narrow column.
+Read later and Bookmarks: save an article from the reader (the clock and bookmark buttons), with L or B on a keyboard, or by holding your finger on it in the list. Both show at the top of every site's list, with articles from all sites. Read later empties itself as you read.
 
-Faster, smoother news front pages, especially in Safari. The page no longer stays blank or black while it loads. When you come back to a front page you have opened before, the list you saw last time shows at once with a thin moving bar under the header, and is replaced by the fresh list as soon as it is ready. On heavy sites (try nytimes.com, opened twice), the second visit skips the site's own scripts, so the list comes up quickly and scrolling and tapping stay responsive. Original still shows the site as it is.
+My news: open the Web Detox menu and tap My news. It gathers the news sites you visit most and shows their front pages together, one section per site, or all of them with the most important first.
 
-Stories open more cleanly: words that a site explains (VG's underlined words, such as "mistenkt") no longer run into the text. Tap the word to see what it means.
+Your things on all your devices: Read later, Bookmarks, what you have read and your section choices follow you through iCloud. Under Your data, at the bottom of the menu, you can delete everything Web Detox has stored.
 
-If a site shows a robot check, Web Detox stops fetching from that site for a while and says so in its menu, so it doesn't make things worse.
+The list: hide what you have read (the switch above the sections). Edit the sections right in the row of buttons: tap the pencil, then tap a section to hide or show it, or drag it to move it. The section you are reading is marked. Leads keep the same size, so the list no longer jumps while it loads, and pictures no longer blink. On a wide screen, small sections stand side by side.
 
-Facebook: more bait posts are hidden (posts that only promise "the simple trick"), and so are shortened links in the comments that lead to such pages.
+Web Detox now speaks 14 languages. The list follows the site's language; the menu and the app follow your device.
+
+Also new: the app's first screen shows whether Web Detox is turned on and allowed on all websites, with a button to the right page in Settings. Safari's "get our app" banner is gone from news sites. "Read on the site" opens in a new tab, so you come straight back. Fixed: bild.de reloading over and over, and dark-mode extensions such as Noir changing the list's colours.
