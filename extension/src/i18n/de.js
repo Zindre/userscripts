@@ -45,6 +45,7 @@ STRINGS.de = {
     privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
     erase: 'Alles löschen, was Web Detox gespeichert hat',
     eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
+    gift: 'Web Detox unterstützen',
     eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
   },
 

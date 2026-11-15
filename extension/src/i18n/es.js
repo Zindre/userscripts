@@ -45,6 +45,7 @@ STRINGS.es = {
     privacyText: 'Tus ajustes, los artículos guardados y lo que has leído se quedan en este navegador y llegan a tus otros dispositivos a través de tu cuenta del navegador o de iCloud. No se nos envía nada.',
     erase: 'Borrar todo lo que Web Detox ha guardado',
     eraseAsk: 'Esto borra tus ajustes, «Leer más tarde», «Marcadores» y el historial de lectura aquí y en tus otros dispositivos la próxima vez que se sincronicen. No se puede deshacer.',
+    gift: 'Apoyar Web Detox',
     eraseYes: 'Borrar todo', eraseNo: 'Cancelar', erased: 'Se ha borrado todo.',
   },
 

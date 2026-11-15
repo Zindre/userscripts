@@ -128,6 +128,7 @@
         privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
         erase: 'Delete everything Web Detox has stored',
         eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
+        gift: 'Support Web Detox',
         eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
       },
 
@@ -214,6 +215,7 @@
         privacyText: 'Dine indstillinger, gemte artikler og det, du har læst, bliver i denne browser og følger med til dine andre enheder via din browserkonto eller iCloud. Intet sendes til os.',
         erase: 'Slet alt, hvad Web Detox har gemt',
         eraseAsk: 'Dette sletter dine indstillinger, Læs senere, Bogmærker og læsehistorik her og på dine andre enheder, næste gang de synkroniserer. Det kan ikke fortrydes.',
+        gift: 'Støt Web Detox',
         eraseYes: 'Slet alt', eraseNo: 'Annuller', erased: 'Alt er slettet.',
       },
 
@@ -297,6 +299,7 @@
         privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
         erase: 'Alles löschen, was Web Detox gespeichert hat',
         eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
+        gift: 'Web Detox unterstützen',
         eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
       },
 
@@ -377,6 +380,7 @@
         privacyText: 'Tus ajustes, los artículos guardados y lo que has leído se quedan en este navegador y llegan a tus otros dispositivos a través de tu cuenta del navegador o de iCloud. No se nos envía nada.',
         erase: 'Borrar todo lo que Web Detox ha guardado',
         eraseAsk: 'Esto borra tus ajustes, «Leer más tarde», «Marcadores» y el historial de lectura aquí y en tus otros dispositivos la próxima vez que se sincronicen. No se puede deshacer.',
+        gift: 'Apoyar Web Detox',
         eraseYes: 'Borrar todo', eraseNo: 'Cancelar', erased: 'Se ha borrado todo.',
       },
 
@@ -460,6 +464,7 @@
         privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
         erase: 'Poista kaikki, mitä Web Detox on tallentanut',
         eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
+        gift: 'Tue Web Detoxia',
         eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
       },
 
@@ -543,6 +548,7 @@
         privacyText: 'Vos réglages, vos articles enregistrés et ce que vous avez lu restent dans ce navigateur et passent sur vos autres appareils via votre compte de navigateur ou iCloud. Rien ne nous est envoyé.',
         erase: 'Effacer tout ce que Web Detox a enregistré',
         eraseAsk: 'Cela efface vos réglages, « À lire plus tard », « Signets » et l’historique de lecture ici, ainsi que sur vos autres appareils lors de leur prochaine synchronisation. Cette action est irréversible.',
+        gift: 'Soutenir Web Detox',
         eraseYes: 'Tout effacer', eraseNo: 'Annuler', erased: 'Tout est effacé.',
       },
 
@@ -623,6 +629,7 @@
         privacyText: 'Le tue impostazioni, gli articoli salvati e ciò che hai letto restano in questo browser e arrivano sugli altri tuoi dispositivi tramite il tuo account del browser o iCloud. Non ci viene inviato nulla.',
         erase: 'Elimina tutto ciò che Web Detox ha salvato',
         eraseAsk: 'Questo elimina le tue impostazioni, Leggi dopo, Segnalibri e la cronologia di lettura qui e sugli altri tuoi dispositivi alla prossima sincronizzazione. Non si può annullare.',
+        gift: 'Sostieni Web Detox',
         eraseYes: 'Elimina tutto', eraseNo: 'Annulla', erased: 'Tutto è stato eliminato.',
       },
 
@@ -706,6 +713,7 @@
         privacyText: '設定、保存した記事、既読履歴はこのブラウザに保存され、ブラウザのアカウントまたはiCloudを通じてほかのデバイスに同期されます。私たちには何も送信されません。',
         erase: 'Web Detoxが保存したデータをすべて削除',
         eraseAsk: '設定、「あとで読む」、「ブックマーク」、既読履歴を、このブラウザと、次回の同期時にほかのデバイスからも削除します。元に戻すことはできません。',
+        gift: 'Web Detoxを支援',
         eraseYes: 'すべて削除', eraseNo: 'キャンセル', erased: 'すべて削除しました。',
       },
 
@@ -789,6 +797,7 @@
         privacyText: 'Innstillingene, de lagrede sakene og det du har lest, blir i denne nettleseren, og følger deg til de andre enhetene dine via nettleserkontoen eller iCloud. Ingenting sendes til oss.',
         erase: 'Slett alt Web Detox har lagret',
         eraseAsk: 'Dette sletter innstillingene, Les senere, Bokmerker og lesehistorikken her, og på de andre enhetene dine neste gang de synkroniserer. Det kan ikke angres.',
+        gift: 'Støtt Web Detox',
         eraseYes: 'Slett alt', eraseNo: 'Avbryt', erased: 'Alt er slettet.',
       },
 
@@ -869,6 +878,7 @@
         privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
         erase: 'Alles wissen wat Web Detox heeft opgeslagen',
         eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
+        gift: 'Steun Web Detox',
         eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
       },
 
@@ -953,6 +963,7 @@
         privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
         erase: 'Usuń wszystko, co zapisał Web Detox',
         eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
+        gift: 'Wesprzyj Web Detox',
         eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
       },
 
@@ -1033,6 +1044,7 @@
         privacyText: 'Seus ajustes, as notícias salvas e o que você leu ficam neste navegador e vão para seus outros dispositivos pela sua conta do navegador ou pelo iCloud. Nada é enviado para nós.',
         erase: 'Apagar tudo o que o Web Detox salvou',
         eraseAsk: 'Isso apaga seus ajustes, Ler depois, Favoritos e o histórico de leitura aqui e nos seus outros dispositivos na próxima sincronização. Não dá para desfazer.',
+        gift: 'Apoiar o Web Detox',
         eraseYes: 'Apagar tudo', eraseNo: 'Cancelar', erased: 'Tudo foi apagado.',
       },
 
@@ -1113,6 +1125,7 @@
         privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
         erase: 'Radera allt som Web Detox har sparat',
         eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
+        gift: 'Stöd Web Detox',
         eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
       },
 
@@ -1196,6 +1209,7 @@
         privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
         erase: '删除 Web Detox 存储的所有内容',
         eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
+        gift: '支持 Web Detox',
         eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
       },
 

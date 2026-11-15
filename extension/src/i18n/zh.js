@@ -48,6 +48,7 @@ STRINGS.zh = {
     privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
     erase: '删除 Web Detox 存储的所有内容',
     eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
+    gift: '支持 Web Detox',
     eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
   },
 

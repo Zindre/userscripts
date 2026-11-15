@@ -165,6 +165,13 @@ $('swipe').addEventListener('change', async () => show(await ask({ act: 'swipeAn
   show(tabId === null ? null : await askUntil(1500));
 })();
 
+// A gift, for those who want to: one quiet link in the footer, nothing more (no reminders, no counting). Not in Safari:
+// in an App Store app a gift has to go through Apple's in-app purchase, which this isn't yet. Empty GIFT_URL: no link.
+const GIFT_URL = '';
+if (GIFT_URL && !api.runtime.getManifest().permissions?.includes('nativeMessaging')) {
+  $('gift').href = GIFT_URL; $('gift').textContent = P.gift; $('gift').hidden = false;
+}
+
 // Delete everything Web Detox has stored (background.js, wd-erase): asked once more first.
 $('erase').addEventListener('click', () => { $('erase').hidden = true; $('erase-ask').hidden = false; $('erase-no').focus(); });
 $('erase-no').addEventListener('click', () => { $('erase-ask').hidden = true; $('erase').hidden = false; });

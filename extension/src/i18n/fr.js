@@ -45,6 +45,7 @@ STRINGS.fr = {
     privacyText: 'Vos réglages, vos articles enregistrés et ce que vous avez lu restent dans ce navigateur et passent sur vos autres appareils via votre compte de navigateur ou iCloud. Rien ne nous est envoyé.',
     erase: 'Effacer tout ce que Web Detox a enregistré',
     eraseAsk: 'Cela efface vos réglages, « À lire plus tard », « Signets » et l’historique de lecture ici, ainsi que sur vos autres appareils lors de leur prochaine synchronisation. Cette action est irréversible.',
+    gift: 'Soutenir Web Detox',
     eraseYes: 'Tout effacer', eraseNo: 'Annuler', erased: 'Tout est effacé.',
   },
 

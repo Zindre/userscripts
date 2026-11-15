@@ -45,6 +45,7 @@ STRINGS.pt = {
     privacyText: 'Seus ajustes, as notícias salvas e o que você leu ficam neste navegador e vão para seus outros dispositivos pela sua conta do navegador ou pelo iCloud. Nada é enviado para nós.',
     erase: 'Apagar tudo o que o Web Detox salvou',
     eraseAsk: 'Isso apaga seus ajustes, Ler depois, Favoritos e o histórico de leitura aqui e nos seus outros dispositivos na próxima sincronização. Não dá para desfazer.',
+    gift: 'Apoiar o Web Detox',
     eraseYes: 'Apagar tudo', eraseNo: 'Cancelar', erased: 'Tudo foi apagado.',
   },
 

@@ -50,6 +50,7 @@ STRINGS.en = {
     privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
     erase: 'Delete everything Web Detox has stored',
     eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
+    gift: 'Support Web Detox',
     eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
   },
 

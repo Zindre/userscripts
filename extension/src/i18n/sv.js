@@ -45,6 +45,7 @@ STRINGS.sv = {
     privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
     erase: 'Radera allt som Web Detox har sparat',
     eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
+    gift: 'Stöd Web Detox',
     eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
   },
 

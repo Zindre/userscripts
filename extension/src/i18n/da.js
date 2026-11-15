@@ -48,6 +48,7 @@ STRINGS.da = {
     privacyText: 'Dine indstillinger, gemte artikler og det, du har læst, bliver i denne browser og følger med til dine andre enheder via din browserkonto eller iCloud. Intet sendes til os.',
     erase: 'Slet alt, hvad Web Detox har gemt',
     eraseAsk: 'Dette sletter dine indstillinger, Læs senere, Bogmærker og læsehistorik her og på dine andre enheder, næste gang de synkroniserer. Det kan ikke fortrydes.',
+    gift: 'Støt Web Detox',
     eraseYes: 'Slet alt', eraseNo: 'Annuller', erased: 'Alt er slettet.',
   },
 

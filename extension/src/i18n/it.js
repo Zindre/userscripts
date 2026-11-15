@@ -45,6 +45,7 @@ STRINGS.it = {
     privacyText: 'Le tue impostazioni, gli articoli salvati e ciò che hai letto restano in questo browser e arrivano sugli altri tuoi dispositivi tramite il tuo account del browser o iCloud. Non ci viene inviato nulla.',
     erase: 'Elimina tutto ciò che Web Detox ha salvato',
     eraseAsk: 'Questo elimina le tue impostazioni, Leggi dopo, Segnalibri e la cronologia di lettura qui e sugli altri tuoi dispositivi alla prossima sincronizzazione. Non si può annullare.',
+    gift: 'Sostieni Web Detox',
     eraseYes: 'Elimina tutto', eraseNo: 'Annulla', erased: 'Tutto è stato eliminato.',
   },
 

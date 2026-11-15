@@ -49,6 +49,7 @@ STRINGS.pl = {
     privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
     erase: 'Usuń wszystko, co zapisał Web Detox',
     eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
+    gift: 'Wesprzyj Web Detox',
     eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
   },
 

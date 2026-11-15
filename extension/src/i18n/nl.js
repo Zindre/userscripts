@@ -45,6 +45,7 @@ STRINGS.nl = {
     privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
     erase: 'Alles wissen wat Web Detox heeft opgeslagen',
     eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
+    gift: 'Steun Web Detox',
     eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
   },
 
