@@ -1582,10 +1582,12 @@
     // media paused, so ads, autoplay video, pop-ups and animation never show. A "Latest" section
     // comes from the site's RSS/Atom feed. Article pages are left alone (they get the synopsis
     // level). Paid articles are marked; what the site sends for them is what the reader shows.
-    const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || '');
-    const T = NB
-      ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, up: 'Flytt opp', down: 'Flytt ned', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
-      : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, up: 'Move up', down: 'Move down', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
+    const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || ''), DE = /^de\b/i.test(document.documentElement.lang || '');
+    const T = DE
+      ? { siteOrder: 'Wie auf der Seite', byImportance: 'Wichtigstes zuerst', top: 'Topthema', important: 'Wichtig', related: 'Mehr zum Thema', latest: 'Neueste', other: 'Sonstiges', sections: 'Rubriken', original: 'Original', done: 'Fertig', paid: 'Abo', count: n => `${n} Artikel`, editSections: 'Rubriken bearbeiten', editHint: 'Tippen zum Aus- oder Einblenden, ziehen zum Verschieben.', loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen', paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel', unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.', short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.', hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen', keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · Esc schließt' }
+      : NB
+      ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, editSections: 'Rediger seksjoner', editHint: 'Trykk for å skjule eller vise, dra for å flytte.', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
+      : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, editSections: 'Edit sections', editHint: 'Tap to hide or show, drag to move.', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
     const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
     // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
     const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -1819,10 +1821,17 @@
       @media (max-width: 360px){.top{gap:4px} .top button{font-size:12px;padding:4px 6px}}
       button{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
       button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-      nav{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+      /* Hide read is a setting, not a section: a switch that stays put to the left of the section chips, which scroll. */
+      .filters{display:flex;align-items:center;gap:10px;padding-top:8px}
+      .filters:not(:has(nav button)) .read-toggle{border-right:0}
+      .read-toggle{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-right:1px solid var(--line);border-radius:0;padding:3px 10px 3px 0;color:var(--muted);font-size:13px;white-space:nowrap}
+      .read-toggle::before{content:"";flex:none;width:28px;height:16px;border-radius:8px;background:var(--line) radial-gradient(circle at 8px 50%,#fff 5.5px,transparent 6px)}
+      .read-toggle[aria-checked="true"]{color:var(--fg)}
+      .read-toggle[aria-checked="true"]::before{background:var(--accent) radial-gradient(circle at 20px 50%,#fff 5.5px,transparent 6px)}
+      nav{display:flex;gap:6px;overflow-x:auto;min-width:0;flex:1;scrollbar-width:none}
       nav::-webkit-scrollbar{display:none}
       nav button{white-space:nowrap;border-radius:999px}
-      nav button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+      nav button[aria-current="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
       section{padding-top:20px;scroll-margin-top:110px}
       h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 2px}
       ol{list-style:none;margin:0;padding:0}
@@ -1889,26 +1898,47 @@
       .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
       footer{color:var(--muted);font-size:13px;padding-top:24px}
       footer button{font-size:13px;padding:2px 8px;margin-top:6px}
-      .editor{position:fixed;inset:0;z-index:2;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
-      .editor[hidden]{display:none}
-      .sheet{background:var(--bg);width:100%;max-width:28rem;max-height:80vh;overflow:auto;border-radius:12px 12px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px))}
-      .sheet h2{font-size:15px;text-transform:none;letter-spacing:0;color:var(--fg);margin-bottom:8px}
-      .sheet ul{list-style:none;margin:0 0 12px;padding:0}
-      .sheet li{display:flex;align-items:center;gap:6px;padding:6px 0}
-      .sheet label{flex:1;display:flex;gap:8px;align-items:center;cursor:pointer}
-      .sheet input{accent-color:var(--accent);width:18px;height:18px}
-      .sheet li button{padding:2px 9px}
-      .sheet > button{width:100%;padding:8px;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}`;
+      /* Sections are edited in the chip row itself: the pencil at its end shows every section, hidden ones too, wrapped
+         on lines; a tap hides or shows one, a drag moves it, and Done keeps it. */
+      .edit-secs{flex:none;border:0;padding:4px 2px 4px 8px;font-size:18px;line-height:1;color:var(--muted)}
+      .filters.editing{flex-wrap:wrap;align-items:flex-start}
+      .filters.editing .read-toggle{display:none}
+      .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
+      .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
+      .edit-hint{margin:6px 0 0;font-size:13px;color:var(--muted)}
+      nav button[data-id]{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+      nav button[data-id] small{color:var(--muted);font-size:12px;margin-left:4px}
+      nav button[data-id][aria-pressed="false"]{opacity:.45;text-decoration:line-through;border-style:dashed}
+      nav button[data-id].drag{outline:2px solid var(--accent);outline-offset:1px;opacity:1}`;
 
 
     let plainHost = null, plainCount = 0;
+    // The page under the list is told it is light and dark, as our own view is. Dark-mode extensions (Noir) look at the page,
+    // not inside our shadow root: they saw a light page and laid their own dark colours over it, the list included. With
+    // color-scheme set, a page background in our colours, and our host's colours pinned, they see a page with its own dark mode.
+    function ownColors() {
+      if (document.getElementById('nothis-scheme')) return;
+      const meta = document.createElement('meta');
+      meta.name = 'color-scheme'; meta.content = 'light dark'; meta.id = 'nothis-scheme-meta';
+      for (const m of document.querySelectorAll('meta[name="color-scheme" i]')) m.remove();
+      const st = document.createElement('style');
+      st.id = 'nothis-scheme';
+      st.textContent = ':root{color-scheme:light dark!important}' +
+        'html,html>body,#declickbait-plain{background:#fbfbf9!important;color:#1d1d1b!important;filter:none!important}' +
+        '@media (prefers-color-scheme: dark){html,html>body,#declickbait-plain{background:#1a1b1a!important;color:#e8e8e5!important}}';
+      const head = document.head || document.documentElement;
+      head.prepend(meta); head.appendChild(st);
+    }
     // Hides the site's page and keeps its media silent. The body keeps its layout while harvest() scrolls
     // it (lazy loading needs that), and is taken out of the page once it is done. Returns how to give it back.
     function swallowSite() {
       const st = document.createElement('style');
       // The body itself stays visible and in the layout, emptied: Safari paints nothing while a page loads unless its body is
       // visible (see the cover in gm-shim.js), and on a page that never finishes loading the list was never painted.
-      st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body>*{display:none!important}';
+      // Once the list is up, what is in the body is skipped by layout and paint, but keeps its boxes: with display:none, the
+      // anti-adblock script on bild.de (Ad Shield, html-load.com) saw its bait ads without a size and sent the tab to its
+      // adblock wall and back, again and again.
+      st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body>*{content-visibility:hidden!important}';
       document.head.appendChild(st);
       document.documentElement.classList.add('cb-plain');
       for (const m of document.querySelectorAll('video, audio')) try { m.pause(); m.muted = true; } catch {}
@@ -1954,7 +1984,7 @@
     function readerContent(art, title, lede, url) {
       const el = readerEl, out = [el('h1', title)];
       if (lede) out.push(el('p', lede, 'lede'));
-      const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+      const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : DE ? 'de-DE' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
       if (by) out.push(el('div', by, 'byline'));
       for (const b of art?.blocks || []) {
         if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
@@ -2019,7 +2049,7 @@
       sh.innerHTML = `<style>${PLAIN_CSS}</style><div class="view" role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="close-reader">✕ ${T.close}</button></div></div><article class="reader"></article></div>`;
       sh.querySelector('.bar span').textContent = title;
       sh.querySelector('.reader').replaceChildren(...readerContent(art, title, lede, url));
-      document.documentElement.appendChild(plainHost);
+      document.documentElement.appendChild(plainHost); ownColors();
       onlyList();
       for (const id of ['nothis-cover', 'nothis-shot']) document.getElementById(id)?.remove();
       sh.querySelector('.view').focus({ preventScroll: true });
@@ -2084,10 +2114,9 @@
       plainHost.id = 'declickbait-plain';
       const sh = plainHost.attachShadow({ mode: 'open' });
       sh.innerHTML = `<style>${PLAIN_CSS}</style>
-        <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="sections">${T.sections}</button><button data-act="original">${T.original}</button></div><nav></nav></header>
+        <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p></header>
         <main></main><footer></footer><div class="keys"></div></div>
-        <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>
-        <div class="editor" hidden><div class="sheet" role="dialog" aria-label="${T.sections}"><h2>${T.sections}</h2><ul></ul><button data-act="done">${T.done}</button></div></div>`;
+        <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
       const h1 = sh.querySelector('h1');
       if (logo) {
         const chip = document.createElement('span'), name = document.createElement('span');
@@ -2096,7 +2125,7 @@
         h1.append(chip, name);
       } else h1.textContent = pageMeta.site || host;
       sh.querySelector('.keys').textContent = T.keys;
-      document.documentElement.appendChild(plainHost);
+      document.documentElement.appendChild(plainHost); ownColors();
       onlyList();
       document.getElementById('nothis-cover')?.remove();
       // Remember the site, so next time the extension covers it before the original is drawn.
@@ -2109,6 +2138,33 @@
       const order = () => [...layout.order.filter(id => sections.has(id)), ...[...sections.keys()].filter(id => !layout.order.includes(id))];
 
       const main = sh.querySelector('main'), nav = sh.querySelector('nav'), rows = new Map(), want = [];
+      // The section being read has its chip marked, and the chip is kept in sight in the row: as the list scrolls, and at once
+      // when a chip is pressed (the list may not move, at the end of it).
+      let spyPin = null, spyFrame = 0;
+      const spy = () => {
+        spyFrame = 0;
+        const chips = [...nav.querySelectorAll('button[data-sec]')]; if (!chips.length) return;
+        let cur = spyPin && sh.getElementById(spyPin);
+        if (!cur) {
+          const line = sh.querySelector('header').getBoundingClientRect().bottom + 24;
+          for (const sec of main.querySelectorAll(':scope > section')) { if (sec.getBoundingClientRect().top <= line) cur = sec; else break; }
+          // At the very end, the last section: one too short to reach the top is still the one being read.
+          if (plainHost.scrollTop > 0 && plainHost.scrollTop + plainHost.clientHeight >= plainHost.scrollHeight - 2) cur = main.querySelector(':scope > section:last-of-type');
+          cur ||= main.querySelector(':scope > section');
+        }
+        for (const c of chips) {
+          const on = c.dataset.sec === cur?.id;
+          if (on === (c.getAttribute('aria-current') === 'true')) continue;
+          if (on) {
+            c.setAttribute('aria-current', 'true');
+            const n = nav.getBoundingClientRect(), r = c.getBoundingClientRect();
+            if (r.left < n.left || r.right > n.right) nav.scrollLeft += r.left - n.left - (n.width - r.width) / 2;
+          } else c.removeAttribute('aria-current');
+        }
+      };
+      plainHost.addEventListener('scroll', () => { spyFrame ||= requestAnimationFrame(spy); }, { passive: true });
+      // A touch or wheel on the list lets go of a chip that was pressed.
+      for (const ev of ['wheel', 'touchstart', 'keydown']) plainHost.addEventListener(ev, () => { if (spyPin) { spyPin = null; spy(); } }, { passive: true });
       // What has the keyboard focus in the list. Safari leaves shadowRoot.activeElement empty in an extension's world, so the
       // arrow keys and j/k always started again from the top there: the focus is followed by its events as well.
       let lastFocus = null;
@@ -2381,10 +2437,9 @@
         const focusKey = focused()?.closest?.('main li[data-key]')?.dataset.key;
         oldRows = new Map(rows);
         main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect(); hiddenRead.clear();
-        // First in the row of section buttons: read articles in or out of the list, like unread-only mail.
-        const readChip = document.createElement('button');
-        readChip.dataset.act = 'hide-read'; readChip.textContent = T.hideRead; readChip.setAttribute('aria-pressed', String(hideRead && !showReadNow));
-        nav.append(readChip);
+        // Read articles in or out of the list, like unread-only mail.
+        const readToggle = sh.querySelector('.read-toggle');
+        readToggle.textContent = T.hideRead; readToggle.setAttribute('aria-checked', String(hideRead && !showReadNow));
         sh.querySelector('[data-act="sort"]').textContent = sortMode === 'importance' ? T.siteOrder : T.byImportance;
         if (sortMode === 'importance') {
           // One list across the visible sections, loudest on the front page first; feed-only items last.
@@ -2407,7 +2462,7 @@
           if (!ol.childElementCount) continue;
           const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
           sec.id = 's-' + id; chip.dataset.sec = sec.id; h2.textContent = chip.textContent = sectionLabel(id);
-          chip.addEventListener('click', () => sec.scrollIntoView());
+          chip.addEventListener('click', () => { spyPin = sec.id; sec.scrollIntoView(); spy(); });
           sec.append(h2, ol); main.append(sec); nav.append(chip);
         }
         plainCount = rows.size;
@@ -2418,30 +2473,84 @@
         if (focusKey) rows.get(focusKey)?.querySelector('a.h')?.focus({ preventScroll: true });
         if (cursor()) mark(cursor());
         oldRows = null;
+        if (editing) showEditChips();
+        spy();
         pumpPlain();
       }
 
-      // Section editor: show/hide and reorder, remembered per host.
-      const editor = sh.querySelector('.editor'), list = editor.querySelector('ul');
-      function openEditor() {
-        list.replaceChildren();
-        for (const id of order()) {
-          const li = document.createElement('li');
-          li.dataset.id = id;
-          li.innerHTML = `<label><input type="checkbox"><span></span></label><button data-move="-1" aria-label="${T.up}">↑</button><button data-move="1" aria-label="${T.down}">↓</button>`;
-          li.querySelector('span').textContent = `${sectionLabel(id)} (${sections.get(id).length})`;
-          li.querySelector('input').checked = !layout.hidden.includes(id);
-          list.append(li);
-        }
-        editor.hidden = false;
+      // Section editing, in the chip row: every section, hidden ones dimmed. A tap (or Enter) hides or shows one, a drag (or
+      // Alt+← →) moves it, Done or Esc keeps the changes. Remembered per host, for both sort orders.
+      const filters = sh.querySelector('.filters'), editBtn = sh.querySelector('.edit-secs'), editHint = sh.querySelector('.edit-hint');
+      let editing = null; // { order: [ids], hidden: Set }
+      function showEditChips() {
+        const ids = [...editing.order.filter(id => sections.has(id)), ...order().filter(id => !editing.order.includes(id))];
+        editing.order = ids;
+        nav.replaceChildren(...ids.map(id => {
+          const c = document.createElement('button'), n = document.createElement('small');
+          c.dataset.id = id; c.textContent = sectionLabel(id); n.textContent = sections.get(id).length; c.append(n);
+          c.setAttribute('aria-pressed', String(!editing.hidden.has(id)));
+          return c;
+        }));
       }
-      async function saveEditor() {
-        layout.order = [...list.children].map(li => li.dataset.id);
-        layout.hidden = [...list.children].filter(li => !li.querySelector('input').checked).map(li => li.dataset.id);
-        await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
-        editor.hidden = true;
+      function startEditing() {
+        editing = { order: order(), hidden: new Set(layout.hidden) };
+        filters.classList.add('editing'); editHint.hidden = false;
+        editBtn.textContent = T.done; editBtn.removeAttribute('aria-label');
+        showEditChips();
+        nav.querySelector('button')?.focus({ preventScroll: true });
+      }
+      async function finishEditing() {
+        if (!editing) return;
+        layout.order = editing.order; layout.hidden = editing.order.filter(id => editing.hidden.has(id));
+        editing = null;
+        filters.classList.remove('editing'); editHint.hidden = true;
+        editBtn.textContent = '✎'; editBtn.setAttribute('aria-label', T.editSections);
         render();
+        editBtn.focus({ preventScroll: true });
+        await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
       }
+      const keepOrder = () => { if (editing) editing.order = [...nav.querySelectorAll('button[data-id]')].map(c => c.dataset.id); };
+      // A drag moves the chip in the row as the finger goes, to the place under it. Short of 8 px it is a tap.
+      let drag = null, dragged = false;
+      nav.addEventListener('pointerdown', e => {
+        const c = editing && e.button === 0 && e.target.closest('button[data-id]'); if (!c) return;
+        drag = { c, x: e.clientX, y: e.clientY, id: e.pointerId, on: false };
+        c.setPointerCapture?.(e.pointerId);
+      });
+      sh.addEventListener('pointermove', e => {
+        if (!drag || e.pointerId !== drag.id) return;
+        if (!drag.on) { if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8) return; drag.on = true; drag.c.classList.add('drag'); }
+        e.preventDefault();
+        const over = [...nav.querySelectorAll('button[data-id]')].find(o => { if (o === drag.c) return false; const r = o.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top - 3 && e.clientY <= r.bottom + 3; });
+        if (!over) return;
+        const r = over.getBoundingClientRect();
+        nav.insertBefore(drag.c, e.clientX > r.left + r.width / 2 ? over.nextSibling : over);
+      });
+      const endDrag = e => {
+        if (!drag || e.pointerId !== drag.id) return;
+        if (drag.on) { dragged = true; drag.c.classList.remove('drag'); keepOrder(); setTimeout(() => { dragged = false; }); }
+        drag = null;
+      };
+      sh.addEventListener('pointerup', endDrag); sh.addEventListener('pointercancel', endDrag);
+      nav.addEventListener('click', e => {
+        const c = editing && e.target.closest('button[data-id]'); if (!c) return;
+        e.stopPropagation();
+        if (dragged) return;
+        const id = c.dataset.id, show = editing.hidden.has(id);
+        if (show) editing.hidden.delete(id); else editing.hidden.add(id);
+        c.setAttribute('aria-pressed', String(show));
+      });
+      nav.addEventListener('keydown', e => {
+        if (!editing) return;
+        const c = e.target.closest?.('button[data-id]');
+        if (e.key === 'Escape') { e.preventDefault(); finishEditing(); return; }
+        if (c && e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+          e.preventDefault();
+          if (e.key === 'ArrowLeft' && c.previousElementSibling) nav.insertBefore(c, c.previousElementSibling);
+          else if (e.key === 'ArrowRight' && c.nextElementSibling) nav.insertBefore(c.nextElementSibling, c);
+          keepOrder(); c.focus();
+        }
+      });
       sh.addEventListener('click', e => {
         // The whole card opens the article; Cmd/Ctrl/Shift-click on the headline still opens the site.
         // The card that was pressed, also when the list moved under the pointer before the release (the click then goes to
@@ -2459,9 +2568,8 @@
         if (b.dataset.act === 'close-reader') closeArticle();
         else if (b.dataset.act === 'prev') step(-1);
         else if (b.dataset.act === 'next') step(1);
-        else if (b.dataset.act === 'sections') openEditor();
+        else if (b.dataset.act === 'sections') { if (editing) finishEditing(); else startEditing(); }
         else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
-        else if (b.dataset.act === 'done') saveEditor();
         else if (b.dataset.act === 'show-read') { showReadNow = true; render(); }
         else if (b.dataset.act === 'hide-read') {
           // Turned on here, it also takes out what was read on this visit: that was asked for.
@@ -2470,13 +2578,7 @@
           render();
         }
         else if (b.dataset.act === 'original') { try { sessionStorage.setItem('declickbait-original', host); } catch {} location.reload(); }
-        else if (b.dataset.move) {
-          const li = b.closest('li');
-          if (b.dataset.move < 0 && li.previousElementSibling) list.insertBefore(li, li.previousElementSibling);
-          else if (b.dataset.move > 0 && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
-        }
       });
-      editor.addEventListener('click', e => { if (e.target === editor) saveEditor(); });
       // The card next to `from` on screen in direction dx/dy: ↑ ↓ the nearest card in the row above or
       // below (closest to the same column), ← → the neighbour in the same row. At the end of a row, and in
       // a single column, ← → stay put: they never move the mark up or down (j/k go through the list in order).
@@ -2499,7 +2601,7 @@
       // previous article and Esc closes.
       // On the window, before the page: an older copy of the engine still listening on the document then lets it be.
       window.addEventListener('keydown', e => {
-        if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !editor.hidden) return;
+        if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || editing) return;
         const t = e.composedPath()[0];
         if (t && (/^(?:INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
         const k = e.key;
