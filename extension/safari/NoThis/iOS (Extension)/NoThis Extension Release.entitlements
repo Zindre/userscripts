@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.no.sedb.NoThis</string>
+	</array>
+	<!-- iCloud key-value store, shared by the extension on iPhone, iPad and Mac: the synced Read later, Bookmarks and
+	     read articles. Release builds only; a free (personal) team can't sign it, so Debug keeps the plain file. -->
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)no.sedb.NoThis</string>
+</dict>
+</plist>

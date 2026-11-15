@@ -6,6 +6,14 @@ const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const ALL_SITES = { origins: ['http://*/*', 'https://*/*'] };
 let tabId = null;
+// The popup's texts in the browser's language (strings.js, from src/i18n/).
+const T = stringsFor(api.i18n?.getUILanguage?.() || navigator.language), P = T.pop;
+document.documentElement.lang = T.lang;
+for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = P[el.dataset.i18n];
+for (const el of document.querySelectorAll('[data-i18n-label]')) el.setAttribute('aria-label', P[el.dataset.i18nLabel]);
+// My news: the news sites you read most, together (mix.html), in a tab of its own.
+$('my-news').textContent = T.myNews + ' →';
+$('my-news').addEventListener('click', () => { api.tabs.create({ url: api.runtime.getURL('mix.html') }); window.close(); });
 
 async function ask(msg = {}) {
   try {
@@ -47,16 +55,15 @@ function show(s) {
   $('unavailable').hidden = !!s;
   if (!s) return unavailable();
   $('host').textContent = s.host;
-  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
-  const checked = s.fetches?.ok ? ` Checked ${plural(s.fetches.ok, 'article')}.` : '';
-  const failed = s.fetches?.failed ? ` ${plural(s.fetches.failed, 'article')} could not be loaded.` : '';
+  const checked = s.fetches?.ok ? P.checked(s.fetches.ok) : '';
+  const failed = s.fetches?.failed ? P.failed(s.fetches.failed) : '';
   const until = s.fetchPausedUntil && new Date(s.fetchPausedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const paused = until ? ` ${s.host} asked for a robot check, so Web Detox fetches no articles from it until ${until}.` : '';
-  $('status').textContent = s.off ? `Showing ${s.host} as published.`
-    : s.calm ? `${s.calm} without distractions: ${s.rewritten ? `${plural(s.rewritten, 'thing')} hidden on this page.` : 'nothing to hide on this page yet.'}`
-    : s.plain ? `Plain view: ${plural(s.rewritten, 'article')}.` + checked + failed + paused
-    : ((s.level === 'plain' || s.level === 'pictures') && s.onArticle ? 'Plain view is for front pages; this article shows clear headlines + synopsis. ' : '')
-      + (s.rewritten ? `Changed ${plural(s.rewritten, 'headline')} on this page.` : 'No clickbait headlines found on this page yet.') + checked + failed + paused;
+  const paused = until ? P.paused(s.host, until) : '';
+  $('status').textContent = s.off ? P.asPublished(s.host)
+    : s.calm ? P.calmStatus(s.calm, s.rewritten)
+    : s.plain ? P.plainStatus(s.rewritten) + checked + failed + paused
+    : ((s.level === 'plain' || s.level === 'pictures') && s.onArticle ? P.plainOnArticle : '')
+      + (s.rewritten ? P.changed(s.rewritten) : P.noneFound) + checked + failed + paused;
   // A calm site (social media) has two levels, Vanilla and Calm; a news site the others.
   for (const r of document.querySelectorAll('input[name=level]')) {
     r.checked = r.value === s.level;
@@ -66,13 +73,13 @@ function show(s) {
   $('calm-box').hidden = s.off || !s.calmParts?.length;
   $('calm-parts').replaceChildren(...(s.calmParts || []).map(p => {
     const l = document.createElement('label'), t = document.createElement('span'), cb = document.createElement('input');
-    l.className = 'switch'; t.textContent = p.label; cb.type = 'checkbox'; cb.checked = p.show;
+    l.className = 'switch'; t.textContent = T.part[p.id] || p.label; cb.type = 'checkbox'; cb.checked = p.show;
     cb.addEventListener('change', () => actAndReload('calmPart', [p.id, cb.checked]));
     l.append(t, cb);
     return l;
   }));
   const isDefault = s.level === s.defaultLevel;
-  $('default').textContent = isDefault ? '✓ Default for all sites' : 'Use this level on all sites';
+  $('default').textContent = isDefault ? P.isDefault : P.makeDefault;
   $('default').disabled = isDefault;
   $('default').hidden = !!s.calm;
   // Headline style applies to the two rewriting levels, and to article pages under plain view.
@@ -95,7 +102,7 @@ function show(s) {
     return [l, cb];
   };
   for (const g of s.topics || []) {
-    const row = document.createElement('div'), [gl, gcb] = topicBox(g.id, g.label);
+    const row = document.createElement('div'), [gl, gcb] = topicBox(g.id, T.topic[g.id] || g.label);
     row.className = 'topic-row'; row.append(gl);
     if (g.children.length) {
       const kids = document.createElement('div'), more = document.createElement('button');
@@ -103,11 +110,11 @@ function show(s) {
       const some = g.children.filter(c => muted.has(c.id)).length;
       kids.hidden = !some;
       more.type = 'button'; more.className = 'more';
-      more.textContent = (some ? `${some} of ${g.children.length}` : `${g.children.length}`) + (kids.hidden ? ' ▸' : ' ▾');
-      more.setAttribute('aria-label', `Subtopics of ${g.label}`);
+      more.textContent = (some ? P.someOf(some, g.children.length) : `${g.children.length}`) + (kids.hidden ? ' ▸' : ' ▾');
+      more.setAttribute('aria-label', P.subtopicsOf(T.topic[g.id] || g.label));
       more.addEventListener('click', () => { kids.hidden = !kids.hidden; more.textContent = more.textContent.replace(/[▸▾]$/, kids.hidden ? '▸' : '▾'); });
       for (const c of g.children) {
-        const [cl, ccb] = topicBox(c.id, c.label);
+        const [cl, ccb] = topicBox(c.id, T.topic[c.id] || c.label);
         if (gcb.checked) { ccb.checked = true; ccb.disabled = true; }
         kids.append(cl);
       }
@@ -119,12 +126,12 @@ function show(s) {
 
   const box = $('changed');
   box.replaceChildren();
-  for (const [list, label] of [['disabledHosts', 'Disabled on'], ['enabledHosts', 'Enabled on']]) {
+  for (const [list, label] of [['disabledHosts', P.disabledOn], ['enabledHosts', P.enabledOn]]) {
     if (!s[list].length) continue;
     const h3 = document.createElement('h3'); h3.textContent = label; box.append(h3);
     for (const h of s[list]) {
       const chip = document.createElement('span'); chip.className = 'chip'; chip.textContent = h;
-      const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', `Remove ${h}`);
+      const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', P.remove(h));
       x.addEventListener('click', async () => show(await ask({ act: 'unset', arg: [list, h] })));
       chip.append(x); box.append(chip);
     }
@@ -157,3 +164,15 @@ $('swipe').addEventListener('change', async () => show(await ask({ act: 'swipeAn
   tabId = tab?.id ?? null;
   show(tabId === null ? null : await askUntil(1500));
 })();
+
+// Delete everything Web Detox has stored (background.js, wd-erase): asked once more first.
+$('erase').addEventListener('click', () => { $('erase').hidden = true; $('erase-ask').hidden = false; $('erase-no').focus(); });
+$('erase-no').addEventListener('click', () => { $('erase-ask').hidden = true; $('erase').hidden = false; });
+$('erase-yes').addEventListener('click', async () => {
+  for (const b of $('erase-ask').querySelectorAll('button')) b.disabled = true;
+  const r = await api.runtime.sendMessage({ type: 'wd-erase' }).catch(() => null);
+  $('erase-ask').hidden = true;
+  $('erased').hidden = !r?.ok;
+  $('erase').hidden = !!r?.ok;
+  if (r?.ok && tabId) api.tabs.reload(tabId).catch(() => {});
+});

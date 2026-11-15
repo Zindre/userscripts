@@ -234,6 +234,8 @@
   // Safari: the app's first screen shows whether Web Detox may run on all websites, as background.js last told it. Once
   // it has told no (or an hour ago), a page where this runs wakes background.js to check again: Safari may have just been
   // given access, and a page is the first sign of that.
+  // What the user's other devices saved or read meanwhile (background.js; it looks at most once a minute).
+  api.runtime.sendMessage({ type: 'wd-sync' }).catch(() => {});
   api.storage?.local?.get('accessTold').then(({ accessTold: t }) => {
     if (t && (!t.all || Date.now() - t.at > 3600e3)) api.runtime.sendMessage({ type: 'nothis-access' }).catch(() => {});
   }).catch(() => {});

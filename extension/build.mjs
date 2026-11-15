@@ -9,7 +9,7 @@
 //
 //   node build.mjs              everything
 //   node build.mjs safari       one target (chrome, firefox, safari, userscript)
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,9 +18,15 @@ const root = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 // Order matters only for code that runs while the script loads; everything else runs from main().
-const ENGINE = ['config', 'hostkey', 'news-hosts', 'sites', 'calm-sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'calm', 'settings'];
+const ENGINE = ['config', 'i18n', 'hostkey', 'news-hosts', 'sites', 'calm-sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'calm', 'mix', 'settings'];
 const USERSCRIPT_ONLY = ['userscript/panel'];
-const read = name => name === 'news-hosts' ? newsList() : readFileSync(join(root, 'src', name.includes('/') ? name : `engine/${name}`) + '.js', 'utf8');
+// The texts in every language (src/i18n/): pick.js, then English, then the others. One bundle for the engine, the popup
+// (strings.js) and the app's page (APP_STRINGS in its Script.js).
+const i18nBundle = () => {
+  const dir = join(root, 'src', 'i18n'), langs = readdirSync(dir).filter(f => /^[a-z]{2}\.js$/.test(f) && f !== 'en.js').sort();
+  return 'const STRINGS = {};\n' + ['pick.js', 'en.js', ...langs].map(f => readFileSync(join(dir, f), 'utf8')).join('\n');
+};
+const read = name => name === 'i18n' ? i18nBundle() : name === 'news-hosts' ? newsList() : readFileSync(join(root, 'src', name.includes('/') ? name : `engine/${name}`) + '.js', 'utf8');
 // src/engine/news-hosts.json (written by tools/news-hosts.mjs) becomes NEWS_LIST: each host's
 // 7-character key (hostKey() in src/engine/hostkey.js), sorted and joined into one string, which
 // sites.js binary-searches. Nothing is decoded when a page loads, and the list is about half the
@@ -149,6 +155,17 @@ devCheck();
 `;
 const devDir = join(root, 'dist', 'chrome-dev');
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : [...Object.keys(targets), 'userscript', ...(existsSync(devDir) ? ['chrome-dev'] : [])];
+// The app's page (iPhone, iPad and Mac) has no build step of its own: its texts in every language are written into its
+// Script.js, between the two marker lines, as plain data.
+{
+  const STRINGS = new Function(i18nBundle() + '\nreturn STRINGS;')();
+  const app = Object.fromEntries(Object.keys(STRINGS).map(l => [l, { ...STRINGS.en.app, ...STRINGS[l].app }]));
+  const file = join(root, 'safari', 'NoThis', 'Shared (App)', 'Resources', 'Script.js'), js = readFileSync(file, 'utf8');
+  const re = /(\/\/ @app-strings begin[^\n]*\n)[\s\S]*?(\/\/ @app-strings end)/;
+  if (!re.test(js)) throw new Error('Script.js: missing the @app-strings markers');
+  const next = js.replace(re, (_, a, b) => `${a}const APP_STRINGS = ${JSON.stringify(app, null, 1)};\n${b}`);
+  if (next !== js) writeFileSync(file, next);
+}
 for (const t of wanted) {
   if (t === 'chrome-dev') {
     const tmp = join(root, 'dist', '.chrome-dev-tmp');
@@ -175,9 +192,13 @@ for (const t of wanted) {
   const out = join(root, 'dist', t);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
-  const skip = new Set(['engine', 'userscript'].map(d => join(root, 'src', d)));
+  const skip = new Set(['engine', 'userscript', 'i18n'].map(d => join(root, 'src', d)));
   cpSync(join(root, 'src'), out, { recursive: true, filter: f => !f.endsWith('.svg') && !skip.has(f) });
   writeFileSync(join(out, 'nothis.js'), assemble(ENGINE));
+  writeFileSync(join(out, 'strings.js'), i18nBundle());
+  // My news (mix.html) reads other sites' front pages with a second copy of the engine, given that site's address and
+  // its downloaded page as location and document, so every rule that looks at them reads that site. Nothing is started.
+  writeFileSync(join(out, 'extract.js'), `globalThis.wdExtract = (location, document) => {\n  'use strict';\n${ENGINE.map(n => indent(read(n))).join('\n')}\n  return { site, items: frontPageItems(undefined, false, document) };\n};\n`);
   // gm-shim.js covers known news sites and calms the calm sites before they are drawn, so it gets
   // both lists too.
   let shim = readFileSync(join(out, 'gm-shim.js'), 'utf8');
@@ -197,6 +218,13 @@ api.runtime.onMessage.addListener(msg => {
 });
 `);
   writeFileSync(join(out, 'manifest.json'), JSON.stringify(targets[t], null, 2) + '\n');
+  // The Xcode project lists each file of the Safari extension by name: a new file in src/ is left out of the app, and
+  // Safari reports it missing only at run time (snapchat-web.js and strings.js were). So the build stops here instead.
+  if (t === 'safari') {
+    const pbx = readFileSync(join(root, 'safari', 'NoThis', 'NoThis.xcodeproj', 'project.pbxproj'), 'utf8');
+    const missing = readdirSync(out).filter(f => !pbx.includes(`dist/safari/${f}`));
+    if (missing.length) throw new Error(`safari/NoThis/NoThis.xcodeproj does not include ${missing.join(', ')}: add them to the extension's Resources (both targets)`);
+  }
   const zip = join(root, 'dist', `nothis-${t}-${version}.zip`);
   rmSync(zip, { force: true });
   execFileSync('zip', ['-qr', '-X', zip, '.'], { cwd: out });

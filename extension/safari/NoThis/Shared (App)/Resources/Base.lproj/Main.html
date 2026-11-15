@@ -10,33 +10,33 @@
     <script src="../Script.js" defer></script>
 </head>
 <body>
-    <img src="../Icon.png" width="128" height="128" alt="Web Detox icon">
-    <p class="platform-ios intro">Two settings in Safari, both on the same page:</p>
+    <img src="../Icon.png" width="128" height="128" alt="Web Detox icon" data-i18n-alt="iconAlt">
+    <p class="platform-ios intro" data-i18n="intro">Two settings in Safari, both on the same page:</p>
     <ol class="platform-ios steps">
         <li class="step-on">
             <span class="mark">1</span>
             <div>
-                <b>Turn on Web Detox</b>
-                <span class="state-unknown">The switch at the top.</span>
-                <span class="state-on">It’s on.</span>
-                <span class="state-off">It’s off: turn on the switch at the top.</span>
+                <b data-i18n="step1">Turn on Web Detox</b>
+                <span class="state-unknown" data-i18n="step1Unknown">The switch at the top.</span>
+                <span class="state-on" data-i18n="step1On">It’s on.</span>
+                <span class="state-off" data-i18n="step1Off">It’s off: turn on the switch at the top.</span>
             </div>
         </li>
         <li class="step-all">
             <span class="mark">2</span>
             <div>
-                <b>Allow it on all websites</b>
-                <span class="access-unknown">Under Permissions, set All Websites to Allow. Otherwise Safari asks on every site. Then open a website in Safari and come back here to check it.</span>
-                <span class="access-on">It’s allowed on all websites.</span>
-                <span class="access-off">Now it only runs on the sites you allow one at a time. That’s fine if you prefer it. To use it everywhere, set All Websites to Allow under Permissions.</span>
+                <b data-i18n="step2">Allow it on all websites</b>
+                <span class="access-unknown" data-i18n="step2Unknown">Under Permissions, set All Websites to Allow. Otherwise Safari asks on every site. Then open a website in Safari and come back here to check it.</span>
+                <span class="access-on" data-i18n="step2On">It’s allowed on all websites.</span>
+                <span class="access-off" data-i18n="step2Off">Now it only runs on the sites you allow one at a time. That’s fine if you prefer it. To use it everywhere, set All Websites to Allow under Permissions.</span>
             </div>
         </li>
     </ol>
-    <button class="platform-ios open-settings">Open Web Detox in Settings</button>
-    <p class="platform-ios path">Settings → Apps → Safari → Extensions → Web Detox</p>
-    <p class="platform-mac state-unknown">You can turn on Web Detox’s extension in Safari Extensions preferences.</p>
-    <p class="platform-mac state-on">Web Detox’s extension is currently on. You can turn it off in Safari Extensions preferences.</p>
-    <p class="platform-mac state-off">Web Detox’s extension is currently off. You can turn it on in Safari Extensions preferences.</p>
-    <button class="platform-mac open-preferences">Quit and Open Safari Extensions Preferences…</button>
+    <button class="platform-ios open-settings" data-i18n="openSettings">Open Web Detox in Settings</button>
+    <p class="platform-ios path" data-i18n="path">Settings → Apps → Safari → Extensions → Web Detox</p>
+    <p class="platform-mac state-unknown" data-i18n="macUnknown">You can turn on Web Detox’s extension in Safari Extensions preferences.</p>
+    <p class="platform-mac state-on" data-i18n="macOn">Web Detox’s extension is currently on. You can turn it off in Safari Extensions preferences.</p>
+    <p class="platform-mac state-off" data-i18n="macOff">Web Detox’s extension is currently off. You can turn it on in Safari Extensions preferences.</p>
+    <button class="platform-mac open-preferences" data-i18n="macOpen">Quit and Open Safari Extensions Preferences…</button>
 </body>
 </html>

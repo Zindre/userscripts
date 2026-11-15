@@ -1,0 +1,85 @@
+// Finnish (suomi).
+STRINGS.fi = {
+  // The list and the reader (plain view), in the language of the site being read.
+  siteOrder: 'Kuten sivulla', byImportance: 'Tärkein ensin', top: 'Pääuutinen', important: 'Tärkeä',
+  related: 'Aiheeseen liittyvät', latest: 'Uusimmat', other: 'Muut', sections: 'Osiot', original: 'Alkuperäinen', done: 'Valmis',
+  paid: 'Tilaajille', count: n => `${n} ${n === 1 ? 'artikkeli' : 'artikkelia'}`,
+  editSections: 'Muokkaa osioita', editHint: 'Piilota tai näytä napauttamalla, siirrä vetämällä.',
+  loading: 'Ladataan artikkelia …', onSite: h => `Lue sivustolla ${h}`, close: 'Sulje',
+  paidHere: 'Artikkelin loppuosa on tilaajille.', prev: 'Edellinen artikkeli', next: 'Seuraava artikkeli',
+  unreadable: 'Artikkelia ei voi näyttää tässä, mutta sen voi lukea sivustolla.',
+  short: 'Tässä on artikkelin koko teksti. Sivustolla voi olla lisää, kuten videota tai myöhempiä päivityksiä.',
+  hideRead: 'Piilota luetut', readHidden: n => `${n} ${n === 1 ? 'luettu artikkeli' : 'luettua artikkelia'} piilotettu`, showRead: 'Näytä',
+  later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
+  myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
+  mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
+  keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
+
+  // The toolbar popup, in the browser's language.
+  pop: {
+    levelHeading: 'Lukutaso tällä sivustolla', levelLabel: 'Lukutaso',
+    vanilla: 'Vanilla', vanillaDesc: 'Sivusto julkaistussa muodossa',
+    headlines: 'Selkeät otsikot', headlinesDesc: 'Klikkiotsikot korvattu artikkelin omalla otsikolla',
+    synopsis: 'Selkeät otsikot + ingressi', synopsisDesc: 'Jokainen otsikko artikkelin ingressin kanssa',
+    pictures: 'Pelkistetty näkymä kuvin', picturesDesc: 'Kuten pelkistetty näkymä, yksi kuva artikkelia kohden, kaikki samankokoisia',
+    plain: 'Pelkistetty näkymä', plainDesc: 'Artikkelit osioittain rauhallisella sivulla. Ei mainoksia, videoita eikä ponnahdusikkunoita',
+    calm: 'Rauhallinen', calmDesc: 'Seurattu sisältö ilman mainoksia, ehdotuksia, lyhytvideosyötteitä tai sovellusta tyrkyttäviä ponnahdusikkunoita',
+    isDefault: '✓ Oletus kaikilla sivustoilla', makeDefault: 'Käytä tätä tasoa kaikilla sivustoilla',
+    calmHeading: 'Näytä tällä sivustolla', neverHeading: 'Älä näytä koskaan', allSites: 'kaikki sivustot',
+    someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `Aiheen ${g} alaiheet`,
+    styleHeading: 'Otsikkotyyli', styleRewrite: 'Kirjoita uudelleen', styleReveal: 'Näytä napauttamalla', styleStack: 'Näytä molemmat',
+    showOriginal: 'Näytä alkuperäiset otsikot', plainHeading: 'Pelkistetty näkymä', swipe: 'Animoi pyyhkäisy artikkelien välillä',
+    otherHeading: 'Muut sivustot', generic: 'Tunnista uutissivustot, joita ei ole määritetty',
+    disabledOn: 'Pois käytöstä', enabledOn: 'Käytössä', remove: h => `Poista ${h}`,
+    notRunning: 'Web Detox ei ole käytössä tällä sivulla.',
+    notRunningHint: 'Se toimii vain verkkosivuilla, ei selaimen tai kaupan sivuilla. Jos se juuri asennettiin tai sallittiin, lataa sivu uudelleen.',
+    grant: 'Salli kaikilla verkkosivustoilla',
+    // Status line at the top. n is a number; h a site such as nrk.no.
+    asPublished: h => `${h} näytetään julkaistussa muodossa.`,
+    calmStatus: (site, n) => `${site} ilman häiriöitä: ` + (n ? `${n} ${n === 1 ? 'kohde' : 'kohdetta'} piilotettu tällä sivulla.` : 'tällä sivulla ei vielä ole piilotettavaa.'),
+    plainStatus: n => `Pelkistetty näkymä: ${n} ${n === 1 ? 'artikkeli' : 'artikkelia'}.`,
+    plainOnArticle: 'Pelkistetty näkymä on etusivuille; tässä artikkelissa näytetään selkeät otsikot + ingressi. ',
+    changed: n => `Tällä sivulla muutettiin ${n} ${n === 1 ? 'otsikko' : 'otsikkoa'}.`,
+    noneFound: 'Tällä sivulla ei vielä löytynyt klikkiotsikoita.',
+    checked: n => ` Tarkistettiin ${n} ${n === 1 ? 'artikkeli' : 'artikkelia'}.`,
+    failed: n => ` ${n} ${n === 1 ? 'artikkeli' : 'artikkelia'} jäi lataamatta.`,
+    paused: (h, time) => ` ${h} pyysi robottitarkistusta, joten Web Detox ei hae sieltä artikkeleita klo ${time} asti.`,
+    privacyHeading: 'Omat tiedot',
+    privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
+    erase: 'Poista kaikki, mitä Web Detox on tallentanut',
+    eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
+    eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
+  },
+
+  // Topics in the popup's "Never show me".
+  topic: {
+    sport: 'Urheilu', football: 'Jalkapallo', winter: 'Talviurheilu', motorsport: 'Moottoriurheilu', tennis: 'Tennis', golf: 'Golf',
+    cycling: 'Pyöräily', handball: 'Käsipallo', icehockey: 'Jääkiekko', combat: 'Nyrkkeily ja MMA', athletics: 'Yleisurheilu',
+    ussports: 'Yhdysvaltain urheilu', esports: 'E-urheilu', entertainment: 'Viihde', reality: 'Tosi-tv', celebrity: 'Julkkikset',
+    royals: 'Kuninkaalliset', tvseries: 'TV ja sarjat', film: 'Elokuvat', music: 'Musiikki', gaming: 'Pelit',
+    incidents: 'Rikokset ja onnettomuudet', crime: 'Rikokset', accidents: 'Onnettomuudet', obituaries: 'Kuolinilmoitukset ja muistokirjoitukset',
+    lifestyle: 'Elämäntyyli', health: 'Terveys ja kuntoilu', food: 'Ruoka ja juoma', travel: 'Matkailu', home: 'Koti ja asuminen',
+    cars: 'Autot', fashion: 'Muoti ja kauneus', relationships: 'Seksi ja parisuhteet', consumer: 'Kuluttaminen ja ostokset',
+    opinion: 'Mielipiteet ja kommentit', politics: 'Politiikka', business: 'Talous ja raha', tech: 'Tekniikka ja tiede',
+    weather: 'Sää',
+  },
+
+  // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+  part: { birthdays: 'Syntymäpäivät', bait: 'Huomionkalastelu (”katso kommentit”)' },
+
+  // The app's own page on iPhone, iPad and Mac, in the device's language.
+  app: {
+    iconAlt: 'Web Detox -kuvake',
+    intro: 'Kaksi Safarin asetusta, molemmat samalla sivulla:',
+    step1: 'Ota Web Detox käyttöön', step1Unknown: 'Ylimpänä oleva kytkin.', step1On: 'Se on käytössä.', step1Off: 'Se ei ole käytössä: laita ylimpänä oleva kytkin päälle.',
+    step2: 'Salli se kaikilla verkkosivustoilla',
+    step2Unknown: 'Aseta Luvat-kohdassa Kaikki verkkosivustot -asetukseksi Salli. Muuten Safari kysyy jokaisella sivustolla. Avaa sitten jokin verkkosivusto Safarissa ja palaa tänne tarkistamaan.',
+    step2On: 'Se on sallittu kaikilla verkkosivustoilla.',
+    step2Off: 'Nyt se toimii vain sivustoilla, jotka sallitaan yksitellen. Sekin käy hyvin. Jotta se toimii kaikkialla, aseta Luvat-kohdassa Kaikki verkkosivustot -asetukseksi Salli.',
+    openSettings: 'Avaa Web Detox Asetuksissa', path: 'Asetukset → Apit → Safari → Laajennukset → Web Detox',
+    macUnknown: 'Web Detoxin laajennuksen voi ottaa käyttöön Safarin asetusten Laajennukset-osiossa.',
+    macOn: 'Web Detoxin laajennus on käytössä. Sen voi poistaa käytöstä Safarin asetusten Laajennukset-osiossa.',
+    macOff: 'Web Detoxin laajennus ei ole käytössä. Sen voi ottaa käyttöön Safarin asetusten Laajennukset-osiossa.',
+    macOpen: 'Lopeta ja avaa Safarin asetukset…',
+  },
+};

@@ -44,11 +44,27 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
 #endif
 
+        // background.js: Read later, Bookmarks, what has been read and the section layouts, kept in iCloud so they
+        // follow the user to their other devices (one small JSON document; background.js merges it). Without the iCloud
+        // entitlement (development builds) the store stays empty and nothing syncs.
+        var reply: [String: Any] = [ "echo": message as Any ]
+        if let m = message as? [String: Any], let type = m["type"] as? String {
+            let store = NSUbiquitousKeyValueStore.default
+            if type == "sync-get" {
+                store.synchronize()
+                if let data = store.string(forKey: "wd-sync") { reply["data"] = data }
+            } else if type == "sync-put", let data = m["data"] as? String {
+                store.set(data, forKey: "wd-sync")
+                store.synchronize()
+                reply["ok"] = true
+            }
+        }
+
         let response = NSExtensionItem()
         if #available(iOS 15.0, macOS 11.0, *) {
-            response.userInfo = [ SFExtensionMessageKey: [ "echo": message ] ]
+            response.userInfo = [ SFExtensionMessageKey: reply ]
         } else {
-            response.userInfo = [ "message": [ "echo": message ] ]
+            response.userInfo = [ "message": reply ]
         }
 
         context.completeRequest(returningItems: [ response ], completionHandler: nil)

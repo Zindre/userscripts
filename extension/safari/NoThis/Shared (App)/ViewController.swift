@@ -49,6 +49,10 @@ class ViewController: PlatformViewController, WKNavigationDelegate, WKScriptMess
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        // The page's texts in the device's language: inside the app, the web view only reports the app's own
+        // localizations as navigator.language, so the device's first language is handed over here.
+        let lang = (Locale.preferredLanguages.first ?? "en").replacingOccurrences(of: "\"", with: "")
+        webView.evaluateJavaScript("applyLang(\"\(lang)\")")
 #if os(iOS)
         pageLoaded = true
         showIOSState()

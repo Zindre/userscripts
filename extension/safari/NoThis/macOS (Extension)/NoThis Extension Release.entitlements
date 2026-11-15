@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- iCloud key-value store, shared with the extension on iPhone and iPad (see the iOS Release entitlements). The
+	     sandbox comes from the build settings. Release builds only. -->
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)no.sedb.NoThis</string>
+</dict>
+</plist>

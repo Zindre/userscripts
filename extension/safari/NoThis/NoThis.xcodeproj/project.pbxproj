@@ -37,6 +37,11 @@
 		BDABED47308D73E300E8E392 /* nothis.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3F308D73E300E8E392 /* nothis.js */; };
 		BDABED48308D73E300E8E392 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = BDABED40308D73E300E8E392 /* popup.css */; };
 		BDABED49308D73E300E8E392 /* gm-shim.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED41308D73E300E8E392 /* gm-shim.js */; };
+		9DDE52B7C58F15475F86DFA9 /* extract.js in Resources */ = {isa = PBXBuildFile; fileRef = 5F8B22AEA43EFA286148CA1B /* extract.js */; };
+		DB22810730552FAEC5D34EC6 /* mix.js in Resources */ = {isa = PBXBuildFile; fileRef = BCA2980295244AE195E11DDB /* mix.js */; };
+		578FEF55F3E307755EDD1AD8 /* mix.html in Resources */ = {isa = PBXBuildFile; fileRef = 54BC2BECCFEFB81D005F2C51 /* mix.html */; };
+		7D8FCB6137E1AF8EE39B63C5 /* strings.js in Resources */ = {isa = PBXBuildFile; fileRef = F408F534D86AB1F57DD00419 /* strings.js */; };
+		61F78444E84896635C92013A /* snapchat-web.js in Resources */ = {isa = PBXBuildFile; fileRef = 71FFE9BC0073929CE5D9AEE0 /* snapchat-web.js */; };
 		BDABED4A308D73E300E8E392 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3A308D73E300E8E392 /* popup.js */; };
 		BDABED4B308D73E300E8E392 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3B308D73E300E8E392 /* background.js */; };
 		BDABED4C308D73E300E8E392 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3C308D73E300E8E392 /* popup.html */; };
@@ -45,6 +50,11 @@
 		BDABED4F308D73E300E8E392 /* nothis.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED3F308D73E300E8E392 /* nothis.js */; };
 		BDABED50308D73E300E8E392 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = BDABED40308D73E300E8E392 /* popup.css */; };
 		BDABED51308D73E300E8E392 /* gm-shim.js in Resources */ = {isa = PBXBuildFile; fileRef = BDABED41308D73E300E8E392 /* gm-shim.js */; };
+		28A4A2E527032CEF9566D833 /* extract.js in Resources */ = {isa = PBXBuildFile; fileRef = 5F8B22AEA43EFA286148CA1B /* extract.js */; };
+		170B363993D307586591B699 /* mix.js in Resources */ = {isa = PBXBuildFile; fileRef = BCA2980295244AE195E11DDB /* mix.js */; };
+		444633AA91ED101FAD732EA8 /* mix.html in Resources */ = {isa = PBXBuildFile; fileRef = 54BC2BECCFEFB81D005F2C51 /* mix.html */; };
+		E4EEFBC84BBA2FFA18D0D603 /* strings.js in Resources */ = {isa = PBXBuildFile; fileRef = F408F534D86AB1F57DD00419 /* strings.js */; };
+		299E3D61749965E522292AF7 /* snapchat-web.js in Resources */ = {isa = PBXBuildFile; fileRef = 71FFE9BC0073929CE5D9AEE0 /* snapchat-web.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +125,11 @@
 		BDABED3F308D73E300E8E392 /* nothis.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = nothis.js; path = ../../../dist/safari/nothis.js; sourceTree = "<group>"; };
 		BDABED40308D73E300E8E392 /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = ../../../dist/safari/popup.css; sourceTree = "<group>"; };
 		BDABED41308D73E300E8E392 /* gm-shim.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "gm-shim.js"; path = "../../../dist/safari/gm-shim.js"; sourceTree = "<group>"; };
+		5F8B22AEA43EFA286148CA1B /* extract.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = extract.js; path = "../../../dist/safari/extract.js"; sourceTree = "<group>"; };
+		BCA2980295244AE195E11DDB /* mix.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = mix.js; path = "../../../dist/safari/mix.js"; sourceTree = "<group>"; };
+		54BC2BECCFEFB81D005F2C51 /* mix.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = mix.html; path = "../../../dist/safari/mix.html"; sourceTree = "<group>"; };
+		F408F534D86AB1F57DD00419 /* strings.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = strings.js; path = "../../../dist/safari/strings.js"; sourceTree = "<group>"; };
+		71FFE9BC0073929CE5D9AEE0 /* snapchat-web.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "snapchat-web.js"; path = "../../../dist/safari/snapchat-web.js"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -244,6 +259,11 @@
 				BDABED3F308D73E300E8E392 /* nothis.js */,
 				BDABED40308D73E300E8E392 /* popup.css */,
 				BDABED41308D73E300E8E392 /* gm-shim.js */,
+				5F8B22AEA43EFA286148CA1B /* extract.js */,
+				BCA2980295244AE195E11DDB /* mix.js */,
+				54BC2BECCFEFB81D005F2C51 /* mix.html */,
+				F408F534D86AB1F57DD00419 /* strings.js */,
+				71FFE9BC0073929CE5D9AEE0 /* snapchat-web.js */,
 			);
 			name = Resources;
 			path = "Shared (Extension)";
@@ -401,6 +421,11 @@
 				BDABED4C308D73E300E8E392 /* popup.html in Resources */,
 				BDABED4A308D73E300E8E392 /* popup.js in Resources */,
 				BDABED51308D73E300E8E392 /* gm-shim.js in Resources */,
+				28A4A2E527032CEF9566D833 /* extract.js in Resources */,
+				170B363993D307586591B699 /* mix.js in Resources */,
+				444633AA91ED101FAD732EA8 /* mix.html in Resources */,
+				E4EEFBC84BBA2FFA18D0D603 /* strings.js in Resources */,
+				299E3D61749965E522292AF7 /* snapchat-web.js in Resources */,
 			);
 		};
 		BDABED13308D73E300E8E392 /* Resources */ = {
@@ -414,6 +439,11 @@
 				BDABED44308D73E300E8E392 /* popup.html in Resources */,
 				BDABED42308D73E300E8E392 /* popup.js in Resources */,
 				BDABED49308D73E300E8E392 /* gm-shim.js in Resources */,
+				9DDE52B7C58F15475F86DFA9 /* extract.js in Resources */,
+				DB22810730552FAEC5D34EC6 /* mix.js in Resources */,
+				578FEF55F3E307755EDD1AD8 /* mix.html in Resources */,
+				7D8FCB6137E1AF8EE39B63C5 /* strings.js in Resources */,
+				61F78444E84896635C92013A /* snapchat-web.js in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -654,7 +684,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
-				CODE_SIGN_ENTITLEMENTS = "iOS (Extension)/NoThis Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "iOS (Extension)/NoThis Extension Release.entitlements";
 				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -813,6 +843,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/NoThis Extension Release.entitlements";
 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Web Detox Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";

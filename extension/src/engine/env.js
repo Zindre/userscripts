@@ -9,7 +9,7 @@ const site = SITES.find(s => s.host.test(host)) ||
   (curatedHost(host) || (listedHost(host) && !notNewsPage(true)) ? { host: null, article: null } : undefined);
 // A site to calm rather than read (calm-sites.js).
 const calmSite = CALM_SITES.find(s => s.host.test(host));
-if (!site && !calmSite && !CFG.genericSites) return;
+if (!site && !calmSite && !CFG.genericSites && !globalThis.__wdMix) return;
 
 // Robot checks (DataDome, Cloudflare, HUMAN, Akamai), on the page itself or in a fetched page. Fetching many articles in a
 // short time is what they look for (nytimes.com showed one): a site that answers with one, or with 429 Too Many Requests,
@@ -48,7 +48,8 @@ const gm = {
   async set(k, v) { try { if (typeof GM !== 'undefined' && GM.setValue) await GM.setValue(k, v); } catch {} },
   xhr(opts) {
     if (Date.now() < fetchPausedUntil) return Promise.reject(new Error('paused'));
-    return gm.rawXhr(opts).then(r => { if (robotCheck(r)) { pauseFetching(); throw new Error('robot check'); } return r; });
+    // My news reads many sites: a robot check from one of them doesn't stop the others there.
+    return gm.rawXhr(opts).then(r => { if (robotCheck(r)) { if (!globalThis.__wdMix) pauseFetching(); throw new Error('robot check'); } return r; });
   },
   rawXhr(opts) {
     // Timing marks for the first fetches (gm-shim.js): how long Safari takes over a fetch from the page and one through

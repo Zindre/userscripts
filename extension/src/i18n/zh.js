@@ -1,0 +1,85 @@
+// Simplified Chinese (简体中文).
+STRINGS.zh = {
+  // The list and the reader (plain view), in the language of the site being read.
+  siteOrder: '网站顺序', byImportance: '重要优先', top: '头条', important: '重要',
+  related: '相关文章', latest: '最新', other: '其他', sections: '栏目', original: '原网页', done: '完成',
+  paid: '订阅', count: n => `${n} 篇文章`,
+  editSections: '编辑栏目', editHint: '轻点以隐藏或显示，拖移以移动。',
+  loading: '正在载入文章…', onSite: h => `在 ${h} 上阅读`, close: '关闭',
+  paidHere: '本文其余部分仅供订阅者阅读。', prev: '上一篇文章', next: '下一篇文章',
+  unreadable: '此文章无法在这里显示，但可以在网站上阅读。',
+  short: '这篇文章的文字只有这些。网站上可能还有更多内容，例如视频或后续更新。',
+  hideRead: '隐藏已读', readHidden: n => `已隐藏 ${n} 篇已读文章`, showRead: '显示',
+  later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
+  myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
+  mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
+  keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
+
+  // The toolbar popup, in the browser's language.
+  pop: {
+    levelHeading: '此网站的阅读级别', levelLabel: '阅读级别',
+    vanilla: 'Vanilla', vanillaDesc: '网站原样',
+    headlines: '清晰标题', headlinesDesc: '用文章本身的标题替换标题党',
+    synopsis: '清晰标题 + 摘要', synopsisDesc: '每个标题附上文章导语',
+    pictures: '带图片的简洁视图', picturesDesc: '与简洁视图相同，每篇文章配一张图片，大小统一',
+    plain: '简洁视图', plainDesc: '文章按栏目排列在平静的页面上。没有广告、视频或弹窗',
+    calm: '平静', calmDesc: '只显示关注的内容，没有广告、推荐、短视频信息流或推广 App 的弹窗',
+    isDefault: '✓ 所有网站的默认设置', makeDefault: '在所有网站上使用此级别',
+    calmHeading: '在此网站上显示', neverHeading: '永不显示', allSites: '所有网站',
+    someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}的子话题`,
+    styleHeading: '标题样式', styleRewrite: '改写', styleReveal: '轻点显示', styleStack: '同时显示',
+    showOriginal: '显示原标题', plainHeading: '简洁视图', swipe: '文章间轻扫时显示动画',
+    otherHeading: '其他网站', generic: '自动识别未设置的新闻网站',
+    disabledOn: '已停用的网站', enabledOn: '已启用的网站', remove: h => `移除 ${h}`,
+    notRunning: 'Web Detox 未在此页面上运行。',
+    notRunningHint: '它只在网页上运行，不在浏览器页面或商店页面上运行。如果刚安装或允许，重新载入页面即可。',
+    grant: '在所有网站上允许',
+    // Status line at the top. n is a number; h a site such as nrk.no.
+    asPublished: h => `正在按原样显示 ${h}。`,
+    calmStatus: (site, n) => `无干扰的 ${site}：` + (n ? `此页面上已隐藏 ${n} 项。` : '此页面上暂时没有要隐藏的内容。'),
+    plainStatus: n => `简洁视图：${n} 篇文章。`,
+    plainOnArticle: '简洁视图适用于首页；此文章显示清晰标题 + 摘要。',
+    changed: n => `已更改此页面上的 ${n} 个标题。`,
+    noneFound: '此页面上暂未发现标题党。',
+    checked: n => `已检查 ${n} 篇文章。`,
+    failed: n => `${n} 篇文章无法载入。`,
+    paused: (h, time) => `${h} 要求进行机器人验证，因此 Web Detox 在 ${time} 之前不会从该网站获取文章。`,
+    privacyHeading: '数据与隐私',
+    privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
+    erase: '删除 Web Detox 存储的所有内容',
+    eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
+    eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
+  },
+
+  // Topics in the popup's "Never show me".
+  topic: {
+    sport: '体育', football: '足球', winter: '冬季运动', motorsport: '赛车', tennis: '网球', golf: '高尔夫',
+    cycling: '自行车', handball: '手球', icehockey: '冰球', combat: '拳击和综合格斗', athletics: '田径',
+    ussports: '美国体育', esports: '电子竞技', entertainment: '娱乐', reality: '真人秀', celebrity: '名人',
+    royals: '王室', tvseries: '电视和剧集', film: '电影', music: '音乐', gaming: '游戏',
+    incidents: '犯罪和事故', crime: '犯罪', accidents: '事故', obituaries: '讣告和悼文',
+    lifestyle: '生活方式', health: '健康和健身', food: '美食和饮品', travel: '旅行', home: '家居和房产',
+    cars: '汽车', fashion: '时尚和美容', relationships: '性和情感', consumer: '消费和购物',
+    opinion: '观点和评论', politics: '政治', business: '商业和财经', tech: '科技和科学',
+    weather: '天气',
+  },
+
+  // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+  part: { birthdays: '生日', bait: '诱导互动帖子（“看评论区”）' },
+
+  // The app's own page on iPhone, iPad and Mac, in the device's language.
+  app: {
+    iconAlt: 'Web Detox 图标',
+    intro: 'Safari 浏览器中有两项设置，都在同一页面上：',
+    step1: '打开 Web Detox', step1Unknown: '顶部的开关。', step1On: '已打开。', step1Off: '已关闭：打开顶部的开关。',
+    step2: '在所有网站上允许',
+    step2Unknown: '在“权限”下，将“所有网站”设为“允许”。否则 Safari 浏览器会在每个网站上询问。然后在 Safari 浏览器中打开一个网站，再回到这里查看。',
+    step2On: '已在所有网站上允许。',
+    step2Off: '现在它只在逐个允许的网站上运行。如果更喜欢这样，也没有问题。要在所有网站上使用，在“权限”下将“所有网站”设为“允许”。',
+    openSettings: '在“设置”中打开 Web Detox', path: '设置 → App → Safari 浏览器 → 扩展 → Web Detox',
+    macUnknown: '可以在 Safari 浏览器设置的“扩展”部分打开 Web Detox 的扩展。',
+    macOn: 'Web Detox 的扩展当前已打开。可以在 Safari 浏览器设置的“扩展”部分将其关闭。',
+    macOff: 'Web Detox 的扩展当前已关闭。可以在 Safari 浏览器设置的“扩展”部分将其打开。',
+    macOpen: '退出并打开 Safari 浏览器设置…',
+  },
+};

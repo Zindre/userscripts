@@ -12,56 +12,70 @@
     <h1>Web Detox</h1>
     <span id="host"></span>
   </header>
+  <button id="my-news" type="button" class="my-news"></button>
 
   <main id="settings" hidden>
     <p id="status"></p>
 
-    <h2>Reading level on this site</h2>
-    <div class="modes" role="radiogroup" aria-label="Reading level">
-      <label><input type="radio" name="level" value="vanilla"><span><b>Vanilla</b>The site as published</span></label>
-      <label><input type="radio" name="level" value="headlines"><span><b>Clear headlines</b>Clickbait replaced with the article's own headline</span></label>
-      <label><input type="radio" name="level" value="synopsis"><span><b>Clear headlines + synopsis</b>Each headline with the article's lead</span></label>
-      <label><input type="radio" name="level" value="pictures"><span><b>Plain view with images</b>As plain view, with one image per article, all the same size</span></label>
-      <label><input type="radio" name="level" value="plain"><span><b>Plain view</b>The articles in sections on a calm page. No ads, video or pop-ups</span></label>
-      <label data-calm><input type="radio" name="level" value="calm"><span><b>Calm</b>What you follow, without ads, suggestions, short-video feeds or pop-ups that push the app</span></label>
+    <h2 data-i18n="levelHeading">Reading level on this site</h2>
+    <div class="modes" role="radiogroup" aria-label="Reading level" data-i18n-label="levelLabel">
+      <label><input type="radio" name="level" value="vanilla"><span><b data-i18n="vanilla">Vanilla</b><span data-i18n="vanillaDesc">The site as published</span></span></label>
+      <label><input type="radio" name="level" value="headlines"><span><b data-i18n="headlines">Clear headlines</b><span data-i18n="headlinesDesc">Clickbait replaced with the article's own headline</span></span></label>
+      <label><input type="radio" name="level" value="synopsis"><span><b data-i18n="synopsis">Clear headlines + synopsis</b><span data-i18n="synopsisDesc">Each headline with the article's lead</span></span></label>
+      <label><input type="radio" name="level" value="pictures"><span><b data-i18n="pictures">Plain view with images</b><span data-i18n="picturesDesc">As plain view, with one image per article, all the same size</span></span></label>
+      <label><input type="radio" name="level" value="plain"><span><b data-i18n="plain">Plain view</b><span data-i18n="plainDesc">The articles in sections on a calm page. No ads, video or pop-ups</span></span></label>
+      <label data-calm><input type="radio" name="level" value="calm"><span><b data-i18n="calm">Calm</b><span data-i18n="calmDesc">What you follow, without ads, suggestions, short-video feeds or pop-ups that push the app</span></span></label>
     </div>
     <button id="default" type="button" class="link"></button>
 
     <section id="calm-box" hidden>
-    <h2>Show on this site</h2>
+    <h2 data-i18n="calmHeading">Show on this site</h2>
     <div id="calm-parts"></div>
     </section>
 
     <section id="news-box">
-    <h2>Never show me <span class="note">all sites</span></h2>
+    <h2><span data-i18n="neverHeading">Never show me</span> <span class="note" data-i18n="allSites">all sites</span></h2>
     <div id="topics" class="topic-tree"></div>
 
     <section id="style-box">
-      <h2>Headline style</h2>
-      <div class="segmented" role="radiogroup" aria-label="Headline style">
-        <label><input type="radio" name="display" value="rewrite"><span>Rewrite</span></label>
-        <label><input type="radio" name="display" value="reveal"><span>Reveal on tap</span></label>
-        <label><input type="radio" name="display" value="stack"><span>Show both</span></label>
+      <h2 data-i18n="styleHeading">Headline style</h2>
+      <div class="segmented" role="radiogroup" aria-label="Headline style" data-i18n-label="styleHeading">
+        <label><input type="radio" name="display" value="rewrite"><span data-i18n="styleRewrite">Rewrite</span></label>
+        <label><input type="radio" name="display" value="reveal"><span data-i18n="styleReveal">Reveal on tap</span></label>
+        <label><input type="radio" name="display" value="stack"><span data-i18n="styleStack">Show both</span></label>
       </div>
-      <label class="switch"><span>Show original headlines <kbd>⌥⇧U</kbd></span><input type="checkbox" id="orig"></label>
+      <label class="switch"><span><span data-i18n="showOriginal">Show original headlines</span> <kbd>⌥⇧U</kbd></span><input type="checkbox" id="orig"></label>
     </section>
 
-    <h2>Plain view</h2>
-    <label class="switch"><span>Animate swiping between articles</span><input type="checkbox" id="swipe"></label>
+    <h2 data-i18n="plainHeading">Plain view</h2>
+    <label class="switch"><span data-i18n="swipe">Animate swiping between articles</span><input type="checkbox" id="swipe"></label>
     </section>
 
-    <h2>Other sites</h2>
-    <label class="switch"><span>Auto-detect news sites I haven't set up</span><input type="checkbox" id="generic"></label>
+    <h2 data-i18n="otherHeading">Other sites</h2>
+    <label class="switch"><span data-i18n="generic">Auto-detect news sites I haven't set up</span><input type="checkbox" id="generic"></label>
     <div id="changed" hidden></div>
   </main>
 
   <main id="unavailable" hidden>
-    <p>Web Detox isn't running on this page.</p>
-    <p class="hint">It only runs on web pages, not on browser or store pages. If you just installed or allowed it, reload the page.</p>
-    <button id="grant" type="button" hidden>Allow on all websites</button>
+    <p data-i18n="notRunning">Web Detox isn't running on this page.</p>
+    <p class="hint" data-i18n="notRunningHint">It only runs on web pages, not on browser or store pages. If you just installed or allowed it, reload the page.</p>
+    <button id="grant" type="button" hidden data-i18n="grant">Allow on all websites</button>
   </main>
 
+  <section id="privacy">
+    <h2 data-i18n="privacyHeading">Your data</h2>
+    <p class="hint" data-i18n="privacyText"></p>
+    <button id="erase" type="button" class="link" data-i18n="erase"></button>
+    <div id="erase-ask" hidden>
+      <p class="hint" data-i18n="eraseAsk"></p>
+      <button id="erase-yes" type="button" class="danger" data-i18n="eraseYes"></button>
+      <button id="erase-no" type="button" data-i18n="eraseNo"></button>
+    </div>
+    <p id="erased" class="hint" hidden data-i18n="erased"></p>
+  </section>
+
   <footer id="version"></footer>
+  <script src="strings.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

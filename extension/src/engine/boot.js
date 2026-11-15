@@ -11,7 +11,7 @@ async function main() {
   // Every setting the start needs, in one read (plain view's too: startup below).
   startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
     siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
-    plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainSaved: {} });
+    plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {} });
   const disabled = startup.disabledHosts || [];
   const enabled = startup.enabledHosts || [];
   CFG.genericSites = startup.genericSites ?? CFG.genericSites;
@@ -31,6 +31,10 @@ async function main() {
   setMuted(startup.mutedTopics || []);
   CFG.display = startup.display ?? CFG.display;
   CFG.swipeAnimation = startup.swipeAnimation ?? CFG.swipeAnimation;
+  // The My news page (mix.html), in the extension's own page: nothing else of this applies there.
+  if (globalThis.__wdMix) { await mixView(); return; }
+  // A visit to a news site, for My news (mix.js).
+  if (site && !calmSite) recordVisit().catch(() => {});
   let original = false; // the plain view's "Original" button: show the site as published, once
   try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
   // "Read on the site" in the reader. Back can land on an entry that still counts as this document: load it.

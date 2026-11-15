@@ -4,12 +4,8 @@
 // media paused, so ads, autoplay video, pop-ups and animation never show. A "Latest" section
 // comes from the site's RSS/Atom feed. Article pages are left alone (they get the synopsis
 // level). Paid articles are marked; what the site sends for them is what the reader shows.
-const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || ''), DE = /^de\b/i.test(document.documentElement.lang || '');
-const T = DE
-  ? { siteOrder: 'Wie auf der Seite', byImportance: 'Wichtigstes zuerst', top: 'Topthema', important: 'Wichtig', related: 'Mehr zum Thema', latest: 'Neueste', other: 'Sonstiges', sections: 'Rubriken', original: 'Original', done: 'Fertig', paid: 'Abo', count: n => `${n} Artikel`, editSections: 'Rubriken bearbeiten', editHint: 'Tippen zum Aus- oder Einblenden, ziehen zum Verschieben.', loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen', paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel', unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.', short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.', hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen', later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen', keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt' }
-  : NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, editSections: 'Rediger seksjoner', editHint: 'Trykk for å skjule eller vise, dra for å flytte.', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, editSections: 'Edit sections', editHint: 'Tap to hide or show, drag to move.', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes' };
+// The list's and the reader's texts, in the site's own language (src/i18n/).
+const T = stringsFor(document.documentElement.lang);
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -323,6 +319,15 @@ const PLAIN_CSS = `
   @media (min-width: 1000px){
     .wrap{max-width:88rem}
     section > ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(22rem,1fr));column-gap:32px}
+    /* Sections with fewer articles than fill a row stand side by side, read down and then across, like a newspaper page;
+       alone, each left most of its row empty (a short regional section, or one with the read articles hidden). */
+    .cols{columns:22rem;column-gap:32px}
+    .cols > section > ol{display:block}
+    /* A section may go on in the next column, between two articles (so the columns come out even); its heading stays
+       with its first article. */
+    .cols li{break-inside:avoid;-webkit-column-break-inside:avoid}
+    .cols h2{break-after:avoid;-webkit-column-break-after:avoid}
+    .cols > section:first-child{padding-top:0;margin-top:20px}
   }
   li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
   /* The picture is part of the card: a click on it goes to the card. In Safari on a Mac, a click on a picture could start
@@ -339,7 +344,9 @@ const PLAIN_CSS = `
   .filters.editing .read-toggle{display:none}
   .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
   .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
-  .edit-hint{margin:6px 0 0;font-size:13px;color:var(--muted)}
+  .edit-hint,.mix-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
+  h2 a.site-link{color:inherit;text-decoration:none}
+  h2 a.site-link:hover{color:var(--accent)}
   nav button[data-id]{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   nav button[data-id] small{color:var(--muted);font-size:12px;margin-left:4px}
   nav button[data-id][aria-pressed="false"]{opacity:.45;text-decoration:line-through;border-style:dashed}
@@ -418,7 +425,7 @@ function readerTermsP(b) {
 function readerContent(art, title, lede, url) {
   const el = readerEl, out = [el('h1', title)];
   if (lede) out.push(el('p', lede, 'lede'));
-  const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : DE ? 'de-DE' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+  const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
   if (by) out.push(el('div', by, 'byline'));
   for (const b of art?.blocks || []) {
     if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
@@ -490,11 +497,13 @@ async function articleView(withImages) {
   window.addEventListener('popstate', () => location.reload());
   return true;
 }
-async function plainView(withImages) {
+// mix: the My news page (mix.js) instead of a site's front page: { sites, load(add) }. Its articles come from several
+// sites' front pages, read elsewhere and handed over through load(); one section per site.
+async function plainView(withImages, mix) {
   timeMark('plain-view');
   // A heavy front page that gm-shim.js stopped before its scripts ran: its links come from a downloaded copy, read without
   // running anything (no layout either, so nothing is measured), and the logo from the list shown meanwhile.
-  const stopped = !!globalThis.__wdStopped;
+  const stopped = !mix && !!globalThis.__wdStopped;
   let src = document;
   if (stopped) {
     try { src = parseHtml((await gm.xhr({ url: location.href, headers: { Accept: 'text/html' } })).responseText); } catch { return false; }
@@ -505,62 +514,69 @@ async function plainView(withImages) {
   const listUrl = location.href, listTitle = document.title;
   // The logo is the first thing here that needs the page laid out, so it pays for the first layout: on nytimes.com in
   // Safari 1.2 s. It counts towards the first pass, which decides whether the page is heavy (the end of plainView).
-  const t0 = performance.now();
-  let logo = null;
-  if (stopped) {
-    const chip = document.getElementById('nothis-shot')?.shadowRoot?.querySelector('h1 .logo');
-    if (chip?.firstElementChild) logo = { el: chip.firstElementChild.cloneNode(true), bg: chip.style.background };
-  } else try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
-  let items = frontPageItems(undefined, !stopped, src);
-  const firstPass = performance.now() - t0;
-  timeMark('first-pass-' + Math.round(firstPass) + 'ms');
-  if (items.length < 8 && !stopped) items = await frontPageSoon(8, 2400);
-  const toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
-  timeMark('links');
-  const giveBack = swallowSite();
-  const known = new Map(items.map(it => [it.key, it]));
-  if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
-  if (items.length < 8) {
-    // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
-    giveBack(); window.scrollTo(0, 0);
-    return false;
+  let logo = null, items = [], toLinks = 0, giveBack = () => {}, known = new Map();
+  if (!mix) {
+    const t0 = performance.now();
+    if (stopped) {
+      const chip = document.getElementById('nothis-shot')?.shadowRoot?.querySelector('h1 .logo');
+      if (chip?.firstElementChild) logo = { el: chip.firstElementChild.cloneNode(true), bg: chip.style.background };
+    } else try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
+    items = frontPageItems(undefined, !stopped, src);
+    const firstPass = performance.now() - t0;
+    timeMark('first-pass-' + Math.round(firstPass) + 'ms');
+    if (items.length < 8 && !stopped) items = await frontPageSoon(8, 2400);
+    toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
+    timeMark('links');
+    giveBack = swallowSite();
+    known = new Map(items.map(it => [it.key, it]));
+    if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
+    if (items.length < 8) {
+      // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
+      giveBack(); window.scrollTo(0, 0);
+      return false;
+    }
   }
   rankItems(items);
   let sortMode = startup.plainSort === 'importance' ? 'importance' : 'site';
-  const layout = (startup.plainLayout || {})[host] || { hidden: [], order: [] };
+  const layoutKey = mix ? 'mix' : host, layout = (startup.plainLayout || {})[layoutKey] || { hidden: [], order: [] };
   // Articles opened here, kept for 30 days on every site. With "hide read" on, those read before this visit are left out
   // of the list, like an inbox showing only unread mail; one read now stays (dimmed) until the next visit, or until the
   // button is pressed.
   let hideRead = !!startup.plainHideRead, showReadNow = false;
   const readBefore = new Set(Object.keys(startup.plainRead || {})), hiddenRead = new Set();
-  const skipRead = it => hideRead && !showReadNow && readBefore.has(it.key);
+  // Read on another device (background.js syncs them): short hashes of the addresses, the last 14 days.
+  const readHash = k => { let h = 0x811c9dc5; for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+  const readElsewhere = new Set(Object.keys(startup.plainReadSync || {})), readThere = key => readElsewhere.has(readHash(key));
+  const skipRead = it => hideRead && !showReadNow && (readBefore.has(it.key) || readThere(it.key));
   const saveRead = key => gm.get('plainRead', {}).then(all => {
     const now = Date.now(), kept = Object.entries({ ...(all || {}), [key]: now }).filter(([, t]) => now - t < 30 * 864e5).sort((a, b) => b[1] - a[1]).slice(0, 3000);
     return gm.set('plainRead', Object.fromEntries(kept));
   });
-  readSectionNames(src);
+  if (!mix) readSectionNames(src);
+  else for (const st of mix.sites) sectionNames.set(st.host, st.name);
 
   plainHost = document.createElement('div');
   plainHost.id = 'declickbait-plain';
   const sh = plainHost.attachShadow({ mode: 'open' });
   sh.innerHTML = `<style>${PLAIN_CSS}</style>
-    <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p></header>
+    <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
     <main></main><footer></footer><div class="keys"></div></div>
     <div class="hold" hidden role="menu"></div>
     <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
-  const h1 = sh.querySelector('h1');
+  const h1 = sh.querySelector('h1'), mixNote = sh.querySelector('.mix-note');
   if (logo) {
     const chip = document.createElement('span'), name = document.createElement('span');
     chip.className = 'logo'; chip.style.background = logo.bg; chip.append(logo.el);
     name.className = 'sr'; name.textContent = pageMeta.site || host;
     h1.append(chip, name);
-  } else h1.textContent = pageMeta.site || host;
+  } else h1.textContent = mix ? T.myNews : pageMeta.site || host;
+  if (mix) sh.querySelector('[data-act="original"]').hidden = true;
   sh.querySelector('.keys').textContent = T.keys;
   document.documentElement.appendChild(plainHost); ownColors();
   onlyList();
   document.getElementById('nothis-cover')?.remove();
   // Remember the site, so next time the extension covers it before the original is drawn.
-  gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
+  if (!mix) gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
 
   const sections = new Map(), byKey = new Map();
   const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
@@ -570,6 +586,8 @@ async function plainView(withImages) {
   const SAVED = { later: 'saved-later', marks: 'saved-marks' }, isSaved = id => id === SAVED.later || id === SAVED.marks;
   const saved = { later: [...(startup.plainSaved?.later || [])], marks: [...(startup.plainSaved?.marks || [])] };
   sections.set(SAVED.later, []); sections.set(SAVED.marks, []);
+  // My news: the sites in the order they are read most, whichever front page comes in first.
+  if (mix) for (const st of mix.sites) sections.set(st.host, []);
   items.forEach(add);
   const syncSaved = () => {
     for (const kind of ['later', 'marks']) {
@@ -623,10 +641,11 @@ async function plainView(withImages) {
     let cur = spyPin && sh.getElementById(spyPin);
     if (!cur) {
       const line = sh.querySelector('header').getBoundingClientRect().bottom + 24;
-      for (const sec of main.querySelectorAll(':scope > section')) { if (sec.getBoundingClientRect().top <= line) cur = sec; else break; }
+      // Sections side by side (.cols) are passed together: the last one whose top is above the line, in reading order.
+      for (const sec of main.querySelectorAll('section')) if (sec.getBoundingClientRect().top <= line) cur = sec;
       // At the very end, the last section: one too short to reach the top is still the one being read.
-      if (plainHost.scrollTop > 0 && plainHost.scrollTop + plainHost.clientHeight >= plainHost.scrollHeight - 2) cur = main.querySelector(':scope > section:last-of-type');
-      cur ||= main.querySelector(':scope > section');
+      if (plainHost.scrollTop > 0 && plainHost.scrollTop + plainHost.clientHeight >= plainHost.scrollHeight - 2) cur = [...main.querySelectorAll('section')].pop();
+      cur ||= main.querySelector('section');
     }
     for (const c of chips) {
       const on = c.dataset.sec === cur?.id;
@@ -697,7 +716,7 @@ async function plainView(withImages) {
   function dropRow(key, li) {
     const sec = li.closest('section');
     li.remove(); rows.delete(key); plainCount = rows.size;
-    if (sec && !sec.querySelector('li')) { nav.querySelector(`[data-sec="${sec.id}"]`)?.remove(); sec.remove(); }
+    if (sec && !sec.querySelector('li')) { nav.querySelector(`[data-sec="${sec.id}"]`)?.remove(); const run = sec.parentElement; sec.remove(); if (run?.classList.contains('cols') && !run.children.length) run.remove(); }
     updateFooter();
   }
   const seenRows = new IntersectionObserver(es => {
@@ -754,7 +773,8 @@ async function plainView(withImages) {
     const text = withImages ? document.createElement('div') : li;
     text.append(a);
     if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
-    const from = it.host && it.host !== host ? it.host.replace(/^www\./, '') : '';
+    // The site, for an article from elsewhere: a saved one, or one in My news shown outside its site's section.
+    const from = it.host && it.host !== host && it.section !== it.host ? it.host.replace(/^www\./, '') : '';
     if (withSection || from) { const sl = document.createElement('span'); sl.className = 'sec-label'; sl.textContent = from || sectionLabel(it.section); text.append(sl); }
     text.append(p);
     if (withImages) {
@@ -769,7 +789,7 @@ async function plainView(withImages) {
     if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
     if (!cache[it.key]) want.push(it.key);
     seenRows.observe(li);
-    if (readKeys.has(it.key)) li.classList.add('read');
+    if (readKeys.has(it.key) || readThere(it.key)) li.classList.add('read');
     return li;
   }
 
@@ -933,7 +953,7 @@ async function plainView(withImages) {
     if (hideRead && !showReadNow) {
       // With "hide read" on, what was read leaves the list on the way back to it, and the keyboard goes on from the next
       // unread card (the one before, at the end). The cards around keep their place: render() holds the one on top.
-      const list = cards(), i = list.indexOf(rows.get(key)), unread = l => !readKeys.has(l.dataset.key);
+      const list = cards(), i = list.indexOf(rows.get(key)), unread = l => !readKeys.has(l.dataset.key) && !readThere(l.dataset.key);
       back = (list.slice(i + 1).find(unread) || list.slice(0, Math.max(i, 0)).reverse().find(unread))?.dataset.key;
       for (const k of readKeys) readBefore.add(k);
       render();
@@ -961,8 +981,22 @@ async function plainView(withImages) {
     if (!ol.childElementCount) return;
     const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
     sec.id = 's-' + id; chip.dataset.sec = sec.id; h2.textContent = chip.textContent = sectionLabel(id);
+    // My news: a site's heading leads to the site, where its own list opens.
+    const st = mix?.sites.find(x => x.host === id);
+    if (st) { const a = document.createElement('a'); a.href = st.origin + '/'; a.textContent = sectionLabel(id) + ' →'; a.className = 'site-link'; h2.replaceChildren(a); }
     chip.addEventListener('click', () => { spyPin = sec.id; sec.scrollIntoView(); spy(); });
     sec.append(h2, ol); main.append(sec); nav.append(chip);
+  }
+  // Runs of small sections go into one .cols box, which lays them side by side on a wide screen (CSS above); on a phone
+  // the box changes nothing. A section is small when it has fewer articles than the three a row holds.
+  function groupSmall() {
+    let run = null;
+    for (const sec of [...main.children]) {
+      if (!(sec.tagName === 'SECTION' && sec.querySelectorAll('li[data-key]').length < 3)) { run = null; continue; }
+      if (!run) { run = document.createElement('div'); run.className = 'cols'; sec.before(run); }
+      run.append(sec);
+    }
+    for (const box of main.querySelectorAll(':scope > .cols')) if (box.children.length < 2) box.replaceWith(...box.children);
   }
   function render() {
     // Keep the article at the top of the screen in place when the list changes around it.
@@ -990,6 +1024,7 @@ async function plainView(withImages) {
       sec.append(h2, ol); main.append(sec);
     }
     else for (const id of order()) if (!layout.hidden.includes(id)) renderSection(id);
+    groupSmall();
     plainCount = rows.size;
     updateFooter();
     plainHost.scrollTop = y;
@@ -1026,13 +1061,13 @@ async function plainView(withImages) {
   }
   async function finishEditing() {
     if (!editing) return;
-    layout.order = editing.order; layout.hidden = editing.order.filter(id => editing.hidden.has(id));
+    layout.order = editing.order; layout.hidden = editing.order.filter(id => editing.hidden.has(id)); layout.at = Date.now(); // newest wins in sync
     editing = null;
     filters.classList.remove('editing'); editHint.hidden = true;
     editBtn.textContent = '✎'; editBtn.setAttribute('aria-label', T.editSections);
     render();
     editBtn.focus({ preventScroll: true });
-    await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
+    await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [layoutKey]: layout });
   }
   const keepOrder = () => { if (editing) editing.order = [...nav.querySelectorAll('button[data-id]')].map(c => c.dataset.id); };
   // A drag moves the chip in the row as the finger goes, to the place under it. Short of 8 px it is a tap.
@@ -1166,7 +1201,7 @@ async function plainView(withImages) {
   // waiting in Safari. Only the extension has gm-shim.js. It takes over the copy's scrolling.
   const lastShot = document.getElementById('nothis-shot');
   if (lastShot) { plainHost.scrollTop = lastShot.scrollTop; lastShot.remove(); }
-  if (EXT) {
+  if (EXT && !mix) {
     const shotKey = 'nothis-shot:' + location.pathname;
     let shotTimer = null;
     // At most every 1.5 s: the list changes all the time while it fills in.
@@ -1181,6 +1216,12 @@ async function plainView(withImages) {
   // a moment after the last touch, click, scroll or key, and while an article is open.
   let later = null, quietAt = 0;
   const renderSoon = (ms = 600) => { clearTimeout(later); later = setTimeout(() => (pressed || current || Date.now() < quietAt) ? renderSoon(500) : render(), ms); };
+  if (mix) {
+    // My news: each site's articles come in as its front page has been read; the list is built again each time.
+    CFG.maxFetchesPerPage = 240;
+    mix.load(fresh => { items.push(...fresh); fresh.forEach(add); renderSoon(0); }, text => { mixNote.textContent = text; mixNote.hidden = !text; });
+    return true;
+  }
   feedItems(src).then(feed => { if (!feed.length) return; feed.forEach(add); renderSoon(0); });
   // Read the rest of a lazily filled front page, a few articles at a time, then drop the site's body.
   // Each step makes the site load more (pictures, players, ads), work that holds up a tap, so it

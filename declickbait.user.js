@@ -60,6 +60,1178 @@
       panelGesture: true,      // userscript: two-finger double tap opens the settings panel on touch screens
     };
 
+    const STRINGS = {};
+    // The texts in every language: src/i18n/<code>.js, one file per language, each STRINGS.<code> = {...}. English (en.js)
+    // is the source, and stands in for a key a language leaves out. build.mjs joins the files after this one; the engine,
+    // the popup and the app's page all use them.
+    //
+    // stringsFor(tag) gives the texts for a language tag such as "nb-NO", "de" or "pt-BR": the list and the reader go by the
+    // site's language (<html lang>), the popup by the browser's, the app's page by the device's. Norwegian nynorsk and "no"
+    // get bokmål; a language with no file gets English.
+    function stringsFor(tag) {
+      const base = String(tag || '').toLowerCase().split(/[-_]/)[0];
+      const code = base === 'no' || base === 'nn' ? 'nb' : STRINGS[base] ? base : 'en';
+      const en = STRINGS.en, own = STRINGS[code] || {}, out = { ...en, ...own, lang: code };
+      for (const k of ['pop', 'topic', 'part', 'app']) out[k] = { ...en[k], ...own[k] };
+      return out;
+    }
+
+    // English: the source for every other language. A language file may leave a key out; English is used for it.
+    // The tone: plain, short and calm. No exclamation marks, no "please", no marketing words.
+    STRINGS.en = {
+      // The list and the reader (plain view), in the language of the site being read.
+      siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important',
+      related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done',
+      paid: 'Subscription', count: n => `${n} ${n === 1 ? 'article' : 'articles'}`,
+      editSections: 'Edit sections', editHint: 'Tap to hide or show, drag to move.',
+      loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close',
+      paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article',
+      unreadable: "This article can't be shown here, but you can read it on the site.",
+      short: "That's all the text this article has. The site may have more, such as video or later updates.",
+      hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show',
+      later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
+      myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
+      mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
+      keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
+
+      // The toolbar popup, in the browser's language.
+      pop: {
+        levelHeading: 'Reading level on this site', levelLabel: 'Reading level',
+        vanilla: 'Vanilla', vanillaDesc: 'The site as published',
+        headlines: 'Clear headlines', headlinesDesc: "Clickbait replaced with the article's own headline",
+        synopsis: 'Clear headlines + synopsis', synopsisDesc: "Each headline with the article's lead",
+        pictures: 'Plain view with images', picturesDesc: 'As plain view, with one image per article, all the same size',
+        plain: 'Plain view', plainDesc: 'The articles in sections on a calm page. No ads, video or pop-ups',
+        calm: 'Calm', calmDesc: 'What you follow, without ads, suggestions, short-video feeds or pop-ups that push the app',
+        isDefault: '✓ Default for all sites', makeDefault: 'Use this level on all sites',
+        calmHeading: 'Show on this site', neverHeading: 'Never show me', allSites: 'all sites',
+        someOf: (n, of) => `${n} of ${of}`, subtopicsOf: g => `Subtopics of ${g}`,
+        styleHeading: 'Headline style', styleRewrite: 'Rewrite', styleReveal: 'Reveal on tap', styleStack: 'Show both',
+        showOriginal: 'Show original headlines', plainHeading: 'Plain view', swipe: 'Animate swiping between articles',
+        otherHeading: 'Other sites', generic: "Auto-detect news sites I haven't set up",
+        disabledOn: 'Disabled on', enabledOn: 'Enabled on', remove: h => `Remove ${h}`,
+        notRunning: "Web Detox isn't running on this page.",
+        notRunningHint: 'It only runs on web pages, not on browser or store pages. If you just installed or allowed it, reload the page.',
+        grant: 'Allow on all websites',
+        // Status line at the top. n is a number; h a site such as nrk.no.
+        asPublished: h => `Showing ${h} as published.`,
+        calmStatus: (site, n) => `${site} without distractions: ` + (n ? `${n} ${n === 1 ? 'thing' : 'things'} hidden on this page.` : 'nothing to hide on this page yet.'),
+        plainStatus: n => `Plain view: ${n} ${n === 1 ? 'article' : 'articles'}.`,
+        plainOnArticle: 'Plain view is for front pages; this article shows clear headlines + synopsis. ',
+        changed: n => `Changed ${n} ${n === 1 ? 'headline' : 'headlines'} on this page.`,
+        noneFound: 'No clickbait headlines found on this page yet.',
+        checked: n => ` Checked ${n} ${n === 1 ? 'article' : 'articles'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'article' : 'articles'} could not be loaded.`,
+        paused: (h, time) => ` ${h} asked for a robot check, so Web Detox fetches no articles from it until ${time}.`,
+        // Privacy, at the bottom of the popup.
+        privacyHeading: 'Your data',
+        privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
+        erase: 'Delete everything Web Detox has stored',
+        eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
+        eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
+      },
+
+      // Topics in the popup's "Never show me".
+      topic: {
+        sport: 'Sport', football: 'Football', winter: 'Winter sports', motorsport: 'Motorsport', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Cycling', handball: 'Handball', icehockey: 'Ice hockey', combat: 'Boxing and MMA', athletics: 'Athletics',
+        ussports: 'US sports', esports: 'Esports', entertainment: 'Entertainment', reality: 'Reality TV', celebrity: 'Celebrities',
+        royals: 'Royals', tvseries: 'TV and series', film: 'Film', music: 'Music', gaming: 'Gaming',
+        incidents: 'Crime and accidents', crime: 'Crime', accidents: 'Accidents', obituaries: 'Death notices and obituaries',
+        lifestyle: 'Lifestyle', health: 'Health and fitness', food: 'Food and drink', travel: 'Travel', home: 'Home and property',
+        cars: 'Cars', fashion: 'Fashion and beauty', relationships: 'Sex and relationships', consumer: 'Consumer and shopping',
+        opinion: 'Opinion and commentary', politics: 'Politics', business: 'Business and money', tech: 'Tech and science',
+        weather: 'Weather',
+      },
+
+      // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+      part: { birthdays: 'Birthdays', bait: 'Bait posts ("see the comments")' },
+
+      // The app's own page on iPhone, iPad and Mac, in the device's language.
+      app: {
+        iconAlt: 'Web Detox icon',
+        intro: 'Two settings in Safari, both on the same page:',
+        step1: 'Turn on Web Detox', step1Unknown: 'The switch at the top.', step1On: 'It’s on.', step1Off: 'It’s off: turn on the switch at the top.',
+        step2: 'Allow it on all websites',
+        step2Unknown: 'Under Permissions, set All Websites to Allow. Otherwise Safari asks on every site. Then open a website in Safari and come back here to check it.',
+        step2On: 'It’s allowed on all websites.',
+        step2Off: 'Now it only runs on the sites you allow one at a time. That’s fine if you prefer it. To use it everywhere, set All Websites to Allow under Permissions.',
+        openSettings: 'Open Web Detox in Settings', path: 'Settings → Apps → Safari → Extensions → Web Detox',
+        macUnknown: 'You can turn on Web Detox’s extension in the Extensions section of Safari Settings.',
+        macOn: 'Web Detox’s extension is currently on. You can turn it off in the Extensions section of Safari Settings.',
+        macOff: 'Web Detox’s extension is currently off. You can turn it on in the Extensions section of Safari Settings.',
+        macOpen: 'Quit and Open Safari Settings…',
+      },
+    };
+
+    // Danish (dansk).
+    STRINGS.da = {
+      // The list and the reader (plain view), in the language of the site being read.
+      siteOrder: 'Som på siden', byImportance: 'Vigtigst først', top: 'Tophistorie', important: 'Vigtigt',
+      related: 'Relaterede artikler', latest: 'Seneste', other: 'Andet', sections: 'Sektioner', original: 'Original', done: 'Færdig',
+      paid: 'Abonnement', count: n => `${n} ${n === 1 ? 'artikel' : 'artikler'}`,
+      editSections: 'Rediger sektioner', editHint: 'Tryk for at skjule eller vise, træk for at flytte.',
+      loading: 'Henter artiklen …', onSite: h => `Læs på ${h}`, close: 'Luk',
+      paidHere: 'Resten af artiklen er for abonnenter.', prev: 'Forrige artikel', next: 'Næste artikel',
+      unreadable: 'Artiklen kan ikke vises her, men den kan læses på siden.',
+      short: 'Det er al teksten i artiklen. Siden kan have mere, fx video eller senere opdateringer.',
+      hideRead: 'Skjul læste', readHidden: n => `${n} ${n === 1 ? 'læst artikel' : 'læste artikler'} skjult`, showRead: 'Vis',
+      later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
+      myNews: 'Mine nyheder', mixEmpty: 'Mine nyheder samler de nyhedssider, du besøger mest. Besøg et par stykker, så dukker de op her.',
+      mixLoading: (n, of) => `Læser forsiderne … ${n} af ${of}`,
+      keys: 'Piletaster vælger · Enter åbner · ← → forrige og næste under læsning · L læs senere · B bogmærke · Esc lukker',
+
+      // The toolbar popup, in the browser's language.
+      pop: {
+        levelHeading: 'Læseniveau på dette websted', levelLabel: 'Læseniveau',
+        vanilla: 'Vanilla', vanillaDesc: 'Webstedet, som det er udgivet',
+        headlines: 'Klare overskrifter', headlinesDesc: 'Clickbait erstattet med artiklens egen overskrift',
+        synopsis: 'Klare overskrifter + resumé', synopsisDesc: 'Hver overskrift med artiklens indledning',
+        pictures: 'Enkel visning med billeder', picturesDesc: 'Som enkel visning, med ét billede pr. artikel, alle i samme størrelse',
+        plain: 'Enkel visning', plainDesc: 'Artiklerne i sektioner på en rolig side. Ingen reklamer, video eller pop op-vinduer',
+        calm: 'Rolig', calmDesc: 'Det, du følger, uden reklamer, forslag, feeds med korte videoer eller pop op-vinduer, der presser på for appen',
+        isDefault: '✓ Standard for alle websteder', makeDefault: 'Brug dette niveau på alle websteder',
+        calmHeading: 'Vis på dette websted', neverHeading: 'Vis aldrig', allSites: 'alle websteder',
+        someOf: (n, of) => `${n} af ${of}`, subtopicsOf: g => `Underemner i ${g}`,
+        styleHeading: 'Overskriftsstil', styleRewrite: 'Omskriv', styleReveal: 'Vis ved tryk', styleStack: 'Vis begge',
+        showOriginal: 'Vis originale overskrifter', plainHeading: 'Enkel visning', swipe: 'Animér swipe mellem artikler',
+        otherHeading: 'Andre websteder', generic: 'Find selv nyhedssider, der ikke er sat op',
+        disabledOn: 'Slået fra på', enabledOn: 'Slået til på', remove: h => `Fjern ${h}`,
+        notRunning: 'Web Detox kører ikke på denne side.',
+        notRunningHint: 'Det kører kun på websider, ikke på browser- eller butikssider. Er det lige installeret eller tilladt, så genindlæs siden.',
+        grant: 'Tillad på alle websteder',
+        // Status line at the top. n is a number; h a site such as nrk.no.
+        asPublished: h => `Viser ${h}, som det er udgivet.`,
+        calmStatus: (site, n) => `${site} uden forstyrrelser: ` + (n ? `${n} ${n === 1 ? 'element' : 'elementer'} skjult på denne side.` : 'intet at skjule på denne side endnu.'),
+        plainStatus: n => `Enkel visning: ${n} ${n === 1 ? 'artikel' : 'artikler'}.`,
+        plainOnArticle: 'Enkel visning er til forsider; denne artikel vises med klare overskrifter + resumé. ',
+        changed: n => `Ændrede ${n} ${n === 1 ? 'overskrift' : 'overskrifter'} på denne side.`,
+        noneFound: 'Ingen clickbait-overskrifter fundet på denne side endnu.',
+        checked: n => ` Tjekkede ${n} ${n === 1 ? 'artikel' : 'artikler'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'artikel' : 'artikler'} kunne ikke hentes.`,
+        paused: (h, time) => ` ${h} bad om et robottjek, så Web Detox henter ingen artikler derfra før kl. ${time}.`,
+        privacyHeading: 'Dine data',
+        privacyText: 'Dine indstillinger, gemte artikler og det, du har læst, bliver i denne browser og følger med til dine andre enheder via din browserkonto eller iCloud. Intet sendes til os.',
+        erase: 'Slet alt, hvad Web Detox har gemt',
+        eraseAsk: 'Dette sletter dine indstillinger, Læs senere, Bogmærker og læsehistorik her og på dine andre enheder, næste gang de synkroniserer. Det kan ikke fortrydes.',
+        eraseYes: 'Slet alt', eraseNo: 'Annuller', erased: 'Alt er slettet.',
+      },
+
+      // Topics in the popup's "Never show me".
+      topic: {
+        sport: 'Sport', football: 'Fodbold', winter: 'Vintersport', motorsport: 'Motorsport', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Cykling', handball: 'Håndbold', icehockey: 'Ishockey', combat: 'Boksning og MMA', athletics: 'Atletik',
+        ussports: 'Amerikansk sport', esports: 'E-sport', entertainment: 'Underholdning', reality: 'Reality-tv', celebrity: 'Kendte',
+        royals: 'Kongelige', tvseries: 'Tv og serier', film: 'Film', music: 'Musik', gaming: 'Gaming',
+        incidents: 'Kriminalitet og ulykker', crime: 'Kriminalitet', accidents: 'Ulykker', obituaries: 'Dødsfald og nekrologer',
+        lifestyle: 'Livsstil', health: 'Sundhed og motion', food: 'Mad og drikke', travel: 'Rejser', home: 'Hjem og bolig',
+        cars: 'Biler', fashion: 'Mode og skønhed', relationships: 'Sex og parforhold', consumer: 'Forbrug og shopping',
+        opinion: 'Debat og kommentarer', politics: 'Politik', business: 'Erhverv og økonomi', tech: 'Teknologi og videnskab',
+        weather: 'Vejr',
+      },
+
+      // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+      part: { birthdays: 'Fødselsdage', bait: 'Lokkeopslag (»se kommentarerne«)' },
+
+      // The app's own page on iPhone, iPad and Mac, in the device's language.
+      app: {
+        iconAlt: 'Web Detox-ikon',
+        intro: 'To indstillinger i Safari, begge på samme side:',
+        step1: 'Slå Web Detox til', step1Unknown: 'Kontakten øverst.', step1On: 'Den er slået til.', step1Off: 'Den er slået fra: slå kontakten øverst til.',
+        step2: 'Tillad den på alle websteder',
+        step2Unknown: 'Sæt Alle websteder til Tillad under Tilladelser. Ellers spørger Safari på hvert websted. Åbn derefter et websted i Safari, og vend tilbage hertil for at tjekke det.',
+        step2On: 'Den er tilladt på alle websteder.',
+        step2Off: 'Nu kører den kun på de websteder, du tillader ét ad gangen. Det er fint, hvis du foretrækker det. For at bruge den overalt skal Alle websteder sættes til Tillad under Tilladelser.',
+        openSettings: 'Åbn Web Detox i Indstillinger', path: 'Indstillinger → Apps → Safari → Udvidelser → Web Detox',
+        macUnknown: 'Du kan slå Web Detox-udvidelsen til i afsnittet Udvidelser i Safari-indstillinger.',
+        macOn: 'Web Detox-udvidelsen er slået til. Du kan slå den fra i afsnittet Udvidelser i Safari-indstillinger.',
+        macOff: 'Web Detox-udvidelsen er slået fra. Du kan slå den til i afsnittet Udvidelser i Safari-indstillinger.',
+        macOpen: 'Afslut, og åbn Safari-indstillinger…',
+      },
+    };
+
+    // German (Deutsch).
+    STRINGS.de = {
+      siteOrder: 'Wie auf der Seite', byImportance: 'Wichtigstes zuerst', top: 'Topthema', important: 'Wichtig',
+      related: 'Mehr zum Thema', latest: 'Neueste', other: 'Sonstiges', sections: 'Rubriken', original: 'Original', done: 'Fertig',
+      paid: 'Abo', count: n => `${n} Artikel`,
+      editSections: 'Rubriken bearbeiten', editHint: 'Tippen zum Aus- oder Einblenden, ziehen zum Verschieben.',
+      loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen',
+      paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel',
+      unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.',
+      short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.',
+      hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen',
+      later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
+      myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
+      mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
+      keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
+
+      pop: {
+        levelHeading: 'Lesestufe auf dieser Website', levelLabel: 'Lesestufe',
+        vanilla: 'Vanilla', vanillaDesc: 'Die Website wie veröffentlicht',
+        headlines: 'Klare Schlagzeilen', headlinesDesc: 'Clickbait ersetzt durch die eigene Schlagzeile des Artikels',
+        synopsis: 'Klare Schlagzeilen + Vorspann', synopsisDesc: 'Jede Schlagzeile mit dem Vorspann des Artikels',
+        pictures: 'Schlichte Ansicht mit Bildern', picturesDesc: 'Wie die schlichte Ansicht, mit einem Bild pro Artikel, alle gleich groß',
+        plain: 'Schlichte Ansicht', plainDesc: 'Die Artikel in Rubriken auf einer ruhigen Seite. Ohne Werbung, Videos oder Pop-ups',
+        calm: 'Ruhig', calmDesc: 'Wem du folgst, ohne Werbung, Vorschläge, Kurzvideo-Feeds oder Pop-ups, die zur App drängen',
+        isDefault: '✓ Standard für alle Websites', makeDefault: 'Diese Stufe auf allen Websites verwenden',
+        calmHeading: 'Auf dieser Website anzeigen', neverHeading: 'Nie anzeigen', allSites: 'alle Websites',
+        someOf: (n, of) => `${n} von ${of}`, subtopicsOf: g => `Unterthemen von ${g}`,
+        styleHeading: 'Stil der Schlagzeilen', styleRewrite: 'Umschreiben', styleReveal: 'Beim Tippen zeigen', styleStack: 'Beide zeigen',
+        showOriginal: 'Original-Schlagzeilen zeigen', plainHeading: 'Schlichte Ansicht', swipe: 'Wischen zwischen Artikeln animieren',
+        otherHeading: 'Andere Websites', generic: 'Nachrichtenseiten automatisch erkennen, die ich nicht eingerichtet habe',
+        disabledOn: 'Deaktiviert auf', enabledOn: 'Aktiviert auf', remove: h => `${h} entfernen`,
+        notRunning: 'Web Detox läuft nicht auf dieser Seite.',
+        notRunningHint: 'Es läuft nur auf Webseiten, nicht auf Browser- oder Store-Seiten. Wenn du es gerade installiert oder erlaubt hast, lade die Seite neu.',
+        grant: 'Auf allen Websites erlauben',
+        asPublished: h => `${h} wird wie veröffentlicht angezeigt.`,
+        calmStatus: (site, n) => `${site} ohne Ablenkungen: ` + (n ? `${n} ${n === 1 ? 'Element' : 'Elemente'} auf dieser Seite ausgeblendet.` : 'auf dieser Seite noch nichts auszublenden.'),
+        plainStatus: n => `Schlichte Ansicht: ${n} Artikel.`,
+        plainOnArticle: 'Die schlichte Ansicht ist für Startseiten; dieser Artikel zeigt klare Schlagzeilen + Vorspann. ',
+        changed: n => `${n} ${n === 1 ? 'Schlagzeile' : 'Schlagzeilen'} auf dieser Seite geändert.`,
+        noneFound: 'Auf dieser Seite noch keine Clickbait-Schlagzeilen gefunden.',
+        checked: n => ` ${n} Artikel geprüft.`,
+        failed: n => ` ${n} Artikel ${n === 1 ? 'konnte' : 'konnten'} nicht geladen werden.`,
+        paused: (h, time) => ` ${h} hat eine Bot-Prüfung verlangt, daher lädt Web Detox bis ${time} Uhr keine Artikel von dort.`,
+        privacyHeading: 'Deine Daten',
+        privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
+        erase: 'Alles löschen, was Web Detox gespeichert hat',
+        eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
+        eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Fußball', winter: 'Wintersport', motorsport: 'Motorsport', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Radsport', handball: 'Handball', icehockey: 'Eishockey', combat: 'Boxen und MMA', athletics: 'Leichtathletik',
+        ussports: 'US-Sport', esports: 'E-Sport', entertainment: 'Unterhaltung', reality: 'Reality-TV', celebrity: 'Promis',
+        royals: 'Königshäuser', tvseries: 'TV und Serien', film: 'Film', music: 'Musik', gaming: 'Gaming',
+        incidents: 'Kriminalität und Unfälle', crime: 'Kriminalität', accidents: 'Unfälle', obituaries: 'Todesanzeigen und Nachrufe',
+        lifestyle: 'Lifestyle', health: 'Gesundheit und Fitness', food: 'Essen und Trinken', travel: 'Reisen', home: 'Wohnen und Immobilien',
+        cars: 'Autos', fashion: 'Mode und Beauty', relationships: 'Sex und Beziehungen', consumer: 'Verbraucher und Shopping',
+        opinion: 'Meinung und Kommentar', politics: 'Politik', business: 'Wirtschaft und Geld', tech: 'Technik und Wissenschaft',
+        weather: 'Wetter',
+      },
+
+      part: { birthdays: 'Geburtstage', bait: 'Köder-Posts („siehe Kommentare“)' },
+
+      app: {
+        iconAlt: 'Symbol von Web Detox',
+        intro: 'Zwei Einstellungen in Safari, beide auf derselben Seite:',
+        step1: 'Web Detox einschalten', step1Unknown: 'Der Schalter oben.', step1On: 'Es ist eingeschaltet.', step1Off: 'Es ist ausgeschaltet: Schalte den Schalter oben ein.',
+        step2: 'Auf allen Websites erlauben',
+        step2Unknown: 'Setze unter „Berechtigungen“ „Alle Websites“ auf „Erlauben“. Sonst fragt Safari auf jeder Website. Öffne dann eine Website in Safari und komm hierher zurück, um es zu prüfen.',
+        step2On: 'Es ist auf allen Websites erlaubt.',
+        step2Off: 'Jetzt läuft es nur auf den Websites, die du einzeln erlaubst. Das ist in Ordnung, wenn dir das lieber ist. Um es überall zu nutzen, setze unter „Berechtigungen“ „Alle Websites“ auf „Erlauben“.',
+        openSettings: 'Web Detox in den Einstellungen öffnen', path: 'Einstellungen → Apps → Safari → Erweiterungen → Web Detox',
+        macUnknown: 'Du kannst die Erweiterung von Web Detox in den Safari-Einstellungen unter „Erweiterungen“ einschalten.',
+        macOn: 'Die Erweiterung von Web Detox ist eingeschaltet. Du kannst sie in den Safari-Einstellungen unter „Erweiterungen“ ausschalten.',
+        macOff: 'Die Erweiterung von Web Detox ist ausgeschaltet. Du kannst sie in den Safari-Einstellungen unter „Erweiterungen“ einschalten.',
+        macOpen: 'Beenden und Safari-Einstellungen öffnen …',
+      },
+    };
+
+    // Spanish (español).
+    STRINGS.es = {
+      siteOrder: 'Orden del sitio', byImportance: 'Primero lo importante', top: 'Noticia principal', important: 'Importante',
+      related: 'Relacionados', latest: 'Lo último', other: 'Otros', sections: 'Secciones', original: 'Original', done: 'Listo',
+      paid: 'Suscriptores', count: n => `${n} ${n === 1 ? 'artículo' : 'artículos'}`,
+      editSections: 'Editar secciones', editHint: 'Toca para ocultar o mostrar, arrastra para mover.',
+      loading: 'Cargando el artículo…', onSite: h => `Leer en ${h}`, close: 'Cerrar',
+      paidHere: 'El resto de este artículo es para suscriptores.', prev: 'Artículo anterior', next: 'Artículo siguiente',
+      unreadable: 'Este artículo no se puede mostrar aquí, pero puedes leerlo en la web.',
+      short: 'Este artículo no tiene más texto. La web puede tener más, como vídeos o actualizaciones posteriores.',
+      hideRead: 'Ocultar leídos', readHidden: n => `${n} ${n === 1 ? 'artículo leído oculto' : 'artículos leídos ocultos'}`, showRead: 'Mostrar',
+      later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',
+      myNews: 'Mis noticias', mixEmpty: 'Mis noticias reúne los sitios de noticias que más visitas. Visita algunos y aparecerán aquí.',
+      mixLoading: (n, of) => `Leyendo las portadas… ${n} de ${of}`,
+      keys: 'Flechas para elegir · Enter abre · ← → anterior y siguiente al leer · L leer más tarde · B marcador · Esc cierra',
+
+      pop: {
+        levelHeading: 'Nivel de lectura en este sitio', levelLabel: 'Nivel de lectura',
+        vanilla: 'Vanilla', vanillaDesc: 'El sitio tal como se publica',
+        headlines: 'Titulares claros', headlinesDesc: 'Los titulares cebo, sustituidos por el propio titular del artículo',
+        synopsis: 'Titulares claros + resumen', synopsisDesc: 'Cada titular con la entradilla del artículo',
+        pictures: 'Vista sencilla con imágenes', picturesDesc: 'Como la vista sencilla, con una imagen por artículo, todas del mismo tamaño',
+        plain: 'Vista sencilla', plainDesc: 'Los artículos por secciones en una página tranquila. Sin anuncios, vídeos ni ventanas emergentes',
+        calm: 'Calma', calmDesc: 'Lo que sigues, sin anuncios, sugerencias, feeds de vídeos cortos ni ventanas que empujan a usar la app',
+        isDefault: '✓ Predeterminado en todos los sitios', makeDefault: 'Usar este nivel en todos los sitios',
+        calmHeading: 'Mostrar en este sitio', neverHeading: 'No mostrar nunca', allSites: 'todos los sitios',
+        someOf: (n, of) => `${n} de ${of}`, subtopicsOf: g => `Subtemas de ${g}`,
+        styleHeading: 'Estilo de titulares', styleRewrite: 'Reescribir', styleReveal: 'Mostrar al tocar', styleStack: 'Mostrar ambos',
+        showOriginal: 'Mostrar titulares originales', plainHeading: 'Vista sencilla', swipe: 'Animar el deslizamiento entre artículos',
+        otherHeading: 'Otros sitios', generic: 'Detectar sitios de noticias que no he configurado',
+        disabledOn: 'Desactivado en', enabledOn: 'Activado en', remove: h => `Quitar ${h}`,
+        notRunning: 'Web Detox no está activo en esta página.',
+        notRunningHint: 'Solo funciona en páginas web, no en páginas del navegador ni de tiendas. Si acabas de instalarlo o permitirlo, vuelve a cargar la página.',
+        grant: 'Permitir en todos los sitios web',
+        asPublished: h => `Mostrando ${h} tal como se publica.`,
+        calmStatus: (site, n) => `${site} sin distracciones: ` + (n ? `${n} ${n === 1 ? 'elemento oculto' : 'elementos ocultos'} en esta página.` : 'aún no hay nada que ocultar en esta página.'),
+        plainStatus: n => `Vista sencilla: ${n} ${n === 1 ? 'artículo' : 'artículos'}.`,
+        plainOnArticle: 'La vista sencilla es para portadas; este artículo se muestra con titulares claros + resumen. ',
+        changed: n => `${n} ${n === 1 ? 'titular cambiado' : 'titulares cambiados'} en esta página.`,
+        noneFound: 'Aún no se han encontrado titulares cebo en esta página.',
+        checked: n => ` ${n} ${n === 1 ? 'artículo revisado' : 'artículos revisados'}.`,
+        failed: n => ` No se ${n === 1 ? 'pudo' : 'pudieron'} cargar ${n} ${n === 1 ? 'artículo' : 'artículos'}.`,
+        paused: (h, time) => ` ${h} pidió una verificación antirrobots, así que Web Detox no descarga artículos de allí hasta las ${time}.`,
+        privacyHeading: 'Tus datos',
+        privacyText: 'Tus ajustes, los artículos guardados y lo que has leído se quedan en este navegador y llegan a tus otros dispositivos a través de tu cuenta del navegador o de iCloud. No se nos envía nada.',
+        erase: 'Borrar todo lo que Web Detox ha guardado',
+        eraseAsk: 'Esto borra tus ajustes, «Leer más tarde», «Marcadores» y el historial de lectura aquí y en tus otros dispositivos la próxima vez que se sincronicen. No se puede deshacer.',
+        eraseYes: 'Borrar todo', eraseNo: 'Cancelar', erased: 'Se ha borrado todo.',
+      },
+
+      topic: {
+        sport: 'Deportes', football: 'Fútbol', winter: 'Deportes de invierno', motorsport: 'Motor', tennis: 'Tenis', golf: 'Golf',
+        cycling: 'Ciclismo', handball: 'Balonmano', icehockey: 'Hockey sobre hielo', combat: 'Boxeo y MMA', athletics: 'Atletismo',
+        ussports: 'Deportes de EE. UU.', esports: 'Esports', entertainment: 'Entretenimiento', reality: 'Telerrealidad', celebrity: 'Famosos',
+        royals: 'Realeza', tvseries: 'TV y series', film: 'Cine', music: 'Música', gaming: 'Videojuegos',
+        incidents: 'Sucesos', crime: 'Delitos', accidents: 'Accidentes', obituaries: 'Esquelas y obituarios',
+        lifestyle: 'Estilo de vida', health: 'Salud y forma física', food: 'Comida y bebida', travel: 'Viajes', home: 'Casa y vivienda',
+        cars: 'Coches', fashion: 'Moda y belleza', relationships: 'Sexo y pareja', consumer: 'Consumo y compras',
+        opinion: 'Opinión y columnas', politics: 'Política', business: 'Economía y dinero', tech: 'Tecnología y ciencia',
+        weather: 'Tiempo',
+      },
+
+      part: { birthdays: 'Cumpleaños', bait: 'Publicaciones cebo («mira los comentarios»)' },
+
+      app: {
+        iconAlt: 'Icono de Web Detox',
+        intro: 'Dos ajustes en Safari, los dos en la misma página:',
+        step1: 'Activar Web Detox', step1Unknown: 'El interruptor de arriba.', step1On: 'Está activado.', step1Off: 'Está desactivado: activa el interruptor de arriba.',
+        step2: 'Permitirlo en todos los sitios web',
+        step2Unknown: 'En «Permisos», elige «Permitir» para «Todos los sitios web». Si no, Safari pregunta en cada sitio. Después abre un sitio web en Safari y vuelve aquí para comprobarlo.',
+        step2On: 'Está permitido en todos los sitios web.',
+        step2Off: 'Ahora solo funciona en los sitios que permites uno a uno. Está bien si lo prefieres. Para usarlo en todas partes, en «Permisos», elige «Permitir» para «Todos los sitios web».',
+        openSettings: 'Abrir Web Detox en Ajustes', path: 'Ajustes → Apps → Safari → Extensiones → Web Detox',
+        macUnknown: 'Puedes activar la extensión de Web Detox en la sección Extensiones de los ajustes de Safari.',
+        macOn: 'La extensión de Web Detox está activada. Puedes desactivarla en la sección Extensiones de los ajustes de Safari.',
+        macOff: 'La extensión de Web Detox está desactivada. Puedes activarla en la sección Extensiones de los ajustes de Safari.',
+        macOpen: 'Salir y abrir los ajustes de Safari…',
+      },
+    };
+
+    // Finnish (suomi).
+    STRINGS.fi = {
+      // The list and the reader (plain view), in the language of the site being read.
+      siteOrder: 'Kuten sivulla', byImportance: 'Tärkein ensin', top: 'Pääuutinen', important: 'Tärkeä',
+      related: 'Aiheeseen liittyvät', latest: 'Uusimmat', other: 'Muut', sections: 'Osiot', original: 'Alkuperäinen', done: 'Valmis',
+      paid: 'Tilaajille', count: n => `${n} ${n === 1 ? 'artikkeli' : 'artikkelia'}`,
+      editSections: 'Muokkaa osioita', editHint: 'Piilota tai näytä napauttamalla, siirrä vetämällä.',
+      loading: 'Ladataan artikkelia …', onSite: h => `Lue sivustolla ${h}`, close: 'Sulje',
+      paidHere: 'Artikkelin loppuosa on tilaajille.', prev: 'Edellinen artikkeli', next: 'Seuraava artikkeli',
+      unreadable: 'Artikkelia ei voi näyttää tässä, mutta sen voi lukea sivustolla.',
+      short: 'Tässä on artikkelin koko teksti. Sivustolla voi olla lisää, kuten videota tai myöhempiä päivityksiä.',
+      hideRead: 'Piilota luetut', readHidden: n => `${n} ${n === 1 ? 'luettu artikkeli' : 'luettua artikkelia'} piilotettu`, showRead: 'Näytä',
+      later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
+      myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
+      mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
+      keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
+
+      // The toolbar popup, in the browser's language.
+      pop: {
+        levelHeading: 'Lukutaso tällä sivustolla', levelLabel: 'Lukutaso',
+        vanilla: 'Vanilla', vanillaDesc: 'Sivusto julkaistussa muodossa',
+        headlines: 'Selkeät otsikot', headlinesDesc: 'Klikkiotsikot korvattu artikkelin omalla otsikolla',
+        synopsis: 'Selkeät otsikot + ingressi', synopsisDesc: 'Jokainen otsikko artikkelin ingressin kanssa',
+        pictures: 'Pelkistetty näkymä kuvin', picturesDesc: 'Kuten pelkistetty näkymä, yksi kuva artikkelia kohden, kaikki samankokoisia',
+        plain: 'Pelkistetty näkymä', plainDesc: 'Artikkelit osioittain rauhallisella sivulla. Ei mainoksia, videoita eikä ponnahdusikkunoita',
+        calm: 'Rauhallinen', calmDesc: 'Seurattu sisältö ilman mainoksia, ehdotuksia, lyhytvideosyötteitä tai sovellusta tyrkyttäviä ponnahdusikkunoita',
+        isDefault: '✓ Oletus kaikilla sivustoilla', makeDefault: 'Käytä tätä tasoa kaikilla sivustoilla',
+        calmHeading: 'Näytä tällä sivustolla', neverHeading: 'Älä näytä koskaan', allSites: 'kaikki sivustot',
+        someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `Aiheen ${g} alaiheet`,
+        styleHeading: 'Otsikkotyyli', styleRewrite: 'Kirjoita uudelleen', styleReveal: 'Näytä napauttamalla', styleStack: 'Näytä molemmat',
+        showOriginal: 'Näytä alkuperäiset otsikot', plainHeading: 'Pelkistetty näkymä', swipe: 'Animoi pyyhkäisy artikkelien välillä',
+        otherHeading: 'Muut sivustot', generic: 'Tunnista uutissivustot, joita ei ole määritetty',
+        disabledOn: 'Pois käytöstä', enabledOn: 'Käytössä', remove: h => `Poista ${h}`,
+        notRunning: 'Web Detox ei ole käytössä tällä sivulla.',
+        notRunningHint: 'Se toimii vain verkkosivuilla, ei selaimen tai kaupan sivuilla. Jos se juuri asennettiin tai sallittiin, lataa sivu uudelleen.',
+        grant: 'Salli kaikilla verkkosivustoilla',
+        // Status line at the top. n is a number; h a site such as nrk.no.
+        asPublished: h => `${h} näytetään julkaistussa muodossa.`,
+        calmStatus: (site, n) => `${site} ilman häiriöitä: ` + (n ? `${n} ${n === 1 ? 'kohde' : 'kohdetta'} piilotettu tällä sivulla.` : 'tällä sivulla ei vielä ole piilotettavaa.'),
+        plainStatus: n => `Pelkistetty näkymä: ${n} ${n === 1 ? 'artikkeli' : 'artikkelia'}.`,
+        plainOnArticle: 'Pelkistetty näkymä on etusivuille; tässä artikkelissa näytetään selkeät otsikot + ingressi. ',
+        changed: n => `Tällä sivulla muutettiin ${n} ${n === 1 ? 'otsikko' : 'otsikkoa'}.`,
+        noneFound: 'Tällä sivulla ei vielä löytynyt klikkiotsikoita.',
+        checked: n => ` Tarkistettiin ${n} ${n === 1 ? 'artikkeli' : 'artikkelia'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'artikkeli' : 'artikkelia'} jäi lataamatta.`,
+        paused: (h, time) => ` ${h} pyysi robottitarkistusta, joten Web Detox ei hae sieltä artikkeleita klo ${time} asti.`,
+        privacyHeading: 'Omat tiedot',
+        privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
+        erase: 'Poista kaikki, mitä Web Detox on tallentanut',
+        eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
+        eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
+      },
+
+      // Topics in the popup's "Never show me".
+      topic: {
+        sport: 'Urheilu', football: 'Jalkapallo', winter: 'Talviurheilu', motorsport: 'Moottoriurheilu', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Pyöräily', handball: 'Käsipallo', icehockey: 'Jääkiekko', combat: 'Nyrkkeily ja MMA', athletics: 'Yleisurheilu',
+        ussports: 'Yhdysvaltain urheilu', esports: 'E-urheilu', entertainment: 'Viihde', reality: 'Tosi-tv', celebrity: 'Julkkikset',
+        royals: 'Kuninkaalliset', tvseries: 'TV ja sarjat', film: 'Elokuvat', music: 'Musiikki', gaming: 'Pelit',
+        incidents: 'Rikokset ja onnettomuudet', crime: 'Rikokset', accidents: 'Onnettomuudet', obituaries: 'Kuolinilmoitukset ja muistokirjoitukset',
+        lifestyle: 'Elämäntyyli', health: 'Terveys ja kuntoilu', food: 'Ruoka ja juoma', travel: 'Matkailu', home: 'Koti ja asuminen',
+        cars: 'Autot', fashion: 'Muoti ja kauneus', relationships: 'Seksi ja parisuhteet', consumer: 'Kuluttaminen ja ostokset',
+        opinion: 'Mielipiteet ja kommentit', politics: 'Politiikka', business: 'Talous ja raha', tech: 'Tekniikka ja tiede',
+        weather: 'Sää',
+      },
+
+      // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+      part: { birthdays: 'Syntymäpäivät', bait: 'Huomionkalastelu (”katso kommentit”)' },
+
+      // The app's own page on iPhone, iPad and Mac, in the device's language.
+      app: {
+        iconAlt: 'Web Detox -kuvake',
+        intro: 'Kaksi Safarin asetusta, molemmat samalla sivulla:',
+        step1: 'Ota Web Detox käyttöön', step1Unknown: 'Ylimpänä oleva kytkin.', step1On: 'Se on käytössä.', step1Off: 'Se ei ole käytössä: laita ylimpänä oleva kytkin päälle.',
+        step2: 'Salli se kaikilla verkkosivustoilla',
+        step2Unknown: 'Aseta Luvat-kohdassa Kaikki verkkosivustot -asetukseksi Salli. Muuten Safari kysyy jokaisella sivustolla. Avaa sitten jokin verkkosivusto Safarissa ja palaa tänne tarkistamaan.',
+        step2On: 'Se on sallittu kaikilla verkkosivustoilla.',
+        step2Off: 'Nyt se toimii vain sivustoilla, jotka sallitaan yksitellen. Sekin käy hyvin. Jotta se toimii kaikkialla, aseta Luvat-kohdassa Kaikki verkkosivustot -asetukseksi Salli.',
+        openSettings: 'Avaa Web Detox Asetuksissa', path: 'Asetukset → Apit → Safari → Laajennukset → Web Detox',
+        macUnknown: 'Web Detoxin laajennuksen voi ottaa käyttöön Safarin asetusten Laajennukset-osiossa.',
+        macOn: 'Web Detoxin laajennus on käytössä. Sen voi poistaa käytöstä Safarin asetusten Laajennukset-osiossa.',
+        macOff: 'Web Detoxin laajennus ei ole käytössä. Sen voi ottaa käyttöön Safarin asetusten Laajennukset-osiossa.',
+        macOpen: 'Lopeta ja avaa Safarin asetukset…',
+      },
+    };
+
+    // French (français).
+    STRINGS.fr = {
+      siteOrder: 'Ordre du site', byImportance: 'Le plus important d’abord', top: 'À la une', important: 'Important',
+      related: 'Sur le même sujet', latest: 'Récents', other: 'Autres', sections: 'Rubriques', original: 'Original', done: 'Terminé',
+      paid: 'Abonnés', count: n => `${n} ${n < 2 ? 'article' : 'articles'}`,
+      editSections: 'Modifier les rubriques', editHint: 'Touchez pour masquer ou afficher, faites glisser pour déplacer.',
+      loading: 'Chargement de l’article…', onSite: h => `Lire sur ${h}`, close: 'Fermer',
+      paidHere: 'La suite de cet article est réservée aux abonnés.', prev: 'Article précédent', next: 'Article suivant',
+      unreadable: 'Cet article ne peut pas s’afficher ici, mais vous pouvez le lire sur le site.',
+      short: 'Cet article n’a pas plus de texte. Le site en a peut-être plus, comme des vidéos ou des mises à jour.',
+      hideRead: 'Masquer les lus', readHidden: n => `${n} ${n < 2 ? 'article lu masqué' : 'articles lus masqués'}`, showRead: 'Afficher',
+      later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
+      myNews: 'Mes infos', mixEmpty: 'Mes infos rassemble les sites d’info que vous consultez le plus. Consultez-en quelques-uns, et ils apparaîtront ici.',
+      mixLoading: (n, of) => `Lecture des pages d’accueil… ${n} sur ${of}`,
+      keys: 'Les flèches choisissent · Enter ouvre · ← → précédent et suivant en lecture · L à lire plus tard · B signet · Esc ferme',
+
+      pop: {
+        levelHeading: 'Niveau de lecture sur ce site', levelLabel: 'Niveau de lecture',
+        vanilla: 'Vanilla', vanillaDesc: 'Le site tel que publié',
+        headlines: 'Titres clairs', headlinesDesc: 'Les titres racoleurs remplacés par le vrai titre de l’article',
+        synopsis: 'Titres clairs + résumé', synopsisDesc: 'Chaque titre avec le chapeau de l’article',
+        pictures: 'Vue simple avec images', picturesDesc: 'Comme la vue simple, avec une image par article, toutes de la même taille',
+        plain: 'Vue simple', plainDesc: 'Les articles par rubrique sur une page calme. Sans publicité, vidéo ni pop-up',
+        calm: 'Calme', calmDesc: 'Ce que vous suivez, sans publicité, suggestions, flux de vidéos courtes ni pop-up qui poussent vers l’app',
+        isDefault: '✓ Par défaut sur tous les sites', makeDefault: 'Utiliser ce niveau sur tous les sites',
+        calmHeading: 'Afficher sur ce site', neverHeading: 'Ne jamais afficher', allSites: 'tous les sites',
+        someOf: (n, of) => `${n} sur ${of}`, subtopicsOf: g => `Sous-thèmes de ${g}`,
+        styleHeading: 'Style des titres', styleRewrite: 'Réécrire', styleReveal: 'Afficher au toucher', styleStack: 'Afficher les deux',
+        showOriginal: 'Afficher les titres d’origine', plainHeading: 'Vue simple', swipe: 'Animer le balayage entre les articles',
+        otherHeading: 'Autres sites', generic: 'Détecter les sites d’info que je n’ai pas configurés',
+        disabledOn: 'Désactivé sur', enabledOn: 'Activé sur', remove: h => `Retirer ${h}`,
+        notRunning: 'Web Detox ne fonctionne pas sur cette page.',
+        notRunningHint: 'Il ne fonctionne que sur les pages web, pas sur les pages du navigateur ou des boutiques. Si vous venez de l’installer ou de l’autoriser, rechargez la page.',
+        grant: 'Autoriser sur tous les sites web',
+        asPublished: h => `${h} s’affiche tel que publié.`,
+        calmStatus: (site, n) => `${site} sans distractions : ` + (n ? `${n} ${n < 2 ? 'élément masqué' : 'éléments masqués'} sur cette page.` : 'rien à masquer sur cette page pour l’instant.'),
+        plainStatus: n => `Vue simple : ${n} ${n < 2 ? 'article' : 'articles'}.`,
+        plainOnArticle: 'La vue simple est faite pour les pages d’accueil ; cet article s’affiche en titres clairs + résumé. ',
+        changed: n => `${n} ${n < 2 ? 'titre modifié' : 'titres modifiés'} sur cette page.`,
+        noneFound: 'Aucun titre racoleur trouvé sur cette page pour l’instant.',
+        checked: n => ` ${n} ${n < 2 ? 'article vérifié' : 'articles vérifiés'}.`,
+        failed: n => ` ${n} ${n < 2 ? 'article n’a pas pu être chargé' : 'articles n’ont pas pu être chargés'}.`,
+        paused: (h, time) => ` ${h} a demandé une vérification anti-robot, donc Web Detox n’y charge aucun article jusqu’à ${time}.`,
+        privacyHeading: 'Vos données',
+        privacyText: 'Vos réglages, vos articles enregistrés et ce que vous avez lu restent dans ce navigateur et passent sur vos autres appareils via votre compte de navigateur ou iCloud. Rien ne nous est envoyé.',
+        erase: 'Effacer tout ce que Web Detox a enregistré',
+        eraseAsk: 'Cela efface vos réglages, « À lire plus tard », « Signets » et l’historique de lecture ici, ainsi que sur vos autres appareils lors de leur prochaine synchronisation. Cette action est irréversible.',
+        eraseYes: 'Tout effacer', eraseNo: 'Annuler', erased: 'Tout est effacé.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Football', winter: 'Sports d’hiver', motorsport: 'Sport automobile', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Cyclisme', handball: 'Handball', icehockey: 'Hockey sur glace', combat: 'Boxe et MMA', athletics: 'Athlétisme',
+        ussports: 'Sports américains', esports: 'Esport', entertainment: 'Divertissement', reality: 'Téléréalité', celebrity: 'Célébrités',
+        royals: 'Familles royales', tvseries: 'Télé et séries', film: 'Cinéma', music: 'Musique', gaming: 'Jeux vidéo',
+        incidents: 'Faits divers', crime: 'Criminalité', accidents: 'Accidents', obituaries: 'Avis de décès et nécrologies',
+        lifestyle: 'Art de vivre', health: 'Santé et forme', food: 'Cuisine et boissons', travel: 'Voyage', home: 'Maison et immobilier',
+        cars: 'Voitures', fashion: 'Mode et beauté', relationships: 'Sexe et couple', consumer: 'Consommation et shopping',
+        opinion: 'Opinions et chroniques', politics: 'Politique', business: 'Économie et argent', tech: 'Tech et sciences',
+        weather: 'Météo',
+      },
+
+      part: { birthdays: 'Anniversaires', bait: 'Posts racoleurs (« voir les commentaires »)' },
+
+      app: {
+        iconAlt: 'Icône de Web Detox',
+        intro: 'Deux réglages dans Safari, sur la même page :',
+        step1: 'Activer Web Detox', step1Unknown: 'L’interrupteur en haut.', step1On: 'C’est activé.', step1Off: 'C’est désactivé : activez l’interrupteur en haut.',
+        step2: 'L’autoriser sur tous les sites web',
+        step2Unknown: 'Sous « Autorisations », réglez « Tous les sites web » sur « Autoriser ». Sinon, Safari demande sur chaque site. Ouvrez ensuite un site web dans Safari et revenez ici pour vérifier.',
+        step2On: 'C’est autorisé sur tous les sites web.',
+        step2Off: 'Pour l’instant, il ne fonctionne que sur les sites que vous autorisez un par un. Cela convient si vous le préférez. Pour l’utiliser partout, réglez « Tous les sites web » sur « Autoriser » sous « Autorisations ».',
+        openSettings: 'Ouvrir Web Detox dans Réglages', path: 'Réglages → Apps → Safari → Extensions → Web Detox',
+        macUnknown: 'Vous pouvez activer l’extension Web Detox dans la section Extensions des réglages de Safari.',
+        macOn: 'L’extension Web Detox est activée. Vous pouvez la désactiver dans la section Extensions des réglages de Safari.',
+        macOff: 'L’extension Web Detox est désactivée. Vous pouvez l’activer dans la section Extensions des réglages de Safari.',
+        macOpen: 'Quitter et ouvrir les réglages de Safari…',
+      },
+    };
+
+    // Italian
+    STRINGS.it = {
+      siteOrder: 'Ordine del sito', byImportance: 'Prima i più importanti', top: 'In primo piano', important: 'Importante',
+      related: 'Articoli correlati', latest: 'Ultime', other: 'Altro', sections: 'Sezioni', original: 'Originale', done: 'Fine',
+      paid: 'Abbonamento', count: n => `${n} ${n === 1 ? 'articolo' : 'articoli'}`,
+      editSections: 'Modifica sezioni', editHint: 'Tocca per nascondere o mostrare, trascina per spostare.',
+      loading: 'Caricamento dell’articolo …', onSite: h => `Leggi su ${h}`, close: 'Chiudi',
+      paidHere: 'Il resto dell’articolo è per gli abbonati.', prev: 'Articolo precedente', next: 'Articolo successivo',
+      unreadable: 'Questo articolo non si può mostrare qui, ma puoi leggerlo sul sito.',
+      short: 'Questo è tutto il testo dell’articolo. Il sito potrebbe avere altro, come video o aggiornamenti successivi.',
+      hideRead: 'Nascondi letti', readHidden: n => `${n} ${n === 1 ? 'articolo letto nascosto' : 'articoli letti nascosti'}`, showRead: 'Mostra',
+      later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',
+      myNews: 'Le mie notizie', mixEmpty: 'Le mie notizie raccoglie i siti di notizie che visiti di più. Visitane qualcuno e compariranno qui.',
+      mixLoading: (n, of) => `Lettura delle prime pagine … ${n} di ${of}`,
+      keys: 'Frecce per scegliere · Enter apre · ← → precedente e successivo durante la lettura · L leggi dopo · B segnalibro · Esc chiude',
+
+      pop: {
+        levelHeading: 'Livello di lettura su questo sito', levelLabel: 'Livello di lettura',
+        vanilla: 'Vanilla', vanillaDesc: 'Il sito così come è pubblicato',
+        headlines: 'Titoli chiari', headlinesDesc: 'Il clickbait sostituito dal vero titolo dell’articolo',
+        synopsis: 'Titoli chiari + sommario', synopsisDesc: 'Ogni titolo con il sommario dell’articolo',
+        pictures: 'Vista semplice con immagini', picturesDesc: 'Come la vista semplice, con un’immagine per articolo, tutte della stessa misura',
+        plain: 'Vista semplice', plainDesc: 'Gli articoli in sezioni su una pagina tranquilla. Niente pubblicità, video o pop-up',
+        calm: 'Calma', calmDesc: 'Ciò che segui, senza pubblicità, suggerimenti, feed di video brevi o pop-up che spingono l’app',
+        isDefault: '✓ Predefinito per tutti i siti', makeDefault: 'Usa questo livello su tutti i siti',
+        calmHeading: 'Mostra su questo sito', neverHeading: 'Non mostrare mai', allSites: 'tutti i siti',
+        someOf: (n, of) => `${n} di ${of}`, subtopicsOf: g => `Sottoargomenti di ${g}`,
+        styleHeading: 'Stile dei titoli', styleRewrite: 'Riscrivi', styleReveal: 'Mostra al tocco', styleStack: 'Mostra entrambi',
+        showOriginal: 'Mostra i titoli originali', plainHeading: 'Vista semplice', swipe: 'Anima lo scorrimento tra gli articoli',
+        otherHeading: 'Altri siti', generic: 'Riconosci da solo i siti di notizie non ancora impostati',
+        disabledOn: 'Disattivato su', enabledOn: 'Attivato su', remove: h => `Rimuovi ${h}`,
+        notRunning: 'Web Detox non è attivo su questa pagina.',
+        notRunningHint: 'Funziona solo sulle pagine web, non sulle pagine del browser o degli store. Se l’hai appena installato o consentito, ricarica la pagina.',
+        grant: 'Consenti su tutti i siti web',
+        asPublished: h => `${h} è mostrato così come è pubblicato.`,
+        calmStatus: (site, n) => `${site} senza distrazioni: ` + (n ? `${n} ${n === 1 ? 'elemento nascosto' : 'elementi nascosti'} su questa pagina.` : 'per ora niente da nascondere su questa pagina.'),
+        plainStatus: n => `Vista semplice: ${n} ${n === 1 ? 'articolo' : 'articoli'}.`,
+        plainOnArticle: 'La vista semplice è per le prime pagine; questo articolo mostra titoli chiari + sommario. ',
+        changed: n => `${n === 1 ? 'Cambiato' : 'Cambiati'} ${n} ${n === 1 ? 'titolo' : 'titoli'} su questa pagina.`,
+        noneFound: 'Per ora nessun titolo clickbait su questa pagina.',
+        checked: n => ` ${n === 1 ? 'Controllato' : 'Controllati'} ${n} ${n === 1 ? 'articolo' : 'articoli'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'articolo non si è potuto caricare' : 'articoli non si sono potuti caricare'}.`,
+        paused: (h, time) => ` ${h} ha chiesto una verifica anti-robot, quindi Web Detox non ne scarica articoli fino alle ${time}.`,
+        privacyHeading: 'I tuoi dati',
+        privacyText: 'Le tue impostazioni, gli articoli salvati e ciò che hai letto restano in questo browser e arrivano sugli altri tuoi dispositivi tramite il tuo account del browser o iCloud. Non ci viene inviato nulla.',
+        erase: 'Elimina tutto ciò che Web Detox ha salvato',
+        eraseAsk: 'Questo elimina le tue impostazioni, Leggi dopo, Segnalibri e la cronologia di lettura qui e sugli altri tuoi dispositivi alla prossima sincronizzazione. Non si può annullare.',
+        eraseYes: 'Elimina tutto', eraseNo: 'Annulla', erased: 'Tutto è stato eliminato.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Calcio', winter: 'Sport invernali', motorsport: 'Motori', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Ciclismo', handball: 'Pallamano', icehockey: 'Hockey su ghiaccio', combat: 'Boxe e MMA', athletics: 'Atletica',
+        ussports: 'Sport americani', esports: 'Esport', entertainment: 'Spettacolo', reality: 'Reality show', celebrity: 'Celebrità',
+        royals: 'Famiglie reali', tvseries: 'TV e serie', film: 'Cinema', music: 'Musica', gaming: 'Videogiochi',
+        incidents: 'Cronaca nera e incidenti', crime: 'Cronaca nera', accidents: 'Incidenti', obituaries: 'Necrologi',
+        lifestyle: 'Lifestyle', health: 'Salute e fitness', food: 'Cibo e bevande', travel: 'Viaggi', home: 'Casa e immobili',
+        cars: 'Auto', fashion: 'Moda e bellezza', relationships: 'Sesso e relazioni', consumer: 'Consumi e shopping',
+        opinion: 'Opinioni e commenti', politics: 'Politica', business: 'Economia e soldi', tech: 'Tecnologia e scienza',
+        weather: 'Meteo',
+      },
+
+      part: { birthdays: 'Compleanni', bait: 'Post esca («guarda i commenti»)' },
+
+      app: {
+        iconAlt: 'Icona di Web Detox',
+        intro: 'Due impostazioni in Safari, entrambe nella stessa pagina:',
+        step1: 'Attiva Web Detox', step1Unknown: 'L’interruttore in alto.', step1On: 'È attivo.', step1Off: 'È disattivato: attiva l’interruttore in alto.',
+        step2: 'Consentilo su tutti i siti web',
+        step2Unknown: 'In Autorizzazioni, imposta Tutti i siti web su Consenti. Altrimenti Safari lo chiede su ogni sito. Poi apri un sito web in Safari e torna qui per controllare.',
+        step2On: 'È consentito su tutti i siti web.',
+        step2Off: 'Ora funziona solo sui siti che consenti uno alla volta. Va bene, se preferisci così. Per usarlo ovunque, imposta Tutti i siti web su Consenti in Autorizzazioni.',
+        openSettings: 'Apri Web Detox in Impostazioni', path: 'Impostazioni → App → Safari → Estensioni → Web Detox',
+        macUnknown: 'Puoi attivare l’estensione di Web Detox nella sezione Estensioni delle impostazioni di Safari.',
+        macOn: 'L’estensione di Web Detox è attiva. Puoi disattivarla nella sezione Estensioni delle impostazioni di Safari.',
+        macOff: 'L’estensione di Web Detox è disattivata. Puoi attivarla nella sezione Estensioni delle impostazioni di Safari.',
+        macOpen: 'Esci e apri le impostazioni di Safari…',
+      },
+    };
+
+    // Japanese (日本語).
+    STRINGS.ja = {
+      // The list and the reader (plain view), in the language of the site being read.
+      siteOrder: 'サイト順', byImportance: '重要な順', top: 'トップ', important: '重要',
+      related: '関連記事', latest: '最新', other: 'その他', sections: 'セクション', original: 'オリジナル', done: '完了',
+      paid: '有料', count: n => `${n}件の記事`,
+      editSections: 'セクションを編集', editHint: 'タップで表示／非表示、ドラッグで移動。',
+      loading: '記事を読み込み中…', onSite: h => `${h}で読む`, close: '閉じる',
+      paidHere: 'この記事の続きは購読者向けです。', prev: '前の記事', next: '次の記事',
+      unreadable: 'この記事はここでは表示できませんが、サイトで読むことができます。',
+      short: 'この記事のテキストはこれですべてです。サイトには動画やその後の更新など、ほかの内容があるかもしれません。',
+      hideRead: '既読を非表示', readHidden: n => `既読の記事${n}件を非表示`, showRead: '表示',
+      later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
+      myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
+      mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
+      keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
+
+      // The toolbar popup, in the browser's language.
+      pop: {
+        levelHeading: 'このサイトの表示レベル', levelLabel: '表示レベル',
+        vanilla: 'Vanilla', vanillaDesc: '公開されたままのサイト',
+        headlines: 'わかりやすい見出し', headlinesDesc: '釣り見出しを記事本来の見出しに置き換え',
+        synopsis: 'わかりやすい見出し＋概要', synopsisDesc: '見出しごとに記事のリード文を表示',
+        pictures: '画像付きシンプル表示', picturesDesc: 'シンプル表示に、記事ごとに同じサイズの画像を1枚ずつ',
+        plain: 'シンプル表示', plainDesc: '落ち着いたページに記事をセクションごとに表示。広告、動画、ポップアップなし',
+        calm: '穏やか', calmDesc: 'フォロー中のものだけを表示。広告、おすすめ、ショート動画のフィード、アプリを勧めるポップアップなし',
+        isDefault: '✓ すべてのサイトのデフォルト', makeDefault: 'すべてのサイトでこのレベルを使用',
+        calmHeading: 'このサイトで表示', neverHeading: '表示しない', allSites: 'すべてのサイト',
+        someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}のサブトピック`,
+        styleHeading: '見出しのスタイル', styleRewrite: '書き換え', styleReveal: 'タップで表示', styleStack: '両方を表示',
+        showOriginal: '元の見出しを表示', plainHeading: 'シンプル表示', swipe: '記事間のスワイプをアニメーション',
+        otherHeading: 'ほかのサイト', generic: '未設定のニュースサイトを自動検出',
+        disabledOn: '無効のサイト', enabledOn: '有効のサイト', remove: h => `${h}を削除`,
+        notRunning: 'Web Detoxはこのページでは動作していません。',
+        notRunningHint: 'Webページでのみ動作し、ブラウザやストアのページでは動作しません。インストールや許可の直後なら、ページを再読み込みすると動作します。',
+        grant: 'すべてのWebサイトで許可',
+        // Status line at the top. n is a number; h a site such as nrk.no.
+        asPublished: h => `${h}を公開されたまま表示しています。`,
+        calmStatus: (site, n) => `気が散るものを除いた${site}：` + (n ? `このページで${n}件を非表示にしました。` : 'このページで非表示にするものはまだありません。'),
+        plainStatus: n => `シンプル表示：${n}件の記事。`,
+        plainOnArticle: 'シンプル表示はトップページ用です。この記事ではわかりやすい見出し＋概要を表示しています。',
+        changed: n => `このページで${n}件の見出しを変更しました。`,
+        noneFound: 'このページではまだ釣り見出しは見つかっていません。',
+        checked: n => `${n}件の記事を確認しました。`,
+        failed: n => `${n}件の記事を読み込めませんでした。`,
+        paused: (h, time) => `${h}がロボット確認を求めたため、Web Detoxは${time}までこのサイトから記事を取得しません。`,
+        privacyHeading: 'データの扱い',
+        privacyText: '設定、保存した記事、既読履歴はこのブラウザに保存され、ブラウザのアカウントまたはiCloudを通じてほかのデバイスに同期されます。私たちには何も送信されません。',
+        erase: 'Web Detoxが保存したデータをすべて削除',
+        eraseAsk: '設定、「あとで読む」、「ブックマーク」、既読履歴を、このブラウザと、次回の同期時にほかのデバイスからも削除します。元に戻すことはできません。',
+        eraseYes: 'すべて削除', eraseNo: 'キャンセル', erased: 'すべて削除しました。',
+      },
+
+      // Topics in the popup's "Never show me".
+      topic: {
+        sport: 'スポーツ', football: 'サッカー', winter: 'ウインタースポーツ', motorsport: 'モータースポーツ', tennis: 'テニス', golf: 'ゴルフ',
+        cycling: '自転車競技', handball: 'ハンドボール', icehockey: 'アイスホッケー', combat: 'ボクシング・MMA', athletics: '陸上競技',
+        ussports: '米国のスポーツ', esports: 'eスポーツ', entertainment: 'エンタメ', reality: 'リアリティ番組', celebrity: '有名人',
+        royals: '王室', tvseries: 'テレビ・ドラマ', film: '映画', music: '音楽', gaming: 'ゲーム',
+        incidents: '事件・事故', crime: '事件', accidents: '事故', obituaries: '訃報・追悼',
+        lifestyle: 'ライフスタイル', health: '健康・フィットネス', food: '食べ物・飲み物', travel: '旅行', home: '住まい・不動産',
+        cars: '車', fashion: 'ファッション・美容', relationships: '性・恋愛', consumer: '消費生活・買い物',
+        opinion: '意見・論評', politics: '政治', business: 'ビジネス・お金', tech: 'テクノロジー・科学',
+        weather: '天気',
+      },
+
+      // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+      part: { birthdays: '誕生日', bait: '釣り投稿（「コメント欄を見て」）' },
+
+      // The app's own page on iPhone, iPad and Mac, in the device's language.
+      app: {
+        iconAlt: 'Web Detoxのアイコン',
+        intro: 'Safariの設定は2つで、どちらも同じページにあります：',
+        step1: 'Web Detoxをオンにする', step1Unknown: '一番上のスイッチです。', step1On: 'オンになっています。', step1Off: 'オフになっています。一番上のスイッチをオンにします。',
+        step2: 'すべてのWebサイトで許可する',
+        step2Unknown: '「アクセス許可」で「すべてのWebサイト」を「許可」に設定します。設定しないと、Safariがサイトごとに確認します。設定したら、SafariでWebサイトを開いてからここに戻ると確認できます。',
+        step2On: 'すべてのWebサイトで許可されています。',
+        step2Off: '現在は、1つずつ許可したサイトでのみ動作します。それでよければこのままで構いません。すべてのサイトで使うには、「アクセス許可」で「すべてのWebサイト」を「許可」に設定します。',
+        openSettings: '「設定」でWeb Detoxを開く', path: '設定 → アプリ → Safari → 機能拡張 → Web Detox',
+        macUnknown: 'Web Detoxの機能拡張は、Safariの設定の「機能拡張」セクションでオンにできます。',
+        macOn: 'Web Detoxの機能拡張は現在オンです。Safariの設定の「機能拡張」セクションでオフにできます。',
+        macOff: 'Web Detoxの機能拡張は現在オフです。Safariの設定の「機能拡張」セクションでオンにできます。',
+        macOpen: '終了してSafariの設定を開く…',
+      },
+    };
+
+    // Norwegian (bokmål; also used for nynorsk and "no").
+    STRINGS.nb = {
+      siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig',
+      related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig',
+      paid: 'Abonnement', count: n => `${n} ${n === 1 ? 'sak' : 'saker'}`,
+      editSections: 'Rediger seksjoner', editHint: 'Trykk for å skjule eller vise, dra for å flytte.',
+      loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk',
+      paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak',
+      unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.',
+      short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.',
+      hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis',
+      later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
+      myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
+      mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
+      keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
+
+      pop: {
+        levelHeading: 'Lesenivå på dette nettstedet', levelLabel: 'Lesenivå',
+        vanilla: 'Vanilla', vanillaDesc: 'Nettstedet slik det er publisert',
+        headlines: 'Klare titler', headlinesDesc: 'Klikkagn byttet ut med sakens egen tittel',
+        synopsis: 'Klare titler + ingress', synopsisDesc: 'Hver tittel med sakens ingress',
+        pictures: 'Ren visning med bilder', picturesDesc: 'Som ren visning, med ett bilde per sak, alle like store',
+        plain: 'Ren visning', plainDesc: 'Sakene i seksjoner på en rolig side. Ingen reklame, video eller popup-vinduer',
+        calm: 'Rolig', calmDesc: 'Det du følger, uten reklame, forslag, kortvideo-strømmer eller popup-vinduer som presser deg mot appen',
+        isDefault: '✓ Standard for alle nettsteder', makeDefault: 'Bruk dette nivået på alle nettsteder',
+        calmHeading: 'Vis på dette nettstedet', neverHeading: 'Vis meg aldri', allSites: 'alle nettsteder',
+        someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underemner i ${g}`,
+        styleHeading: 'Tittelstil', styleRewrite: 'Skriv om', styleReveal: 'Vis ved trykk', styleStack: 'Vis begge',
+        showOriginal: 'Vis opprinnelige titler', plainHeading: 'Ren visning', swipe: 'Animer sveip mellom saker',
+        otherHeading: 'Andre nettsteder', generic: 'Finn nyhetsnettsteder jeg ikke har satt opp',
+        disabledOn: 'Slått av på', enabledOn: 'Slått på på', remove: h => `Fjern ${h}`,
+        notRunning: 'Web Detox kjører ikke på denne siden.',
+        notRunningHint: 'Den kjører bare på nettsider, ikke på nettleserens egne sider eller butikksider. Har du nettopp installert eller tillatt den, last inn siden på nytt.',
+        grant: 'Tillat på alle nettsteder',
+        asPublished: h => `Viser ${h} slik det er publisert.`,
+        calmStatus: (site, n) => `${site} uten forstyrrelser: ` + (n ? `${n} ting skjult på denne siden.` : 'ingenting å skjule på denne siden ennå.'),
+        plainStatus: n => `Ren visning: ${n} ${n === 1 ? 'sak' : 'saker'}.`,
+        plainOnArticle: 'Ren visning er for forsider; denne saken vises med klare titler + ingress. ',
+        changed: n => `Endret ${n} ${n === 1 ? 'tittel' : 'titler'} på denne siden.`,
+        noneFound: 'Ingen klikkagn-titler funnet på denne siden ennå.',
+        checked: n => ` Sjekket ${n} ${n === 1 ? 'sak' : 'saker'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'sak' : 'saker'} kunne ikke lastes.`,
+        paused: (h, time) => ` ${h} ba om en robotsjekk, så Web Detox henter ingen saker derfra før ${time}.`,
+        privacyHeading: 'Dine data',
+        privacyText: 'Innstillingene, de lagrede sakene og det du har lest, blir i denne nettleseren, og følger deg til de andre enhetene dine via nettleserkontoen eller iCloud. Ingenting sendes til oss.',
+        erase: 'Slett alt Web Detox har lagret',
+        eraseAsk: 'Dette sletter innstillingene, Les senere, Bokmerker og lesehistorikken her, og på de andre enhetene dine neste gang de synkroniserer. Det kan ikke angres.',
+        eraseYes: 'Slett alt', eraseNo: 'Avbryt', erased: 'Alt er slettet.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Fotball', winter: 'Vintersport', motorsport: 'Motorsport', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Sykling', handball: 'Håndball', icehockey: 'Ishockey', combat: 'Boksing og MMA', athletics: 'Friidrett',
+        ussports: 'Amerikansk idrett', esports: 'E-sport', entertainment: 'Underholdning', reality: 'Reality-TV', celebrity: 'Kjendiser',
+        royals: 'Kongelige', tvseries: 'TV og serier', film: 'Film', music: 'Musikk', gaming: 'Dataspill',
+        incidents: 'Krim og ulykker', crime: 'Krim', accidents: 'Ulykker', obituaries: 'Dødsfall og minneord',
+        lifestyle: 'Livsstil', health: 'Helse og trening', food: 'Mat og drikke', travel: 'Reise', home: 'Bolig og eiendom',
+        cars: 'Bil', fashion: 'Mote og skjønnhet', relationships: 'Sex og samliv', consumer: 'Forbruker og shopping',
+        opinion: 'Meninger og kommentarer', politics: 'Politikk', business: 'Økonomi og næringsliv', tech: 'Teknologi og vitenskap',
+        weather: 'Vær',
+      },
+
+      part: { birthdays: 'Bursdager', bait: 'Agn-innlegg («se kommentarene»)' },
+
+      app: {
+        iconAlt: 'Web Detox-ikon',
+        intro: 'To innstillinger i Safari, begge på samme side:',
+        step1: 'Slå på Web Detox', step1Unknown: 'Bryteren øverst.', step1On: 'Den er på.', step1Off: 'Den er av: slå på bryteren øverst.',
+        step2: 'Tillat den på alle nettsteder',
+        step2Unknown: 'Under Tillatelser setter du Alle nettsteder til Tillat. Ellers spør Safari på hvert nettsted. Åpne så et nettsted i Safari og kom tilbake hit for å sjekke.',
+        step2On: 'Den er tillatt på alle nettsteder.',
+        step2Off: 'Nå kjører den bare på nettstedene du tillater ett om gangen. Det er greit om du foretrekker det. For å bruke den overalt setter du Alle nettsteder til Tillat under Tillatelser.',
+        openSettings: 'Åpne Web Detox i Innstillinger', path: 'Innstillinger → Apper → Safari → Utvidelser → Web Detox',
+        macUnknown: 'Du kan slå på utvidelsen Web Detox under Utvidelser i Safari-innstillingene.',
+        macOn: 'Utvidelsen Web Detox er på. Du kan slå den av under Utvidelser i Safari-innstillingene.',
+        macOff: 'Utvidelsen Web Detox er av. Du kan slå den på under Utvidelser i Safari-innstillingene.',
+        macOpen: 'Avslutt og åpne Safari-innstillingene …',
+      },
+    };
+
+    // Dutch (Nederlands).
+    STRINGS.nl = {
+      siteOrder: 'Zoals op de site', byImportance: 'Belangrijkste eerst', top: 'Hoofdnieuws', important: 'Belangrijk',
+      related: 'Meer hierover', latest: 'Nieuwste', other: 'Overig', sections: 'Rubrieken', original: 'Origineel', done: 'Klaar',
+      paid: 'Abonnement', count: n => `${n} ${n === 1 ? 'artikel' : 'artikelen'}`,
+      editSections: 'Rubrieken bewerken', editHint: 'Tik om te verbergen of te tonen, sleep om te verplaatsen.',
+      loading: 'Artikel wordt geladen…', onSite: h => `Lezen op ${h}`, close: 'Sluiten',
+      paidHere: 'De rest van dit artikel is voor abonnees.', prev: 'Vorig artikel', next: 'Volgend artikel',
+      unreadable: 'Dit artikel kan hier niet worden getoond, maar je kunt het op de site lezen.',
+      short: 'Meer tekst heeft dit artikel niet. De site heeft misschien meer, zoals video of latere updates.',
+      hideRead: 'Gelezen verbergen', readHidden: n => `${n} gelezen ${n === 1 ? 'artikel' : 'artikelen'} verborgen`, showRead: 'Tonen',
+      later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
+      myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
+      mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
+      keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
+
+      pop: {
+        levelHeading: 'Leesniveau op deze site', levelLabel: 'Leesniveau',
+        vanilla: 'Vanilla', vanillaDesc: 'De site zoals gepubliceerd',
+        headlines: 'Heldere koppen', headlinesDesc: 'Clickbait vervangen door de eigen kop van het artikel',
+        synopsis: 'Heldere koppen + intro', synopsisDesc: 'Elke kop met de intro van het artikel',
+        pictures: 'Eenvoudig met afbeeldingen', picturesDesc: 'Als de eenvoudige weergave, met één afbeelding per artikel, allemaal even groot',
+        plain: 'Eenvoudige weergave', plainDesc: 'De artikelen in rubrieken op een rustige pagina. Geen advertenties, video of pop-ups',
+        calm: 'Rustig', calmDesc: 'Wat je volgt, zonder advertenties, suggesties, feeds met korte video’s of pop-ups die de app opdringen',
+        isDefault: '✓ Standaard voor alle sites', makeDefault: 'Dit niveau op alle sites gebruiken',
+        calmHeading: 'Tonen op deze site', neverHeading: 'Nooit tonen', allSites: 'alle sites',
+        someOf: (n, of) => `${n} van ${of}`, subtopicsOf: g => `Subonderwerpen van ${g}`,
+        styleHeading: 'Stijl van koppen', styleRewrite: 'Herschrijven', styleReveal: 'Tonen bij tikken', styleStack: 'Beide tonen',
+        showOriginal: 'Originele koppen tonen', plainHeading: 'Eenvoudige weergave', swipe: 'Vegen tussen artikelen animeren',
+        otherHeading: 'Andere sites', generic: 'Nieuwssites automatisch herkennen die ik niet heb ingesteld',
+        disabledOn: 'Uitgeschakeld op', enabledOn: 'Ingeschakeld op', remove: h => `${h} verwijderen`,
+        notRunning: 'Web Detox is niet actief op deze pagina.',
+        notRunningHint: 'Het werkt alleen op webpagina’s, niet op browser- of storepagina’s. Heb je het net geïnstalleerd of toegestaan, laad de pagina dan opnieuw.',
+        grant: 'Toestaan op alle websites',
+        asPublished: h => `${h} wordt getoond zoals gepubliceerd.`,
+        calmStatus: (site, n) => `${site} zonder afleiding: ` + (n ? `${n} ${n === 1 ? 'onderdeel' : 'onderdelen'} verborgen op deze pagina.` : 'nog niets te verbergen op deze pagina.'),
+        plainStatus: n => `Eenvoudige weergave: ${n} ${n === 1 ? 'artikel' : 'artikelen'}.`,
+        plainOnArticle: 'De eenvoudige weergave is voor voorpagina’s; dit artikel toont heldere koppen + intro. ',
+        changed: n => `${n} ${n === 1 ? 'kop' : 'koppen'} gewijzigd op deze pagina.`,
+        noneFound: 'Nog geen clickbaitkoppen gevonden op deze pagina.',
+        checked: n => ` ${n} ${n === 1 ? 'artikel' : 'artikelen'} gecontroleerd.`,
+        failed: n => ` ${n} ${n === 1 ? 'artikel kon' : 'artikelen konden'} niet worden geladen.`,
+        paused: (h, time) => ` ${h} vroeg om een robotcontrole, dus Web Detox haalt tot ${time} geen artikelen van die site op.`,
+        privacyHeading: 'Je gegevens',
+        privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
+        erase: 'Alles wissen wat Web Detox heeft opgeslagen',
+        eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
+        eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Voetbal', winter: 'Wintersport', motorsport: 'Autosport', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Wielrennen', handball: 'Handbal', icehockey: 'IJshockey', combat: 'Boksen en MMA', athletics: 'Atletiek',
+        ussports: 'Amerikaanse sporten', esports: 'E-sports', entertainment: 'Entertainment', reality: 'Realitytv', celebrity: 'Beroemdheden',
+        royals: 'Koningshuizen', tvseries: 'Tv en series', film: 'Film', music: 'Muziek', gaming: 'Gaming',
+        incidents: 'Misdaad en ongelukken', crime: 'Misdaad', accidents: 'Ongelukken', obituaries: 'Overlijdensberichten en in memoriams',
+        lifestyle: 'Lifestyle', health: 'Gezondheid en fitness', food: 'Eten en drinken', travel: 'Reizen', home: 'Wonen en vastgoed',
+        cars: 'Auto’s', fashion: 'Mode en beauty', relationships: 'Seks en relaties', consumer: 'Consument en winkelen',
+        opinion: 'Opinie en commentaar', politics: 'Politiek', business: 'Economie en geld', tech: 'Tech en wetenschap',
+        weather: 'Weer',
+      },
+
+      part: { birthdays: 'Verjaardagen', bait: 'Lokberichten (“zie de reacties”)' },
+
+      app: {
+        iconAlt: 'Pictogram van Web Detox',
+        intro: 'Twee instellingen in Safari, allebei op dezelfde pagina:',
+        step1: 'Web Detox aanzetten', step1Unknown: 'De schakelaar bovenaan.', step1On: 'Het staat aan.', step1Off: 'Het staat uit: zet de schakelaar bovenaan aan.',
+        step2: 'Toestaan op alle websites',
+        step2Unknown: 'Zet onder “Toestemmingen” “Alle websites” op “Sta toe”. Anders vraagt Safari het op elke site. Open daarna een website in Safari en kom hier terug om het te controleren.',
+        step2On: 'Het is toegestaan op alle websites.',
+        step2Off: 'Nu werkt het alleen op de sites die je een voor een toestaat. Dat is prima als je dat liever hebt. Om het overal te gebruiken, zet je onder “Toestemmingen” “Alle websites” op “Sta toe”.',
+        openSettings: 'Open Web Detox in Instellingen', path: 'Instellingen → Apps → Safari → Extensies → Web Detox',
+        macUnknown: 'Je kunt de extensie van Web Detox aanzetten in het onderdeel Extensies van de Safari-instellingen.',
+        macOn: 'De extensie van Web Detox staat aan. Je kunt hem uitzetten in het onderdeel Extensies van de Safari-instellingen.',
+        macOff: 'De extensie van Web Detox staat uit. Je kunt hem aanzetten in het onderdeel Extensies van de Safari-instellingen.',
+        macOpen: 'Stop en open Safari-instellingen…',
+      },
+    };
+
+    // Polish
+    STRINGS.pl = {
+      // Plurals: forms for 1, for 2–4 (except 12–14), and for the rest.
+      siteOrder: 'Kolejność strony', byImportance: 'Najważniejsze najpierw', top: 'Główny temat', important: 'Ważne',
+      related: 'Powiązane artykuły', latest: 'Najnowsze', other: 'Inne', sections: 'Działy', original: 'Oryginał', done: 'Gotowe',
+      paid: 'Subskrypcja',
+      count: n => `${n} ${n === 1 ? 'artykuł' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'artykuły' : 'artykułów'}`,
+      editSections: 'Edytuj działy', editHint: 'Stuknij, aby ukryć lub pokazać; przeciągnij, aby przenieść.',
+      loading: 'Wczytywanie artykułu …', onSite: h => `Czytaj na ${h}`, close: 'Zamknij',
+      paidHere: 'Dalsza część artykułu jest dla subskrybentów.', prev: 'Poprzedni artykuł', next: 'Następny artykuł',
+      unreadable: 'Tego artykułu nie da się tu pokazać, ale można go przeczytać na stronie.',
+      short: 'To cały tekst tego artykułu. Strona może mieć więcej, np. wideo lub późniejsze aktualizacje.',
+      hideRead: 'Ukryj przeczytane',
+      readHidden: n => `Ukryto ${n} ${n === 1 ? 'przeczytany artykuł' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'przeczytane artykuły' : 'przeczytanych artykułów'}`,
+      showRead: 'Pokaż',
+      later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
+      myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
+      mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
+      keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
+
+      pop: {
+        levelHeading: 'Poziom czytania na tej stronie', levelLabel: 'Poziom czytania',
+        vanilla: 'Vanilla', vanillaDesc: 'Strona w opublikowanej postaci',
+        headlines: 'Jasne nagłówki', headlinesDesc: 'Clickbait zastąpiony prawdziwym nagłówkiem artykułu',
+        synopsis: 'Jasne nagłówki + lead', synopsisDesc: 'Każdy nagłówek z leadem artykułu',
+        pictures: 'Widok prosty ze zdjęciami', picturesDesc: 'Jak widok prosty, z jednym zdjęciem na artykuł, wszystkie tej samej wielkości',
+        plain: 'Widok prosty', plainDesc: 'Artykuły w działach na spokojnej stronie. Bez reklam, wideo i wyskakujących okienek',
+        calm: 'Spokój', calmDesc: 'Obserwowane treści bez reklam, sugestii, krótkich filmików i okienek, które namawiają do aplikacji',
+        isDefault: '✓ Domyślny dla wszystkich stron', makeDefault: 'Używaj tego poziomu na wszystkich stronach',
+        calmHeading: 'Pokazuj na tej stronie', neverHeading: 'Nigdy nie pokazuj', allSites: 'wszystkie strony',
+        someOf: (n, of) => `${n} z ${of}`, subtopicsOf: g => `Podtematy: ${g}`,
+        styleHeading: 'Styl nagłówków', styleRewrite: 'Przepisz', styleReveal: 'Pokaż po stuknięciu', styleStack: 'Pokaż oba',
+        showOriginal: 'Pokazuj oryginalne nagłówki', plainHeading: 'Widok prosty', swipe: 'Animuj przesuwanie między artykułami',
+        otherHeading: 'Inne strony', generic: 'Wykrywaj nieskonfigurowane serwisy informacyjne',
+        disabledOn: 'Wyłączone na', enabledOn: 'Włączone na', remove: h => `Usuń ${h}`,
+        notRunning: 'Web Detox nie działa na tej stronie.',
+        notRunningHint: 'Działa tylko na stronach internetowych, nie na stronach przeglądarki ani sklepu. Jeśli został dopiero zainstalowany lub dostał zgodę, odśwież stronę.',
+        grant: 'Pozwalaj na wszystkich witrynach',
+        asPublished: h => `Strona ${h} w opublikowanej postaci.`,
+        calmStatus: (site, n) => `${site} bez rozpraszaczy: ` + (n ? `ukryto ${n} ${n === 1 ? 'element' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'elementy' : 'elementów'} na tej stronie.` : 'na razie nic do ukrycia na tej stronie.'),
+        plainStatus: n => `Widok prosty: ${n} ${n === 1 ? 'artykuł' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'artykuły' : 'artykułów'}.`,
+        plainOnArticle: 'Widok prosty jest dla stron głównych; ten artykuł ma jasne nagłówki + lead. ',
+        changed: n => `Zmieniono ${n} ${n === 1 ? 'nagłówek' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'nagłówki' : 'nagłówków'} na tej stronie.`,
+        noneFound: 'Na razie brak nagłówków typu clickbait na tej stronie.',
+        checked: n => ` Sprawdzono ${n} ${n === 1 ? 'artykuł' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'artykuły' : 'artykułów'}.`,
+        failed: n => ` Nie udało się wczytać ${n} ${n === 1 ? 'artykułu' : 'artykułów'}.`,
+        paused: (h, time) => ` ${h} wymaga sprawdzenia, czy to nie robot, więc Web Detox nie pobiera stamtąd artykułów do ${time}.`,
+        privacyHeading: 'Dane i prywatność',
+        privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
+        erase: 'Usuń wszystko, co zapisał Web Detox',
+        eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
+        eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Piłka nożna', winter: 'Sporty zimowe', motorsport: 'Sporty motorowe', tennis: 'Tenis', golf: 'Golf',
+        cycling: 'Kolarstwo', handball: 'Piłka ręczna', icehockey: 'Hokej na lodzie', combat: 'Boks i MMA', athletics: 'Lekkoatletyka',
+        ussports: 'Sporty amerykańskie', esports: 'E-sport', entertainment: 'Rozrywka', reality: 'Reality show', celebrity: 'Celebryci',
+        royals: 'Rodziny królewskie', tvseries: 'TV i seriale', film: 'Film', music: 'Muzyka', gaming: 'Gry',
+        incidents: 'Przestępstwa i wypadki', crime: 'Przestępstwa', accidents: 'Wypadki', obituaries: 'Nekrologi i wspomnienia',
+        lifestyle: 'Styl życia', health: 'Zdrowie i fitness', food: 'Jedzenie i picie', travel: 'Podróże', home: 'Dom i nieruchomości',
+        cars: 'Motoryzacja', fashion: 'Moda i uroda', relationships: 'Seks i związki', consumer: 'Konsumenci i zakupy',
+        opinion: 'Opinie i komentarze', politics: 'Polityka', business: 'Biznes i finanse', tech: 'Technologia i nauka',
+        weather: 'Pogoda',
+      },
+
+      part: { birthdays: 'Urodziny', bait: 'Posty-przynęty („zobacz komentarze”)' },
+
+      app: {
+        iconAlt: 'Ikona Web Detox',
+        intro: 'Dwa ustawienia w Safari, oba na tej samej stronie:',
+        step1: 'Włącz Web Detox', step1Unknown: 'Przełącznik na górze.', step1On: 'Jest włączony.', step1Off: 'Jest wyłączony: włącz przełącznik na górze.',
+        step2: 'Pozwól na wszystkich witrynach',
+        step2Unknown: 'W sekcji Uprawnienia ustaw Wszystkie witryny na Pozwalaj. W przeciwnym razie Safari pyta na każdej stronie. Potem otwórz stronę w Safari i wróć tutaj, aby to sprawdzić.',
+        step2On: 'Ma zgodę na wszystkich witrynach.',
+        step2Off: 'Teraz działa tylko na stronach, na które pozwala się po kolei. Jeśli tak ma być, to w porządku. Aby działał wszędzie, ustaw Wszystkie witryny na Pozwalaj w sekcji Uprawnienia.',
+        openSettings: 'Otwórz Web Detox w Ustawieniach', path: 'Ustawienia → Aplikacje → Safari → Rozszerzenia → Web Detox',
+        macUnknown: 'Rozszerzenie Web Detox można włączyć w sekcji Rozszerzenia w ustawieniach Safari.',
+        macOn: 'Rozszerzenie Web Detox jest teraz włączone. Można je wyłączyć w sekcji Rozszerzenia w ustawieniach Safari.',
+        macOff: 'Rozszerzenie Web Detox jest teraz wyłączone. Można je włączyć w sekcji Rozszerzenia w ustawieniach Safari.',
+        macOpen: 'Zakończ i otwórz ustawienia Safari…',
+      },
+    };
+
+    // Portuguese (Brazil)
+    STRINGS.pt = {
+      siteOrder: 'Ordem do site', byImportance: 'Mais importantes primeiro', top: 'Destaque', important: 'Importante',
+      related: 'Notícias relacionadas', latest: 'Últimas', other: 'Outras', sections: 'Seções', original: 'Original', done: 'OK',
+      paid: 'Assinatura', count: n => `${n} ${n === 1 ? 'notícia' : 'notícias'}`,
+      editSections: 'Editar seções', editHint: 'Toque para ocultar ou mostrar, arraste para mover.',
+      loading: 'Carregando a notícia …', onSite: h => `Ler em ${h}`, close: 'Fechar',
+      paidHere: 'O resto desta notícia é para assinantes.', prev: 'Notícia anterior', next: 'Próxima notícia',
+      unreadable: 'Esta notícia não pode ser mostrada aqui, mas dá para ler no site.',
+      short: 'Este é todo o texto desta notícia. O site pode ter mais, como vídeo ou atualizações posteriores.',
+      hideRead: 'Ocultar lidas', readHidden: n => `${n} ${n === 1 ? 'notícia lida oculta' : 'notícias lidas ocultas'}`, showRead: 'Mostrar',
+      later: 'Ler depois', marks: 'Favoritos', mark: 'Favorito', unLater: 'Remover de Ler depois', unMark: 'Remover favorito',
+      myNews: 'Minhas notícias', mixEmpty: 'Minhas notícias reúne os sites de notícias que você mais visita. Visite alguns e eles aparecem aqui.',
+      mixLoading: (n, of) => `Lendo as páginas iniciais … ${n} de ${of}`,
+      keys: 'Setas escolhem · Enter abre · ← → anterior e próxima durante a leitura · L ler depois · B favorito · Esc fecha',
+
+      pop: {
+        levelHeading: 'Nível de leitura neste site', levelLabel: 'Nível de leitura',
+        vanilla: 'Vanilla', vanillaDesc: 'O site como foi publicado',
+        headlines: 'Títulos claros', headlinesDesc: 'Caça-cliques trocados pelo título da própria notícia',
+        synopsis: 'Títulos claros + resumo', synopsisDesc: 'Cada título com o resumo da notícia',
+        pictures: 'Visão simples com imagens', picturesDesc: 'Como a visão simples, com uma imagem por notícia, todas do mesmo tamanho',
+        plain: 'Visão simples', plainDesc: 'As notícias em seções numa página tranquila. Sem anúncios, vídeos ou pop-ups',
+        calm: 'Calma', calmDesc: 'O que você segue, sem anúncios, sugestões, feeds de vídeos curtos ou pop-ups que empurram o app',
+        isDefault: '✓ Padrão para todos os sites', makeDefault: 'Usar este nível em todos os sites',
+        calmHeading: 'Mostrar neste site', neverHeading: 'Nunca mostrar', allSites: 'todos os sites',
+        someOf: (n, of) => `${n} de ${of}`, subtopicsOf: g => `Subtemas de ${g}`,
+        styleHeading: 'Estilo dos títulos', styleRewrite: 'Reescrever', styleReveal: 'Revelar ao tocar', styleStack: 'Mostrar os dois',
+        showOriginal: 'Mostrar títulos originais', plainHeading: 'Visão simples', swipe: 'Animar a troca entre notícias',
+        otherHeading: 'Outros sites', generic: 'Detectar sites de notícias ainda não configurados',
+        disabledOn: 'Desativado em', enabledOn: 'Ativado em', remove: h => `Remover ${h}`,
+        notRunning: 'O Web Detox não está ativo nesta página.',
+        notRunningHint: 'Ele só funciona em páginas da web, não em páginas do navegador ou de lojas. Se você acabou de instalar ou permitir, recarregue a página.',
+        grant: 'Permitir em todos os sites',
+        asPublished: h => `Mostrando ${h} como foi publicado.`,
+        calmStatus: (site, n) => `${site} sem distrações: ` + (n ? `${n} ${n === 1 ? 'item oculto' : 'itens ocultos'} nesta página.` : 'nada para ocultar nesta página por enquanto.'),
+        plainStatus: n => `Visão simples: ${n} ${n === 1 ? 'notícia' : 'notícias'}.`,
+        plainOnArticle: 'A visão simples é para páginas iniciais; esta notícia mostra títulos claros + resumo. ',
+        changed: n => `${n} ${n === 1 ? 'título alterado' : 'títulos alterados'} nesta página.`,
+        noneFound: 'Nenhum título caça-clique encontrado nesta página por enquanto.',
+        checked: n => ` ${n} ${n === 1 ? 'notícia verificada' : 'notícias verificadas'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'notícia não pôde ser carregada' : 'notícias não puderam ser carregadas'}.`,
+        paused: (h, time) => ` ${h} pediu uma verificação anti-robô, então o Web Detox não busca notícias de lá até as ${time}.`,
+        privacyHeading: 'Seus dados',
+        privacyText: 'Seus ajustes, as notícias salvas e o que você leu ficam neste navegador e vão para seus outros dispositivos pela sua conta do navegador ou pelo iCloud. Nada é enviado para nós.',
+        erase: 'Apagar tudo o que o Web Detox salvou',
+        eraseAsk: 'Isso apaga seus ajustes, Ler depois, Favoritos e o histórico de leitura aqui e nos seus outros dispositivos na próxima sincronização. Não dá para desfazer.',
+        eraseYes: 'Apagar tudo', eraseNo: 'Cancelar', erased: 'Tudo foi apagado.',
+      },
+
+      topic: {
+        sport: 'Esportes', football: 'Futebol', winter: 'Esportes de inverno', motorsport: 'Automobilismo', tennis: 'Tênis', golf: 'Golfe',
+        cycling: 'Ciclismo', handball: 'Handebol', icehockey: 'Hóquei no gelo', combat: 'Boxe e MMA', athletics: 'Atletismo',
+        ussports: 'Esportes dos EUA', esports: 'eSports', entertainment: 'Entretenimento', reality: 'Reality shows', celebrity: 'Celebridades',
+        royals: 'Realeza', tvseries: 'TV e séries', film: 'Cinema', music: 'Música', gaming: 'Games',
+        incidents: 'Crimes e acidentes', crime: 'Crimes', accidents: 'Acidentes', obituaries: 'Obituários',
+        lifestyle: 'Estilo de vida', health: 'Saúde e fitness', food: 'Comida e bebida', travel: 'Viagem', home: 'Casa e imóveis',
+        cars: 'Carros', fashion: 'Moda e beleza', relationships: 'Sexo e relacionamentos', consumer: 'Consumo e compras',
+        opinion: 'Opinião e análise', politics: 'Política', business: 'Economia e dinheiro', tech: 'Tecnologia e ciência',
+        weather: 'Previsão do tempo',
+      },
+
+      part: { birthdays: 'Aniversários', bait: 'Posts isca (“veja os comentários”)' },
+
+      app: {
+        iconAlt: 'Ícone do Web Detox',
+        intro: 'Dois ajustes no Safari, os dois na mesma página:',
+        step1: 'Ative o Web Detox', step1Unknown: 'O botão no topo.', step1On: 'Está ativado.', step1Off: 'Está desativado: ative o botão no topo.',
+        step2: 'Permita em todos os sites',
+        step2Unknown: 'Em Permissões, defina Todos os Sites como Permitir. Senão o Safari pergunta em cada site. Depois abra um site no Safari e volte aqui para conferir.',
+        step2On: 'Está permitido em todos os sites.',
+        step2Off: 'Agora ele só funciona nos sites que você permite um por um. Tudo bem, se você prefere assim. Para usar em todos, defina Todos os Sites como Permitir em Permissões.',
+        openSettings: 'Abrir o Web Detox nos Ajustes', path: 'Ajustes → Apps → Safari → Extensões → Web Detox',
+        macUnknown: 'Você pode ativar a extensão do Web Detox na seção Extensões dos Ajustes do Safari.',
+        macOn: 'A extensão do Web Detox está ativada. Você pode desativá-la na seção Extensões dos Ajustes do Safari.',
+        macOff: 'A extensão do Web Detox está desativada. Você pode ativá-la na seção Extensões dos Ajustes do Safari.',
+        macOpen: 'Encerrar e Abrir os Ajustes do Safari…',
+      },
+    };
+
+    // Swedish
+    STRINGS.sv = {
+      siteOrder: 'Sajtens ordning', byImportance: 'Viktigast först', top: 'Toppnyhet', important: 'Viktigt',
+      related: 'Relaterade artiklar', latest: 'Senaste', other: 'Övrigt', sections: 'Avdelningar', original: 'Original', done: 'Klar',
+      paid: 'Prenumeration', count: n => `${n} ${n === 1 ? 'artikel' : 'artiklar'}`,
+      editSections: 'Redigera avdelningar', editHint: 'Tryck för att dölja eller visa, dra för att flytta.',
+      loading: 'Läser in artikeln …', onSite: h => `Läs på ${h}`, close: 'Stäng',
+      paidHere: 'Resten av artikeln är för prenumeranter.', prev: 'Föregående artikel', next: 'Nästa artikel',
+      unreadable: 'Artikeln kan inte visas här, men du kan läsa den på sajten.',
+      short: 'Det är all text som artikeln har. Sajten kan ha mer, till exempel video eller senare uppdateringar.',
+      hideRead: 'Dölj lästa', readHidden: n => `${n} ${n === 1 ? 'läst artikel dold' : 'lästa artiklar dolda'}`, showRead: 'Visa',
+      later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
+      myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
+      mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
+      keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
+
+      pop: {
+        levelHeading: 'Läsnivå på den här sajten', levelLabel: 'Läsnivå',
+        vanilla: 'Vanilla', vanillaDesc: 'Sajten som den är publicerad',
+        headlines: 'Tydliga rubriker', headlinesDesc: 'Klickbete ersatt med artikelns egen rubrik',
+        synopsis: 'Tydliga rubriker + ingress', synopsisDesc: 'Varje rubrik med artikelns ingress',
+        pictures: 'Enkel vy med bilder', picturesDesc: 'Som enkel vy, med en bild per artikel, alla lika stora',
+        plain: 'Enkel vy', plainDesc: 'Artiklarna i avdelningar på en lugn sida. Inga annonser, videor eller popupfönster',
+        calm: 'Lugn', calmDesc: 'Det du följer, utan annonser, förslag, flöden med korta videor eller popupfönster som tjatar om appen',
+        isDefault: '✓ Standard för alla sajter', makeDefault: 'Använd den här nivån på alla sajter',
+        calmHeading: 'Visa på den här sajten', neverHeading: 'Visa aldrig', allSites: 'alla sajter',
+        someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underämnen till ${g}`,
+        styleHeading: 'Rubrikstil', styleRewrite: 'Skriv om', styleReveal: 'Visa vid tryck', styleStack: 'Visa båda',
+        showOriginal: 'Visa ursprungliga rubriker', plainHeading: 'Enkel vy', swipe: 'Animera svep mellan artiklar',
+        otherHeading: 'Andra sajter', generic: 'Känn igen nyhetssajter som inte är inställda',
+        disabledOn: 'Avstängt på', enabledOn: 'Påslaget på', remove: h => `Ta bort ${h}`,
+        notRunning: 'Web Detox körs inte på den här sidan.',
+        notRunningHint: 'Det körs bara på webbsidor, inte på webbläsarens egna sidor eller butikssidor. Om du nyss har installerat eller tillåtit det, läs in sidan igen.',
+        grant: 'Tillåt på alla webbplatser',
+        asPublished: h => `Visar ${h} som den är publicerad.`,
+        calmStatus: (site, n) => `${site} utan distraktioner: ` + (n ? `${n} ${n === 1 ? 'sak dold' : 'saker dolda'} på den här sidan.` : 'inget att dölja på den här sidan än.'),
+        plainStatus: n => `Enkel vy: ${n} ${n === 1 ? 'artikel' : 'artiklar'}.`,
+        plainOnArticle: 'Enkel vy är för förstasidor; den här artikeln visar tydliga rubriker + ingress. ',
+        changed: n => `Ändrade ${n} ${n === 1 ? 'rubrik' : 'rubriker'} på den här sidan.`,
+        noneFound: 'Inga klickbetesrubriker hittade på den här sidan än.',
+        checked: n => ` Kontrollerade ${n} ${n === 1 ? 'artikel' : 'artiklar'}.`,
+        failed: n => ` ${n} ${n === 1 ? 'artikel' : 'artiklar'} kunde inte läsas in.`,
+        paused: (h, time) => ` ${h} bad om en robotkontroll, så Web Detox hämtar inga artiklar därifrån förrän kl. ${time}.`,
+        privacyHeading: 'Dina data',
+        privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
+        erase: 'Radera allt som Web Detox har sparat',
+        eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
+        eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
+      },
+
+      topic: {
+        sport: 'Sport', football: 'Fotboll', winter: 'Vintersport', motorsport: 'Motorsport', tennis: 'Tennis', golf: 'Golf',
+        cycling: 'Cykel', handball: 'Handboll', icehockey: 'Ishockey', combat: 'Boxning och MMA', athletics: 'Friidrott',
+        ussports: 'Amerikansk sport', esports: 'E-sport', entertainment: 'Nöje', reality: 'Dokusåpor', celebrity: 'Kändisar',
+        royals: 'Kungligt', tvseries: 'TV och serier', film: 'Film', music: 'Musik', gaming: 'Spel',
+        incidents: 'Brott och olyckor', crime: 'Brott', accidents: 'Olyckor', obituaries: 'Dödsannonser och minnesord',
+        lifestyle: 'Livsstil', health: 'Hälsa och träning', food: 'Mat och dryck', travel: 'Resor', home: 'Hem och bostad',
+        cars: 'Bil', fashion: 'Mode och skönhet', relationships: 'Sex och relationer', consumer: 'Konsument och shopping',
+        opinion: 'Åsikter och debatt', politics: 'Politik', business: 'Ekonomi och pengar', tech: 'Teknik och vetenskap',
+        weather: 'Väder',
+      },
+
+      part: { birthdays: 'Födelsedagar', bait: 'Lockinlägg (”se kommentarerna”)' },
+
+      app: {
+        iconAlt: 'Symbol för Web Detox',
+        intro: 'Två inställningar i Safari, båda på samma sida:',
+        step1: 'Slå på Web Detox', step1Unknown: 'Reglaget högst upp.', step1On: 'Det är på.', step1Off: 'Det är av: slå på reglaget högst upp.',
+        step2: 'Tillåt det på alla webbplatser',
+        step2Unknown: 'Under Behörigheter ställer du in Alla webbplatser på Tillåt. Annars frågar Safari på varje sajt. Öppna sedan en webbplats i Safari och kom tillbaka hit för att kontrollera.',
+        step2On: 'Det är tillåtet på alla webbplatser.',
+        step2Off: 'Nu körs det bara på de sajter du tillåter en i taget. Det går bra om du föredrar det. För att använda det överallt ställer du in Alla webbplatser på Tillåt under Behörigheter.',
+        openSettings: 'Öppna Web Detox i Inställningar', path: 'Inställningar → Appar → Safari → Tillägg → Web Detox',
+        macUnknown: 'Du kan slå på tillägget Web Detox i avsnittet Tillägg i Safari-inställningarna.',
+        macOn: 'Tillägget Web Detox är på. Du kan stänga av det i avsnittet Tillägg i Safari-inställningarna.',
+        macOff: 'Tillägget Web Detox är av. Du kan slå på det i avsnittet Tillägg i Safari-inställningarna.',
+        macOpen: 'Avsluta och öppna Safari-inställningar…',
+      },
+    };
+
+    // Simplified Chinese (简体中文).
+    STRINGS.zh = {
+      // The list and the reader (plain view), in the language of the site being read.
+      siteOrder: '网站顺序', byImportance: '重要优先', top: '头条', important: '重要',
+      related: '相关文章', latest: '最新', other: '其他', sections: '栏目', original: '原网页', done: '完成',
+      paid: '订阅', count: n => `${n} 篇文章`,
+      editSections: '编辑栏目', editHint: '轻点以隐藏或显示，拖移以移动。',
+      loading: '正在载入文章…', onSite: h => `在 ${h} 上阅读`, close: '关闭',
+      paidHere: '本文其余部分仅供订阅者阅读。', prev: '上一篇文章', next: '下一篇文章',
+      unreadable: '此文章无法在这里显示，但可以在网站上阅读。',
+      short: '这篇文章的文字只有这些。网站上可能还有更多内容，例如视频或后续更新。',
+      hideRead: '隐藏已读', readHidden: n => `已隐藏 ${n} 篇已读文章`, showRead: '显示',
+      later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
+      myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
+      mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
+      keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
+
+      // The toolbar popup, in the browser's language.
+      pop: {
+        levelHeading: '此网站的阅读级别', levelLabel: '阅读级别',
+        vanilla: 'Vanilla', vanillaDesc: '网站原样',
+        headlines: '清晰标题', headlinesDesc: '用文章本身的标题替换标题党',
+        synopsis: '清晰标题 + 摘要', synopsisDesc: '每个标题附上文章导语',
+        pictures: '带图片的简洁视图', picturesDesc: '与简洁视图相同，每篇文章配一张图片，大小统一',
+        plain: '简洁视图', plainDesc: '文章按栏目排列在平静的页面上。没有广告、视频或弹窗',
+        calm: '平静', calmDesc: '只显示关注的内容，没有广告、推荐、短视频信息流或推广 App 的弹窗',
+        isDefault: '✓ 所有网站的默认设置', makeDefault: '在所有网站上使用此级别',
+        calmHeading: '在此网站上显示', neverHeading: '永不显示', allSites: '所有网站',
+        someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}的子话题`,
+        styleHeading: '标题样式', styleRewrite: '改写', styleReveal: '轻点显示', styleStack: '同时显示',
+        showOriginal: '显示原标题', plainHeading: '简洁视图', swipe: '文章间轻扫时显示动画',
+        otherHeading: '其他网站', generic: '自动识别未设置的新闻网站',
+        disabledOn: '已停用的网站', enabledOn: '已启用的网站', remove: h => `移除 ${h}`,
+        notRunning: 'Web Detox 未在此页面上运行。',
+        notRunningHint: '它只在网页上运行，不在浏览器页面或商店页面上运行。如果刚安装或允许，重新载入页面即可。',
+        grant: '在所有网站上允许',
+        // Status line at the top. n is a number; h a site such as nrk.no.
+        asPublished: h => `正在按原样显示 ${h}。`,
+        calmStatus: (site, n) => `无干扰的 ${site}：` + (n ? `此页面上已隐藏 ${n} 项。` : '此页面上暂时没有要隐藏的内容。'),
+        plainStatus: n => `简洁视图：${n} 篇文章。`,
+        plainOnArticle: '简洁视图适用于首页；此文章显示清晰标题 + 摘要。',
+        changed: n => `已更改此页面上的 ${n} 个标题。`,
+        noneFound: '此页面上暂未发现标题党。',
+        checked: n => `已检查 ${n} 篇文章。`,
+        failed: n => `${n} 篇文章无法载入。`,
+        paused: (h, time) => `${h} 要求进行机器人验证，因此 Web Detox 在 ${time} 之前不会从该网站获取文章。`,
+        privacyHeading: '数据与隐私',
+        privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
+        erase: '删除 Web Detox 存储的所有内容',
+        eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
+        eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
+      },
+
+      // Topics in the popup's "Never show me".
+      topic: {
+        sport: '体育', football: '足球', winter: '冬季运动', motorsport: '赛车', tennis: '网球', golf: '高尔夫',
+        cycling: '自行车', handball: '手球', icehockey: '冰球', combat: '拳击和综合格斗', athletics: '田径',
+        ussports: '美国体育', esports: '电子竞技', entertainment: '娱乐', reality: '真人秀', celebrity: '名人',
+        royals: '王室', tvseries: '电视和剧集', film: '电影', music: '音乐', gaming: '游戏',
+        incidents: '犯罪和事故', crime: '犯罪', accidents: '事故', obituaries: '讣告和悼文',
+        lifestyle: '生活方式', health: '健康和健身', food: '美食和饮品', travel: '旅行', home: '家居和房产',
+        cars: '汽车', fashion: '时尚和美容', relationships: '性和情感', consumer: '消费和购物',
+        opinion: '观点和评论', politics: '政治', business: '商业和财经', tech: '科技和科学',
+        weather: '天气',
+      },
+
+      // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
+      part: { birthdays: '生日', bait: '诱导互动帖子（“看评论区”）' },
+
+      // The app's own page on iPhone, iPad and Mac, in the device's language.
+      app: {
+        iconAlt: 'Web Detox 图标',
+        intro: 'Safari 浏览器中有两项设置，都在同一页面上：',
+        step1: '打开 Web Detox', step1Unknown: '顶部的开关。', step1On: '已打开。', step1Off: '已关闭：打开顶部的开关。',
+        step2: '在所有网站上允许',
+        step2Unknown: '在“权限”下，将“所有网站”设为“允许”。否则 Safari 浏览器会在每个网站上询问。然后在 Safari 浏览器中打开一个网站，再回到这里查看。',
+        step2On: '已在所有网站上允许。',
+        step2Off: '现在它只在逐个允许的网站上运行。如果更喜欢这样，也没有问题。要在所有网站上使用，在“权限”下将“所有网站”设为“允许”。',
+        openSettings: '在“设置”中打开 Web Detox', path: '设置 → App → Safari 浏览器 → 扩展 → Web Detox',
+        macUnknown: '可以在 Safari 浏览器设置的“扩展”部分打开 Web Detox 的扩展。',
+        macOn: 'Web Detox 的扩展当前已打开。可以在 Safari 浏览器设置的“扩展”部分将其关闭。',
+        macOff: 'Web Detox 的扩展当前已关闭。可以在 Safari 浏览器设置的“扩展”部分将其打开。',
+        macOpen: '退出并打开 Safari 浏览器设置…',
+      },
+    };
+
     // ───────────────────────────── Host keys ─────────────────────────────
     // A host's 42-bit fingerprint as 7 characters, for NEWS_LIST (see sites.js). build.mjs runs this
     // same function to make the list, so the two always agree. gm-shim.js gets this file and the list
@@ -668,7 +1840,7 @@
       (curatedHost(host) || (listedHost(host) && !notNewsPage(true)) ? { host: null, article: null } : undefined);
     // A site to calm rather than read (calm-sites.js).
     const calmSite = CALM_SITES.find(s => s.host.test(host));
-    if (!site && !calmSite && !CFG.genericSites) return;
+    if (!site && !calmSite && !CFG.genericSites && !globalThis.__wdMix) return;
 
     // Robot checks (DataDome, Cloudflare, HUMAN, Akamai), on the page itself or in a fetched page. Fetching many articles in a
     // short time is what they look for (nytimes.com showed one): a site that answers with one, or with 429 Too Many Requests,
@@ -707,7 +1879,8 @@
       async set(k, v) { try { if (typeof GM !== 'undefined' && GM.setValue) await GM.setValue(k, v); } catch {} },
       xhr(opts) {
         if (Date.now() < fetchPausedUntil) return Promise.reject(new Error('paused'));
-        return gm.rawXhr(opts).then(r => { if (robotCheck(r)) { pauseFetching(); throw new Error('robot check'); } return r; });
+        // My news reads many sites: a robot check from one of them doesn't stop the others there.
+        return gm.rawXhr(opts).then(r => { if (robotCheck(r)) { if (!globalThis.__wdMix) pauseFetching(); throw new Error('robot check'); } return r; });
       },
       rawXhr(opts) {
         // Timing marks for the first fetches (gm-shim.js): how long Safari takes over a fetch from the page and one through
@@ -1582,12 +2755,8 @@
     // media paused, so ads, autoplay video, pop-ups and animation never show. A "Latest" section
     // comes from the site's RSS/Atom feed. Article pages are left alone (they get the synopsis
     // level). Paid articles are marked; what the site sends for them is what the reader shows.
-    const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || ''), DE = /^de\b/i.test(document.documentElement.lang || '');
-    const T = DE
-      ? { siteOrder: 'Wie auf der Seite', byImportance: 'Wichtigstes zuerst', top: 'Topthema', important: 'Wichtig', related: 'Mehr zum Thema', latest: 'Neueste', other: 'Sonstiges', sections: 'Rubriken', original: 'Original', done: 'Fertig', paid: 'Abo', count: n => `${n} Artikel`, editSections: 'Rubriken bearbeiten', editHint: 'Tippen zum Aus- oder Einblenden, ziehen zum Verschieben.', loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen', paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel', unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.', short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.', hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen', later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen', keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt' }
-      : NB
-      ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, editSections: 'Rediger seksjoner', editHint: 'Trykk for å skjule eller vise, dra for å flytte.', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker' }
-      : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, editSections: 'Edit sections', editHint: 'Tap to hide or show, drag to move.', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes' };
+    // The list's and the reader's texts, in the site's own language (src/i18n/).
+    const T = stringsFor(document.documentElement.lang);
     const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
     // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
     const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -1901,6 +3070,15 @@
       @media (min-width: 1000px){
         .wrap{max-width:88rem}
         section > ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(22rem,1fr));column-gap:32px}
+        /* Sections with fewer articles than fill a row stand side by side, read down and then across, like a newspaper page;
+           alone, each left most of its row empty (a short regional section, or one with the read articles hidden). */
+        .cols{columns:22rem;column-gap:32px}
+        .cols > section > ol{display:block}
+        /* A section may go on in the next column, between two articles (so the columns come out even); its heading stays
+           with its first article. */
+        .cols li{break-inside:avoid;-webkit-column-break-inside:avoid}
+        .cols h2{break-after:avoid;-webkit-column-break-after:avoid}
+        .cols > section:first-child{padding-top:0;margin-top:20px}
       }
       li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
       /* The picture is part of the card: a click on it goes to the card. In Safari on a Mac, a click on a picture could start
@@ -1917,7 +3095,9 @@
       .filters.editing .read-toggle{display:none}
       .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
       .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
-      .edit-hint{margin:6px 0 0;font-size:13px;color:var(--muted)}
+      .edit-hint,.mix-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
+      h2 a.site-link{color:inherit;text-decoration:none}
+      h2 a.site-link:hover{color:var(--accent)}
       nav button[data-id]{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
       nav button[data-id] small{color:var(--muted);font-size:12px;margin-left:4px}
       nav button[data-id][aria-pressed="false"]{opacity:.45;text-decoration:line-through;border-style:dashed}
@@ -1996,7 +3176,7 @@
     function readerContent(art, title, lede, url) {
       const el = readerEl, out = [el('h1', title)];
       if (lede) out.push(el('p', lede, 'lede'));
-      const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(NB ? 'nb-NO' : DE ? 'de-DE' : undefined, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+      const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
       if (by) out.push(el('div', by, 'byline'));
       for (const b of art?.blocks || []) {
         if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
@@ -2068,11 +3248,13 @@
       window.addEventListener('popstate', () => location.reload());
       return true;
     }
-    async function plainView(withImages) {
+    // mix: the My news page (mix.js) instead of a site's front page: { sites, load(add) }. Its articles come from several
+    // sites' front pages, read elsewhere and handed over through load(); one section per site.
+    async function plainView(withImages, mix) {
       timeMark('plain-view');
       // A heavy front page that gm-shim.js stopped before its scripts ran: its links come from a downloaded copy, read without
       // running anything (no layout either, so nothing is measured), and the logo from the list shown meanwhile.
-      const stopped = !!globalThis.__wdStopped;
+      const stopped = !mix && !!globalThis.__wdStopped;
       let src = document;
       if (stopped) {
         try { src = parseHtml((await gm.xhr({ url: location.href, headers: { Accept: 'text/html' } })).responseText); } catch { return false; }
@@ -2083,62 +3265,69 @@
       const listUrl = location.href, listTitle = document.title;
       // The logo is the first thing here that needs the page laid out, so it pays for the first layout: on nytimes.com in
       // Safari 1.2 s. It counts towards the first pass, which decides whether the page is heavy (the end of plainView).
-      const t0 = performance.now();
-      let logo = null;
-      if (stopped) {
-        const chip = document.getElementById('nothis-shot')?.shadowRoot?.querySelector('h1 .logo');
-        if (chip?.firstElementChild) logo = { el: chip.firstElementChild.cloneNode(true), bg: chip.style.background };
-      } else try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
-      let items = frontPageItems(undefined, !stopped, src);
-      const firstPass = performance.now() - t0;
-      timeMark('first-pass-' + Math.round(firstPass) + 'ms');
-      if (items.length < 8 && !stopped) items = await frontPageSoon(8, 2400);
-      const toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
-      timeMark('links');
-      const giveBack = swallowSite();
-      const known = new Map(items.map(it => [it.key, it]));
-      if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
-      if (items.length < 8) {
-        // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
-        giveBack(); window.scrollTo(0, 0);
-        return false;
+      let logo = null, items = [], toLinks = 0, giveBack = () => {}, known = new Map();
+      if (!mix) {
+        const t0 = performance.now();
+        if (stopped) {
+          const chip = document.getElementById('nothis-shot')?.shadowRoot?.querySelector('h1 .logo');
+          if (chip?.firstElementChild) logo = { el: chip.firstElementChild.cloneNode(true), bg: chip.style.background };
+        } else try { logo = siteLogo(); } catch {} // before harvest() scrolls the page
+        items = frontPageItems(undefined, !stopped, src);
+        const firstPass = performance.now() - t0;
+        timeMark('first-pass-' + Math.round(firstPass) + 'ms');
+        if (items.length < 8 && !stopped) items = await frontPageSoon(8, 2400);
+        toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
+        timeMark('links');
+        giveBack = swallowSite();
+        known = new Map(items.map(it => [it.key, it]));
+        if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
+        if (items.length < 8) {
+          // Nothing to lay out: give the page back, and the caller falls back to the synopsis level.
+          giveBack(); window.scrollTo(0, 0);
+          return false;
+        }
       }
       rankItems(items);
       let sortMode = startup.plainSort === 'importance' ? 'importance' : 'site';
-      const layout = (startup.plainLayout || {})[host] || { hidden: [], order: [] };
+      const layoutKey = mix ? 'mix' : host, layout = (startup.plainLayout || {})[layoutKey] || { hidden: [], order: [] };
       // Articles opened here, kept for 30 days on every site. With "hide read" on, those read before this visit are left out
       // of the list, like an inbox showing only unread mail; one read now stays (dimmed) until the next visit, or until the
       // button is pressed.
       let hideRead = !!startup.plainHideRead, showReadNow = false;
       const readBefore = new Set(Object.keys(startup.plainRead || {})), hiddenRead = new Set();
-      const skipRead = it => hideRead && !showReadNow && readBefore.has(it.key);
+      // Read on another device (background.js syncs them): short hashes of the addresses, the last 14 days.
+      const readHash = k => { let h = 0x811c9dc5; for (let i = 0; i < k.length; i++) { h ^= k.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+      const readElsewhere = new Set(Object.keys(startup.plainReadSync || {})), readThere = key => readElsewhere.has(readHash(key));
+      const skipRead = it => hideRead && !showReadNow && (readBefore.has(it.key) || readThere(it.key));
       const saveRead = key => gm.get('plainRead', {}).then(all => {
         const now = Date.now(), kept = Object.entries({ ...(all || {}), [key]: now }).filter(([, t]) => now - t < 30 * 864e5).sort((a, b) => b[1] - a[1]).slice(0, 3000);
         return gm.set('plainRead', Object.fromEntries(kept));
       });
-      readSectionNames(src);
+      if (!mix) readSectionNames(src);
+      else for (const st of mix.sites) sectionNames.set(st.host, st.name);
 
       plainHost = document.createElement('div');
       plainHost.id = 'declickbait-plain';
       const sh = plainHost.attachShadow({ mode: 'open' });
       sh.innerHTML = `<style>${PLAIN_CSS}</style>
-        <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p></header>
+        <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
         <main></main><footer></footer><div class="keys"></div></div>
         <div class="hold" hidden role="menu"></div>
         <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
-      const h1 = sh.querySelector('h1');
+      const h1 = sh.querySelector('h1'), mixNote = sh.querySelector('.mix-note');
       if (logo) {
         const chip = document.createElement('span'), name = document.createElement('span');
         chip.className = 'logo'; chip.style.background = logo.bg; chip.append(logo.el);
         name.className = 'sr'; name.textContent = pageMeta.site || host;
         h1.append(chip, name);
-      } else h1.textContent = pageMeta.site || host;
+      } else h1.textContent = mix ? T.myNews : pageMeta.site || host;
+      if (mix) sh.querySelector('[data-act="original"]').hidden = true;
       sh.querySelector('.keys').textContent = T.keys;
       document.documentElement.appendChild(plainHost); ownColors();
       onlyList();
       document.getElementById('nothis-cover')?.remove();
       // Remember the site, so next time the extension covers it before the original is drawn.
-      gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
+      if (!mix) gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
 
       const sections = new Map(), byKey = new Map();
       const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
@@ -2148,6 +3337,8 @@
       const SAVED = { later: 'saved-later', marks: 'saved-marks' }, isSaved = id => id === SAVED.later || id === SAVED.marks;
       const saved = { later: [...(startup.plainSaved?.later || [])], marks: [...(startup.plainSaved?.marks || [])] };
       sections.set(SAVED.later, []); sections.set(SAVED.marks, []);
+      // My news: the sites in the order they are read most, whichever front page comes in first.
+      if (mix) for (const st of mix.sites) sections.set(st.host, []);
       items.forEach(add);
       const syncSaved = () => {
         for (const kind of ['later', 'marks']) {
@@ -2201,10 +3392,11 @@
         let cur = spyPin && sh.getElementById(spyPin);
         if (!cur) {
           const line = sh.querySelector('header').getBoundingClientRect().bottom + 24;
-          for (const sec of main.querySelectorAll(':scope > section')) { if (sec.getBoundingClientRect().top <= line) cur = sec; else break; }
+          // Sections side by side (.cols) are passed together: the last one whose top is above the line, in reading order.
+          for (const sec of main.querySelectorAll('section')) if (sec.getBoundingClientRect().top <= line) cur = sec;
           // At the very end, the last section: one too short to reach the top is still the one being read.
-          if (plainHost.scrollTop > 0 && plainHost.scrollTop + plainHost.clientHeight >= plainHost.scrollHeight - 2) cur = main.querySelector(':scope > section:last-of-type');
-          cur ||= main.querySelector(':scope > section');
+          if (plainHost.scrollTop > 0 && plainHost.scrollTop + plainHost.clientHeight >= plainHost.scrollHeight - 2) cur = [...main.querySelectorAll('section')].pop();
+          cur ||= main.querySelector('section');
         }
         for (const c of chips) {
           const on = c.dataset.sec === cur?.id;
@@ -2275,7 +3467,7 @@
       function dropRow(key, li) {
         const sec = li.closest('section');
         li.remove(); rows.delete(key); plainCount = rows.size;
-        if (sec && !sec.querySelector('li')) { nav.querySelector(`[data-sec="${sec.id}"]`)?.remove(); sec.remove(); }
+        if (sec && !sec.querySelector('li')) { nav.querySelector(`[data-sec="${sec.id}"]`)?.remove(); const run = sec.parentElement; sec.remove(); if (run?.classList.contains('cols') && !run.children.length) run.remove(); }
         updateFooter();
       }
       const seenRows = new IntersectionObserver(es => {
@@ -2332,7 +3524,8 @@
         const text = withImages ? document.createElement('div') : li;
         text.append(a);
         if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
-        const from = it.host && it.host !== host ? it.host.replace(/^www\./, '') : '';
+        // The site, for an article from elsewhere: a saved one, or one in My news shown outside its site's section.
+        const from = it.host && it.host !== host && it.section !== it.host ? it.host.replace(/^www\./, '') : '';
         if (withSection || from) { const sl = document.createElement('span'); sl.className = 'sec-label'; sl.textContent = from || sectionLabel(it.section); text.append(sl); }
         text.append(p);
         if (withImages) {
@@ -2347,7 +3540,7 @@
         if (!rows.has(it.key)) return null; // cached metadata showed a muted topic: fill() dropped it
         if (!cache[it.key]) want.push(it.key);
         seenRows.observe(li);
-        if (readKeys.has(it.key)) li.classList.add('read');
+        if (readKeys.has(it.key) || readThere(it.key)) li.classList.add('read');
         return li;
       }
 
@@ -2511,7 +3704,7 @@
         if (hideRead && !showReadNow) {
           // With "hide read" on, what was read leaves the list on the way back to it, and the keyboard goes on from the next
           // unread card (the one before, at the end). The cards around keep their place: render() holds the one on top.
-          const list = cards(), i = list.indexOf(rows.get(key)), unread = l => !readKeys.has(l.dataset.key);
+          const list = cards(), i = list.indexOf(rows.get(key)), unread = l => !readKeys.has(l.dataset.key) && !readThere(l.dataset.key);
           back = (list.slice(i + 1).find(unread) || list.slice(0, Math.max(i, 0)).reverse().find(unread))?.dataset.key;
           for (const k of readKeys) readBefore.add(k);
           render();
@@ -2539,8 +3732,22 @@
         if (!ol.childElementCount) return;
         const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
         sec.id = 's-' + id; chip.dataset.sec = sec.id; h2.textContent = chip.textContent = sectionLabel(id);
+        // My news: a site's heading leads to the site, where its own list opens.
+        const st = mix?.sites.find(x => x.host === id);
+        if (st) { const a = document.createElement('a'); a.href = st.origin + '/'; a.textContent = sectionLabel(id) + ' →'; a.className = 'site-link'; h2.replaceChildren(a); }
         chip.addEventListener('click', () => { spyPin = sec.id; sec.scrollIntoView(); spy(); });
         sec.append(h2, ol); main.append(sec); nav.append(chip);
+      }
+      // Runs of small sections go into one .cols box, which lays them side by side on a wide screen (CSS above); on a phone
+      // the box changes nothing. A section is small when it has fewer articles than the three a row holds.
+      function groupSmall() {
+        let run = null;
+        for (const sec of [...main.children]) {
+          if (!(sec.tagName === 'SECTION' && sec.querySelectorAll('li[data-key]').length < 3)) { run = null; continue; }
+          if (!run) { run = document.createElement('div'); run.className = 'cols'; sec.before(run); }
+          run.append(sec);
+        }
+        for (const box of main.querySelectorAll(':scope > .cols')) if (box.children.length < 2) box.replaceWith(...box.children);
       }
       function render() {
         // Keep the article at the top of the screen in place when the list changes around it.
@@ -2568,6 +3775,7 @@
           sec.append(h2, ol); main.append(sec);
         }
         else for (const id of order()) if (!layout.hidden.includes(id)) renderSection(id);
+        groupSmall();
         plainCount = rows.size;
         updateFooter();
         plainHost.scrollTop = y;
@@ -2604,13 +3812,13 @@
       }
       async function finishEditing() {
         if (!editing) return;
-        layout.order = editing.order; layout.hidden = editing.order.filter(id => editing.hidden.has(id));
+        layout.order = editing.order; layout.hidden = editing.order.filter(id => editing.hidden.has(id)); layout.at = Date.now(); // newest wins in sync
         editing = null;
         filters.classList.remove('editing'); editHint.hidden = true;
         editBtn.textContent = '✎'; editBtn.setAttribute('aria-label', T.editSections);
         render();
         editBtn.focus({ preventScroll: true });
-        await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [host]: layout });
+        await gm.set('plainLayout', { ...((await gm.get('plainLayout', {})) || {}), [layoutKey]: layout });
       }
       const keepOrder = () => { if (editing) editing.order = [...nav.querySelectorAll('button[data-id]')].map(c => c.dataset.id); };
       // A drag moves the chip in the row as the finger goes, to the place under it. Short of 8 px it is a tap.
@@ -2744,7 +3952,7 @@
       // waiting in Safari. Only the extension has gm-shim.js. It takes over the copy's scrolling.
       const lastShot = document.getElementById('nothis-shot');
       if (lastShot) { plainHost.scrollTop = lastShot.scrollTop; lastShot.remove(); }
-      if (EXT) {
+      if (EXT && !mix) {
         const shotKey = 'nothis-shot:' + location.pathname;
         let shotTimer = null;
         // At most every 1.5 s: the list changes all the time while it fills in.
@@ -2759,6 +3967,12 @@
       // a moment after the last touch, click, scroll or key, and while an article is open.
       let later = null, quietAt = 0;
       const renderSoon = (ms = 600) => { clearTimeout(later); later = setTimeout(() => (pressed || current || Date.now() < quietAt) ? renderSoon(500) : render(), ms); };
+      if (mix) {
+        // My news: each site's articles come in as its front page has been read; the list is built again each time.
+        CFG.maxFetchesPerPage = 240;
+        mix.load(fresh => { items.push(...fresh); fresh.forEach(add); renderSoon(0); }, text => { mixNote.textContent = text; mixNote.hidden = !text; });
+        return true;
+      }
       feedItems(src).then(feed => { if (!feed.length) return; feed.forEach(add); renderSoon(0); });
       // Read the rest of a lazily filled front page, a few articles at a time, then drop the site's body.
       // Each step makes the site load more (pictures, players, ads), work that holds up a tap, so it
@@ -3085,6 +4299,57 @@
       pass();
     }
 
+    // ───────────────────────────── My news ─────────────────────────────
+    // The news sites the user reads, learnt from their own visits, and their front pages together on one calm page: the My
+    // news page (mix.html, opened from the popup). Every visit to a known news site counts once per tab; the count fades
+    // with a half-life of two weeks, so the list follows what is read now. It stays in this browser (and goes to the user's
+    // other devices with the rest, see background.js). The page reads each site's front page as downloaded HTML through a
+    // second copy of the engine (extract.js, built for it: wdExtract), so each site is read by its own rules.
+    const VISIT_HALF_LIFE = 14 * 864e5, MIX_SITES = 8, MIX_PER_SITE = 30;
+    const visitScore = (e, now = Date.now()) => (e?.s || 0) * Math.pow(0.5, (now - (e?.at || now)) / VISIT_HALF_LIFE);
+    async function recordVisit() {
+      try { if (sessionStorage.getItem('wd-visit') === host) return; sessionStorage.setItem('wd-visit', host); } catch {}
+      const visits = (await gm.get('newsVisits', {})) || {}, now = Date.now();
+      const name = norm(document.querySelector('meta[property="og:site_name"]')?.getAttribute('content') || '');
+      visits[host] = { s: visitScore(visits[host], now) + 1, at: now, o: location.origin, n: name || visits[host]?.n || '' };
+      await gm.set('newsVisits', Object.fromEntries(Object.entries(visits).sort((a, b) => visitScore(b[1], now) - visitScore(a[1], now)).slice(0, 60)));
+    }
+    // The sites for My news: the ones visited more than once lately, most visited first.
+    function mySites(visits) {
+      const now = Date.now();
+      return Object.entries(visits || {}).map(([h, e]) => ({ host: h, origin: e.o || 'https://' + h, name: e.n || h, score: visitScore(e, now) }))
+        .filter(x => x.score >= 1.5).sort((a, b) => b.score - a.score).slice(0, MIX_SITES);
+    }
+    async function mixView() {
+      document.title = T.myNews;
+      const sites = mySites(startup.newsVisits);
+      // Each site's front page, three at a time; its articles join the list as they come.
+      const load = async (add, note) => {
+        if (!sites.length) return note(T.mixEmpty);
+        let done = 0;
+        note(T.mixLoading(0, sites.length));
+        const one = async st => {
+          try {
+            const r = await gm.xhr({ url: st.origin + '/', headers: { Accept: 'text/html' } });
+            const doc = parseHtml(r.responseText), base = doc.createElement('base');
+            base.href = r.finalUrl || st.origin + '/';
+            doc.head.prepend(base);
+            let items = (globalThis.wdExtract?.(new URL(base.href), doc)?.items || []).slice(0, 80);
+            items.forEach((it, i) => { it.m.y = i; }); // nothing is laid out: the order on the page stands in for the height
+            rankItems(items);
+            items = items.filter(it => !mutedTopicOf(it.url, it.teaser)).slice(0, MIX_PER_SITE);
+            for (const it of items) { it.host = st.host; it.section = st.host; }
+            if (items.length) add(items);
+          } catch (e) { console.warn('Web Detox: My news', st.host, e); }
+          done++;
+          note(done < sites.length ? T.mixLoading(done, sites.length) : '');
+        };
+        const queue = [...sites];
+        await Promise.all([0, 1, 2].map(async () => { while (queue.length) await one(queue.shift()); }));
+      };
+      await plainView((startup.level || 'pictures') !== 'plain', { sites, load });
+    }
+
     // ───────────────────────────── Settings ─────────────────────────────
     // One place that reads and changes the settings, used by the extension's popup (through
     // GM.exposeSettings, see boot.js) and by the userscript's in-page panel (userscript/panel.js).
@@ -3271,7 +4536,7 @@
       // Every setting the start needs, in one read (plain view's too: startup below).
       startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
         siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
-        plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainSaved: {} });
+        plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {} });
       const disabled = startup.disabledHosts || [];
       const enabled = startup.enabledHosts || [];
       CFG.genericSites = startup.genericSites ?? CFG.genericSites;
@@ -3291,6 +4556,10 @@
       setMuted(startup.mutedTopics || []);
       CFG.display = startup.display ?? CFG.display;
       CFG.swipeAnimation = startup.swipeAnimation ?? CFG.swipeAnimation;
+      // The My news page (mix.html), in the extension's own page: nothing else of this applies there.
+      if (globalThis.__wdMix) { await mixView(); return; }
+      // A visit to a news site, for My news (mix.js).
+      if (site && !calmSite) recordVisit().catch(() => {});
       let original = false; // the plain view's "Original" button: show the site as published, once
       try { original = sessionStorage.getItem('declickbait-original') === host; sessionStorage.removeItem('declickbait-original'); } catch {}
       // "Read on the site" in the reader. Back can land on an entry that still counts as this document: load it.
