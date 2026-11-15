@@ -101,10 +101,15 @@
       await api.storage.local.set({ [k]: v });
     },
     xmlHttpRequest(o) {
-      api.runtime.sendMessage({ type: 'declickbait-fetch', url: o.url, headers: o.headers, timeout: o.timeout }).then(r => {
+      // A message to the background can go unanswered in Safari (its background page was put to sleep in between):
+      // then the fetch gives up here, a little after its own timeout, so it can't hold its place in the queue forever.
+      let done = false;
+      const once = f => (...a) => { if (done) return; done = true; clearTimeout(watch); f(...a); };
+      const watch = setTimeout(once(() => { fetches.failed++; o.ontimeout?.(new Error('no answer from background')); }), (o.timeout || 12000) + 5000);
+      api.runtime.sendMessage({ type: 'declickbait-fetch', url: o.url, headers: o.headers, timeout: o.timeout }).then(once(r => {
         if (r && !r.error) { fetches[r.status < 400 ? 'ok' : 'failed']++; o.onload?.(r); }
         else { fetches.failed++; (r?.timedOut ? o.ontimeout : o.onerror)?.(new Error(r?.error || 'no response from background')); }
-      }, e => { fetches.failed++; o.onerror?.(e); });
+      }), once(e => { fetches.failed++; o.onerror?.(e); }));
     },
     exposeSettings(fn) { settingsHandler = fn; },
   };

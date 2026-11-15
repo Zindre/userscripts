@@ -6,10 +6,10 @@
 // level). Paid articles are marked; what the site sends for them is what the reader shows.
 const NB = /^(nb|nn|no)\b/i.test(document.documentElement.lang || ''), DE = /^de\b/i.test(document.documentElement.lang || '');
 const T = DE
-  ? { siteOrder: 'Wie auf der Seite', byImportance: 'Wichtigstes zuerst', top: 'Topthema', important: 'Wichtig', related: 'Mehr zum Thema', latest: 'Neueste', other: 'Sonstiges', sections: 'Rubriken', original: 'Original', done: 'Fertig', paid: 'Abo', count: n => `${n} Artikel`, editSections: 'Rubriken bearbeiten', editHint: 'Tippen zum Aus- oder Einblenden, ziehen zum Verschieben.', loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen', paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel', unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.', short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.', hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen', keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · Esc schließt' }
+  ? { siteOrder: 'Wie auf der Seite', byImportance: 'Wichtigstes zuerst', top: 'Topthema', important: 'Wichtig', related: 'Mehr zum Thema', latest: 'Neueste', other: 'Sonstiges', sections: 'Rubriken', original: 'Original', done: 'Fertig', paid: 'Abo', count: n => `${n} Artikel`, editSections: 'Rubriken bearbeiten', editHint: 'Tippen zum Aus- oder Einblenden, ziehen zum Verschieben.', loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen', paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel', unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.', short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.', hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen', later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen', keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt' }
   : NB
-  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, editSections: 'Rediger seksjoner', editHint: 'Trykk for å skjule eller vise, dra for å flytte.', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · Esc lukker' }
-  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, editSections: 'Edit sections', editHint: 'Tap to hide or show, drag to move.', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · Esc closes' };
+  ? { siteOrder: 'Avisens rekkefølge', byImportance: 'Viktigst først', top: 'Toppsak', important: 'Viktig', related: 'Relaterte saker', latest: 'Siste', other: 'Annet', sections: 'Seksjoner', original: 'Original', done: 'Ferdig', paid: 'Abonnement', count: n => `${n} saker`, editSections: 'Rediger seksjoner', editHint: 'Trykk for å skjule eller vise, dra for å flytte.', loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk', paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak', unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.', short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.', hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis', later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke', keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker' }
+  : { siteOrder: 'Site order', byImportance: 'Most important first', top: 'Top story', important: 'Important', related: 'Related articles', latest: 'Latest', other: 'Other', sections: 'Sections', original: 'Original', done: 'Done', paid: 'Subscription', count: n => `${n} articles`, editSections: 'Edit sections', editHint: 'Tap to hide or show, drag to move.', loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close', paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article', unreadable: "This article can't be shown here, but you can read it on the site.", short: "That's all the text this article has. The site may have more, such as video or later updates.", hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show', later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark', keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes' };
 const NOT_SECTION = /^(?:i|a|s|article|articles|artikkel|story|stories|amp|www|entry|news-story|content)$/i;
 // Commercial sections (advertorials, affiliate shopping) are swallowed like the ads.
 const AD_SECTION = /^(?:brand-?stories|brand-?studio|brandstudio|partner|partnerinnhold|partner-content|sponsored|sponset|annonse|annons|annonsorinnhold|mainos|anzeige|kaufberater|bons-plans|shopping|shoppingtips|deals|coupons|codes-promo|gutscheine|rabattkoder|tilbud|kaufkompass|vergleich)$/i;
@@ -39,7 +39,7 @@ function readSectionNames(root = document) {
     if (m && registrable(u.hostname) === registrable(host) && t.length >= 2 && t.length <= 30 && !had) sectionNames.set(id, t);
   }
 }
-const sectionLabel = id => id === 'latest' ? T.latest : id === 'other' ? T.other : sectionNames.get(id) || (id[0].toUpperCase() + id.slice(1)).replace(/-/g, ' ');
+const sectionLabel = id => id === 'latest' ? T.latest : id === 'other' ? T.other : id === 'saved-later' ? T.later : id === 'saved-marks' ? T.marks : sectionNames.get(id) || (id[0].toUpperCase() + id.slice(1)).replace(/-/g, ' ');
 // Advertorials dressed as articles carry a small label; plain view leaves them out with the other ads.
 const AD_LABEL = /^(?:annonse|annons|annonsørinnhold|annonsorinnhold|sponset|sponsrat|sponsoreret|sponsored|sponsored content|anzeige|werbung|advertisement|advertorial|reklame|paid post|partner content|i samarbeid med\b.*|i samarbete med\b.*|in partnership with\b.*)$/i;
 function isAd(a) {
@@ -261,6 +261,16 @@ const PLAIN_CSS = `
   li[data-tier="3"]{box-shadow:inset 3px 0 0 var(--accent)}
   li[data-tier="2"]{box-shadow:inset 3px 0 0 var(--muted)}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .view .bar button.save{padding:5px 8px;line-height:0;color:var(--muted)}
+  .view .bar button.save svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .view .bar button.save[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+  .view .bar button.save[aria-pressed="true"] .f{fill:currentColor}
+  /* A long press on a card (touch screens) opens this small menu instead of the browser's own for the link. */
+  main li[data-key],main li[data-key] a{-webkit-touch-callout:none}
+  .hold{position:fixed;z-index:3;display:flex;flex-direction:column;min-width:210px;padding:6px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+  .hold[hidden]{display:none}
+  .hold button{border:0;border-radius:8px;text-align:left;font-size:16px;padding:10px 12px}
+  .hold button:active{background:var(--line)}
   .sec-label{display:inline-block;margin-left:6px;font-size:12px;color:var(--muted);vertical-align:2px}
   a.h{color:var(--fg);text-decoration:none;font-weight:600;font-size:17px;line-height:1.25}
   a.h:visited,li.read a.h{color:var(--muted)}
@@ -315,7 +325,9 @@ const PLAIN_CSS = `
     section > ol{display:grid;grid-template-columns:repeat(auto-fill,minmax(22rem,1fr));column-gap:32px}
   }
   li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
-  li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block}
+  /* The picture is part of the card: a click on it goes to the card. In Safari on a Mac, a click on a picture could start
+     dragging it instead, and then nothing opened. */
+  li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
   @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 84px;gap:10px} li.pic .pic-img{width:84px;height:56px}}
   .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
   footer{color:var(--muted);font-size:13px;padding-top:24px}
@@ -427,13 +439,9 @@ function readerContent(art, title, lede, url) {
   let at = host; try { at = new URL(art.finalUrl).hostname.replace(/^www\./, ''); } catch {} // a sister site the article moved to
   const end = el('div', '', 'end'), site = el('a', T.onSite(at)), close = el('button', T.close);
   site.href = onSiteUrl(url); close.dataset.act = 'close-reader';
-  // The address bar can already show this article, and then the link would only change the hash: load the page.
-  site.addEventListener('click', e => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || location.href.split('#')[0] !== url.split('#')[0]) return;
-    e.preventDefault();
-    history.replaceState(null, '', site.href);
-    location.reload();
-  });
+  // The site opens in a tab of its own (a frame is refused by most news sites): closing it brings you back to the reader,
+  // where you were. A new tab also loads the page when the address bar already shows this article.
+  site.target = '_blank'; site.rel = 'noopener';
   end.append(site);
   end.append(close); out.push(end);
   return out;
@@ -538,7 +546,8 @@ async function plainView(withImages) {
   sh.innerHTML = `<style>${PLAIN_CSS}</style>
     <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p></header>
     <main></main><footer></footer><div class="keys"></div></div>
-    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
+    <div class="hold" hidden role="menu"></div>
+    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
   const h1 = sh.querySelector('h1');
   if (logo) {
     const chip = document.createElement('span'), name = document.createElement('span');
@@ -555,9 +564,54 @@ async function plainView(withImages) {
 
   const sections = new Map(), byKey = new Map();
   const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
+  // Read later and Bookmarks: articles saved from any site, shown first in every list (unless hidden or moved like any
+  // section). Read later is a queue, and an article leaves it once it has been read; a bookmark stays until it is taken
+  // away. Kept in extension storage, so every site sees the same lists.
+  const SAVED = { later: 'saved-later', marks: 'saved-marks' }, isSaved = id => id === SAVED.later || id === SAVED.marks;
+  const saved = { later: [...(startup.plainSaved?.later || [])], marks: [...(startup.plainSaved?.marks || [])] };
+  sections.set(SAVED.later, []); sections.set(SAVED.marks, []);
   items.forEach(add);
-  // Sections in the order the user chose, then the rest in order of first appearance on the page.
-  const order = () => [...layout.order.filter(id => sections.has(id)), ...[...sections.keys()].filter(id => !layout.order.includes(id))];
+  const syncSaved = () => {
+    for (const kind of ['later', 'marks']) {
+      const list = sections.get(SAVED[kind]); list.length = 0;
+      for (const s of saved[kind]) {
+        const it = byKey.get(s.key) || { ...s, section: SAVED[kind] };
+        byKey.set(s.key, it); list.push(it);
+      }
+    }
+  };
+  syncSaved();
+  const isIn = (kind, key) => saved[kind].some(s => s.key === key);
+  // The headline and lead as the list shows them, so a saved article looks the same in another site's list.
+  const savedEntry = it => {
+    const li = rows.get(it.key), m = cache[it.key];
+    return { key: it.key, url: it.url, teaser: li?.querySelector('a.h')?.textContent || it.teaser, desc: li?.querySelector('p.lead')?.textContent || it.desc || '',
+      img: it.img || (m && !m.err && m.image) || '', host: it.host || host, at: Date.now() };
+  };
+  // Another tab may have changed the lists meanwhile: the change is made to what is stored now.
+  async function storeSaved(kind, entry, on) {
+    const st = (await gm.get('plainSaved', {})) || {};
+    st[kind] = [...(on ? [entry] : []), ...(st[kind] || []).filter(s => s.key !== entry.key)].slice(0, 500);
+    await gm.set('plainSaved', st);
+  }
+  let savedChanged = false;
+  function toggleSaved(kind, it) {
+    if (!it) return;
+    const on = !isIn(kind, it.key), entry = savedEntry(it);
+    saved[kind] = [...(on ? [entry] : []), ...saved[kind].filter(s => s.key !== it.key)];
+    storeSaved(kind, entry, on);
+    showSavedButtons();
+    if (current) savedChanged = true; else render();
+  }
+  function showSavedButtons() {
+    for (const kind of ['later', 'marks']) view.querySelector(`[data-act="${kind === 'later' ? 'later' : 'mark'}"]`).setAttribute('aria-pressed', String(!!current && isIn(kind, current.key)));
+  }
+  // Sections in the order the user chose, then the rest in order of first appearance on the page; the saved lists first
+  // until they are moved.
+  const order = () => {
+    const rest = [...sections.keys()].filter(id => !layout.order.includes(id));
+    return [...rest.filter(isSaved), ...layout.order.filter(id => sections.has(id)), ...rest.filter(id => !isSaved(id))];
+  };
 
   const main = sh.querySelector('main'), nav = sh.querySelector('nav'), rows = new Map(), want = [];
   // The section being read has its chip marked, and the chip is kept in sight in the row: as the list scrolls, and at once
@@ -663,7 +717,9 @@ async function plainView(withImages) {
     while (running < CFG.concurrency && want.length) {
       const key = want.shift(), it = byKey.get(key);
       running++;
-      getMeta(it.url).finally(() => { running--; fillSoon(key); pumpPlain(); });
+      // Never longer than 40 s in a slot: a fetch that hangs would otherwise stop the queue, and the cards after it kept
+      // their grey placeholder bars for good.
+      Promise.race([getMeta(it.url), new Promise(r => setTimeout(r, 40000))]).finally(() => { running--; fillSoon(key); pumpPlain(); });
     }
   }
   // The cards of the list being replaced (render): a card that would look the same is moved into the new list as it
@@ -698,7 +754,8 @@ async function plainView(withImages) {
     const text = withImages ? document.createElement('div') : li;
     text.append(a);
     if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
-    if (withSection) { const sl = document.createElement('span'); sl.className = 'sec-label'; sl.textContent = sectionLabel(it.section); text.append(sl); }
+    const from = it.host && it.host !== host ? it.host.replace(/^www\./, '') : '';
+    if (withSection || from) { const sl = document.createElement('span'); sl.className = 'sec-label'; sl.textContent = from || sectionLabel(it.section); text.append(sl); }
     text.append(p);
     if (withImages) {
       // Every row gets the same frame, with or without a picture, so the list stays even.
@@ -722,10 +779,12 @@ async function plainView(withImages) {
   const view = sh.querySelector('.view'), reader = view.querySelector('.reader'), readKeys = new Set(readBefore);
   view.querySelector('[data-act="close-reader"]').textContent = '✕ ' + T.close;
   let current = null; // the article on screen
+  const doneLater = new Set(); // read from Read later while the reader was open: they leave it when it closes
   // replace: moving to the previous/next article, which shouldn't stack up in the history.
   function openArticle(it, replace, fromHistory) {
     const li = rows.get(it.key);
     current = it; li?.classList.add('read');
+    if (isIn('later', it.key)) doneLater.add(it.key);
     if (!readKeys.has(it.key)) { readKeys.add(it.key); saveRead(it.key); }
     view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
     const list = cards(), i = list.indexOf(li);
@@ -738,6 +797,7 @@ async function plainView(withImages) {
     let url = listUrl; try { if (new URL(it.url).origin === location.origin) url = it.url; } catch {}
     if (!fromHistory) try { history[replace ? 'replaceState' : 'pushState']({ nothis: it.key }, '', url); } catch {}
     document.title = li?.querySelector('a.h').textContent || it.teaser;
+    showSavedButtons();
     fillReader(it);
     // The neighbours are likely next: fetch them now.
     for (const n of [list[i + 1], list[i - 1]]) if (n) prefetch(n.dataset.key, true);
@@ -819,6 +879,38 @@ async function plainView(withImages) {
   }
   // A click or tap on a card puts the keyboard's place there, so the arrow keys go on from it.
   main.addEventListener('pointerdown', e => { const li = e.target.closest?.('li[data-key]'); if (li) { pressed = li; cursorKey = li.dataset.key; mark(li); } }, { capture: true, passive: true });
+  // A long press on a card (half a second, without moving) opens a small menu to save it for later or bookmark it; the
+  // tap that ends the press does not open the article. A tap elsewhere, a scroll or Esc closes the menu.
+  const holdMenu = sh.querySelector('.hold');
+  let holdTimer = 0, holdAt = null, holdDone = false;
+  const closeHold = () => { holdMenu.hidden = true; holdMenu.replaceChildren(); };
+  function openHold(li, x, y) {
+    const it = byKey.get(li.dataset.key); if (!it) return;
+    holdDone = true; cursorKey = li.dataset.key; mark(li);
+    holdMenu.replaceChildren(...[['later', isIn('later', it.key) ? T.unLater : T.later], ['marks', isIn('marks', it.key) ? T.unMark : T.mark]].map(([kind, label]) => {
+      const b = document.createElement('button'); b.setAttribute('role', 'menuitem'); b.textContent = label;
+      b.addEventListener('click', e => { e.stopPropagation(); closeHold(); toggleSaved(kind, it); });
+      return b;
+    }));
+    holdMenu.hidden = false;
+    const r = holdMenu.getBoundingClientRect();
+    holdMenu.style.left = Math.max(8, Math.min(x - r.width / 2, innerWidth - r.width - 8)) + 'px';
+    holdMenu.style.top = (y - r.height - 16 > 8 ? y - r.height - 16 : Math.min(y + 16, innerHeight - r.height - 8)) + 'px';
+  }
+  main.addEventListener('touchstart', e => {
+    const li = e.target.closest?.('li[data-key]'); if (!li || e.touches.length > 1) return;
+    const t = e.touches[0]; holdAt = { x: t.clientX, y: t.clientY }; holdDone = false;
+    clearTimeout(holdTimer); holdTimer = setTimeout(() => openHold(li, holdAt.x, holdAt.y), 500);
+  }, { passive: true });
+  main.addEventListener('touchmove', e => { const t = e.touches[0]; if (holdAt && Math.hypot(t.clientX - holdAt.x, t.clientY - holdAt.y) > 10) clearTimeout(holdTimer); }, { passive: true });
+  main.addEventListener('touchend', e => { clearTimeout(holdTimer); if (holdDone) e.preventDefault(); }, { passive: false });
+  main.addEventListener('touchcancel', () => clearTimeout(holdTimer), { passive: true });
+  main.addEventListener('contextmenu', e => { if (holdDone) e.preventDefault(); });
+  // The click that ends a long press is not a tap on the card.
+  main.addEventListener('click', e => { if (holdDone) { holdDone = false; e.preventDefault(); e.stopPropagation(); } }, true);
+  sh.addEventListener('pointerdown', e => { if (!holdMenu.hidden && !holdMenu.contains(e.target)) closeHold(); }, true);
+  plainHost.addEventListener('scroll', () => { if (!holdMenu.hidden) closeHold(); }, { passive: true });
+  sh.addEventListener('keydown', e => { if (e.key === 'Escape' && !holdMenu.hidden) { e.stopPropagation(); closeHold(); } }, true);
   for (const ev of ['pointerenter', 'focusin', 'touchstart']) main.addEventListener(ev, e => {
     const li = e.target.closest?.('li[data-key]'); if (li) prefetch(li.dataset.key, true);
   }, { capture: true, passive: true });
@@ -829,6 +921,15 @@ async function plainView(withImages) {
     document.title = listTitle;
     if (!fromHistory) history.back();
     let back = key;
+    for (const k of doneLater) { const s = saved.later.find(x => x.key === k); if (s) { saved.later = saved.later.filter(x => x !== s); storeSaved('later', s, false); savedChanged = true; } }
+    doneLater.clear();
+    if (savedChanged && !(hideRead && !showReadNow)) {
+      // The card leaves Read later (or comes into a saved list): the keyboard goes on from the next card.
+      const list = cards(), i = list.indexOf(rows.get(key));
+      savedChanged = false; render();
+      if (!rows.get(key)?.isConnected) back = list.slice(i + 1).find(l => rows.get(l.dataset.key)?.isConnected)?.dataset.key;
+    }
+    savedChanged = false;
     if (hideRead && !showReadNow) {
       // With "hide read" on, what was read leaves the list on the way back to it, and the keyboard goes on from the next
       // unread card (the one before, at the end). The cards around keep their place: render() holds the one on top.
@@ -850,6 +951,19 @@ async function plainView(withImages) {
     const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
     reader.replaceChildren(...readerContent(art, li?.querySelector('a.h').textContent || it.teaser, lede, it.url));
   }
+  function renderSection(id) {
+    const ol = document.createElement('ol');
+    for (const it of sections.get(id)) {
+      if (rows.has(it.key)) continue; // an article in two sections is shown once
+      if (skipRead(it) && !isSaved(id)) { hiddenRead.add(it.key); continue; } // a saved article stays until it is taken out
+      const li = row(it, false); if (li) ol.append(li);
+    }
+    if (!ol.childElementCount) return;
+    const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
+    sec.id = 's-' + id; chip.dataset.sec = sec.id; h2.textContent = chip.textContent = sectionLabel(id);
+    chip.addEventListener('click', () => { spyPin = sec.id; sec.scrollIntoView(); spy(); });
+    sec.append(h2, ol); main.append(sec); nav.append(chip);
+  }
   function render() {
     // Keep the article at the top of the screen in place when the list changes around it.
     const y = plainHost.scrollTop, top = sh.querySelector('header').getBoundingClientRect().bottom;
@@ -857,6 +971,7 @@ async function plainView(withImages) {
     const anchorKey = anchor?.dataset.key, anchorTop = anchor?.getBoundingClientRect().top;
     // The headline that has the keyboard focus keeps it: the list is built anew, and the arrow keys and j/k go on from there.
     const focusKey = focused()?.closest?.('main li[data-key]')?.dataset.key;
+    syncSaved();
     oldRows = new Map(rows);
     main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect(); hiddenRead.clear();
     // Read articles in or out of the list, like unread-only mail.
@@ -866,27 +981,15 @@ async function plainView(withImages) {
     if (sortMode === 'importance') {
       // One list across the visible sections, loudest on the front page first; feed-only items last.
       const ol = document.createElement('ol'), seenKeys = new Set();
-      const all = order().filter(id => !layout.hidden.includes(id)).flatMap(id => sections.get(id))
+      for (const id of order()) if (isSaved(id) && !layout.hidden.includes(id)) renderSection(id);
+      const all = order().filter(id => !isSaved(id) && !layout.hidden.includes(id)).flatMap(id => sections.get(id))
         .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key) && !(skipRead(it) && hiddenRead.add(it.key))).sort((a, b) => (b.score || 0) - (a.score || 0));
       for (const it of all) if (!rows.has(it.key)) { const li = row(it, true); if (li) ol.append(li); }
       const sec = document.createElement('section'), h2 = document.createElement('h2');
       sec.id = 's-importance'; h2.textContent = T.byImportance;
       sec.append(h2, ol); main.append(sec);
     }
-    else for (const id of order()) {
-      if (layout.hidden.includes(id)) continue;
-      const ol = document.createElement('ol');
-      for (const it of sections.get(id)) {
-        if (rows.has(it.key)) continue; // an article in two sections is shown once
-        if (skipRead(it)) { hiddenRead.add(it.key); continue; }
-        const li = row(it, false); if (li) ol.append(li);
-      }
-      if (!ol.childElementCount) continue;
-      const sec = document.createElement('section'), h2 = document.createElement('h2'), chip = document.createElement('button');
-      sec.id = 's-' + id; chip.dataset.sec = sec.id; h2.textContent = chip.textContent = sectionLabel(id);
-      chip.addEventListener('click', () => { spyPin = sec.id; sec.scrollIntoView(); spy(); });
-      sec.append(h2, ol); main.append(sec); nav.append(chip);
-    }
+    else for (const id of order()) if (!layout.hidden.includes(id)) renderSection(id);
     plainCount = rows.size;
     updateFooter();
     plainHost.scrollTop = y;
@@ -993,6 +1096,8 @@ async function plainView(withImages) {
     else if (b.dataset.act === 'sections') { if (editing) finishEditing(); else startEditing(); }
     else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
     else if (b.dataset.act === 'show-read') { showReadNow = true; render(); }
+    else if (b.dataset.act === 'later') toggleSaved('later', current);
+    else if (b.dataset.act === 'mark') toggleSaved('marks', current);
     else if (b.dataset.act === 'hide-read') {
       // Turned on here, it also takes out what was read on this visit: that was asked for.
       hideRead = !(hideRead && !showReadNow); showReadNow = false; gm.set('plainHideRead', hideRead);
@@ -1034,6 +1139,7 @@ async function plainView(withImages) {
       if (k === 'Escape') closeArticle();
       else if (k === 'ArrowRight' || k === 'j') step(1);
       else if (k === 'ArrowLeft' || k === 'k') step(-1);
+      else if (k === 'l' || k === 'b') toggleSaved(k === 'l' ? 'later' : 'marks', current);
       else return;
     } else if (/^(?:Arrow(?:Down|Up|Left|Right)|j|k)$/.test(k)) {
       const list = cards(), cur = cursor() || (list.includes(here) ? here : undefined);
@@ -1046,6 +1152,9 @@ async function plainView(withImages) {
     } else if (k === 'o' || (k === 'Enter' && cursor() && !t?.closest?.('button, input, [data-act]'))) {
       const li = cursor() || (cards().includes(here) ? here : null); if (!li) return;
       openArticle(byKey.get(li.dataset.key));
+    } else if (k === 'l' || k === 'b') {
+      const li = cursor() || (cards().includes(here) ? here : null); if (!li) return;
+      toggleSaved(k === 'l' ? 'later' : 'marks', byKey.get(li.dataset.key));
     } else return;
     e.preventDefault();
   }, true);

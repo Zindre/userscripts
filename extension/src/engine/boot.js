@@ -11,7 +11,7 @@ async function main() {
   // Every setting the start needs, in one read (plain view's too: startup below).
   startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
     siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
-    plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {} });
+    plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainSaved: {} });
   const disabled = startup.disabledHosts || [];
   const enabled = startup.enabledHosts || [];
   CFG.genericSites = startup.genericSites ?? CFG.genericSites;
