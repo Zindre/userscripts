@@ -5,6 +5,18 @@
 (() => {
   'use strict';
   const api = globalThis.browser ?? globalThis.chrome;
+  // Safari's own banner for the site's app ("Open" / download), which a site asks for with <meta name="apple-itunes-app">:
+  // the tag is taken out as the parser adds it, before Safari reads it, on every site. Afterwards only the head is
+  // watched, for a tag added by the site's scripts. When the app is installed and has claimed the site's addresses,
+  // Safari shows its banner anyway: no page can stop that.
+  const isAppBanner = n => n.nodeName === 'META' && n.getAttribute('name')?.toLowerCase() === 'apple-itunes-app';
+  const appBanner = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (isAppBanner(n)) n.remove(); });
+  appBanner.observe(document, { childList: true, subtree: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    appBanner.disconnect();
+    for (const m of document.querySelectorAll('meta[name="apple-itunes-app" i]')) m.remove();
+    if (document.head) appBanner.observe(document.head, { childList: true });
+  }, { once: true });
   // Times in ms since the page's navigation started, for finding out where a slow start goes. Marked here and by the
   // engine (mark() in env.js). A build made with WD_TIMING_URL (build.mjs) sends them to that address on this Mac.
   const marks = {}, mark = n => { if (!(n in marks)) marks[n] = Math.round(performance.now()); };
