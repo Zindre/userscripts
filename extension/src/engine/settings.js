@@ -13,8 +13,14 @@ async function settingsAction(act, arg) {
     // vanilla is "off on this host" (disabledHosts); any other level switches the host back on.
     const disabled = (await gm.get('disabledHosts', [])) || [], enabled = (await gm.get('enabledHosts', [])) || [];
     if (arg === 'vanilla') { await gm.set('disabledHosts', [...new Set([...disabled, host])]); await gm.set('enabledHosts', enabled.filter(h => h !== host)); }
+    else if (arg === 'calm' && webSite) {
+      // Calm on a site of the rest of the web: switched on again, and not counted as a news site.
+      await gm.set('disabledHosts', disabled.filter(h => h !== host)); await gm.set('enabledHosts', enabled.filter(h => h !== host));
+      await gm.set('siteLevels', { ...((await gm.get('siteLevels', {})) || {}), [host]: 'calm' });
+    }
     else {
-      if (hostOff) { await gm.set('disabledHosts', disabled.filter(h => h !== host)); await gm.set('enabledHosts', [...new Set([...enabled, host])]); }
+      // A news level chosen on a site that isn't known as news makes it one (enabledHosts).
+      if (hostOff || webSite) { await gm.set('disabledHosts', disabled.filter(h => h !== host)); await gm.set('enabledHosts', [...new Set([...enabled, host])]); }
       await gm.set('siteLevels', { ...((await gm.get('siteLevels', {})) || {}), [host]: arg });
     }
     location.reload();
@@ -23,8 +29,8 @@ async function settingsAction(act, arg) {
   else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
   else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
   else if (act === 'calmPart') {
-    const [id, show] = arg, all = (await gm.get('calmParts', {})) || {}, partsOff = (all[calmSite.name] || []).filter(p => p !== id);
-    await gm.set('calmParts', { ...all, [calmSite.name]: show ? partsOff : [...partsOff, id] });
+    const [id, show] = arg, all = (await gm.get('calmParts', {})) || {}, key = calmSite ? calmSite.name : '*', partsOff = (all[key] || []).filter(p => p !== id);
+    await gm.set('calmParts', { ...all, [key]: show ? partsOff : [...partsOff, id] });
     location.reload();
   }
   else if (act === 'generic') { await gm.set('genericSites', !CFG.genericSites); location.reload(); }
@@ -32,9 +38,9 @@ async function settingsAction(act, arg) {
 
 async function settingsState() {
   const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
-  return { host, off: hostOff, level, calm: calmSite?.name || null, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
+  return { host, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
     genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
-    calmParts: (calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label, show: !calmPartsOff.includes(p.id) })),
+    calmParts: (webCalm ? WEB_PARTS.filter(p => !p.shop || shopPage()) : calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label || p.id, show: !calmPartsOff.includes(p.id) })),
     fetchPausedUntil: fetchPausedUntil > Date.now() ? fetchPausedUntil : 0, topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
     disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
 }

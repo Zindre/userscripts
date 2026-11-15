@@ -4,6 +4,29 @@
 // app or a login taken away again. Counts what it hid, for the popup.
 let calmCount = 0, calmPartsOff = [];
 
+// Shared with calm-web.js (the rest of the web).
+// The outermost fixed layer over most of the screen around el (the backdrop, not just the box), or
+// a fixed bar at the top or bottom; else a fixed layer like that inside el.
+const calmBig = n => { const r = n.getBoundingClientRect(); return r.width * r.height > innerWidth * innerHeight * 0.4 || (r.width > innerWidth * 0.8 && r.height > 20 && r.height < innerHeight * 0.3); };
+const calmFixed = n => { const p = getComputedStyle(n).position; return p === 'fixed' || p === 'sticky'; };
+const calmLayerOf = el => {
+  let found = null;
+  for (let n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) if (calmFixed(n) && calmBig(n)) found = n;
+  if (found || calmFixed(el)) return found || el;
+  const inside = [...el.querySelectorAll('div')].slice(0, 40).find(n => calmFixed(n) && calmBig(n));
+  if (inside) return inside;
+  // A dialog in a layer that isn't fixed itself, beside a fixed backdrop without text (Instagram);
+  // only a layer that holds little more than the dialog, never the page around it.
+  const most = el.textContent.length * 1.5 + 200;
+  for (let n = el.parentElement; n && n !== document.body && n !== document.documentElement && n.textContent.length <= most; n = n.parentElement)
+    if ([...n.children].some(c => !c.contains(el) && !c.textContent.trim() && calmFixed(c) && calmBig(c))) return n;
+  return null;
+};
+// A consent dialog is one you answer: it has an accept or reject button. A login wall's footer
+// that mentions cookies or privacy doesn't make it one.
+const CONSENT_BUTTON = /godta|aksepter|avvis|tillat|accept|reject|decline|refuse|allow|agree|only (?:essential|necessary)|nødvendige|acceptera|avvisa|tillåt|afvis|akzeptieren|ablehnen|zustimmen/i;
+const calmConsent = (d, t) => CONSENT.test(t) && [...d.querySelectorAll('button, [role="button"], a')].some(b => CONSENT_BUTTON.test(b.textContent || ''));
+
 function runCalm(s) {
   // Some sites swap out <head> or the whole <html> while they boot, so the sheet is put back when it goes.
   const sheet = () => { if (!document.getElementById('nothis-calm')) (document.head || document.documentElement).appendChild(calmStyle(s)); };
@@ -41,27 +64,7 @@ function runCalm(s) {
   const dropped = it => (s.drop || []).some(d => typeof d === 'string' ? it.querySelector(d) : heading(it).some(t => d.test(t)) || leaves(it, s.head || 40).some(t => d.test(t))) ||
     (s.parts || []).some(p => p.post && calmPartsOff.includes(p.id) && [...it.querySelectorAll(p.sel)].some(m => p.post.test(bare(m.textContent))));
 
-  // The outermost fixed layer over most of the screen around el (the backdrop, not just the box), or
-  // a fixed bar at the top or bottom; else a fixed layer like that inside el.
-  const big = n => { const r = n.getBoundingClientRect(); return r.width * r.height > innerWidth * innerHeight * 0.4 || (r.width > innerWidth * 0.8 && r.height > 20 && r.height < innerHeight * 0.3); };
-  const fixed = n => { const p = getComputedStyle(n).position; return p === 'fixed' || p === 'sticky'; };
-  const layerOf = el => {
-    let found = null;
-    for (let n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) if (fixed(n) && big(n)) found = n;
-    if (found || fixed(el)) return found || el;
-    const inside = [...el.querySelectorAll('div')].slice(0, 40).find(n => fixed(n) && big(n));
-    if (inside) return inside;
-    // A dialog in a layer that isn't fixed itself, beside a fixed backdrop without text (Instagram);
-    // only a layer that holds little more than the dialog, never the page around it.
-    const most = el.textContent.length * 1.5 + 200;
-    for (let n = el.parentElement; n && n !== document.body && n !== document.documentElement && n.textContent.length <= most; n = n.parentElement)
-      if ([...n.children].some(c => !c.contains(el) && !c.textContent.trim() && fixed(c) && big(c))) return n;
-    return null;
-  };
-  // A consent dialog is one you answer: it has an accept or reject button. A login wall's footer
-  // that mentions cookies or privacy doesn't make it one.
-  const CONSENT_BUTTON = /godta|aksepter|avvis|tillat|accept|reject|decline|refuse|allow|agree|only (?:essential|necessary)|nødvendige|acceptera|avvisa|tillåt|afvis|akzeptieren|ablehnen|zustimmen/i;
-  const consent = (d, t) => CONSENT.test(t) && [...d.querySelectorAll('button, [role="button"], a')].some(b => CONSENT_BUTTON.test(b.textContent || ''));
+  const big = calmBig, fixed = calmFixed, layerOf = calmLayerOf, consent = calmConsent;
   const pushes = () => {
     if (Date.now() - tapped < 2500) return;
     for (const d of document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog[open], [class*="modal" i], [class*="banner" i], [id*="banner" i]')) {

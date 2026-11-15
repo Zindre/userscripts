@@ -559,10 +559,10 @@ async function plainView(withImages, mix) {
   plainHost.id = 'declickbait-plain';
   const sh = plainHost.attachShadow({ mode: 'open' });
   sh.innerHTML = `<style>${PLAIN_CSS}</style>
-    <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
+    <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav aria-label="${T.sections}"></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
     <main></main><footer></footer><div class="keys"></div></div>
     <div class="hold" hidden role="menu"></div>
-    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev">‹</button><button data-act="next">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
+    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg aria-hidden="true" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev" aria-label="${T.prev}">‹</button><button data-act="next" aria-label="${T.next}">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
   const h1 = sh.querySelector('h1'), mixNote = sh.querySelector('.mix-note');
   if (logo) {
     const chip = document.createElement('span'), name = document.createElement('span');
@@ -580,7 +580,8 @@ async function plainView(withImages, mix) {
 
   const sections = new Map(), byKey = new Map();
   const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
-  // Read later and Bookmarks: articles saved from any site, shown first in every list (unless hidden or moved like any
+  // Read later and Bookmarks: a site's list shows the articles saved from that site, first; My news shows them all
+  // (unless hidden or moved like any
   // section). Read later is a queue, and an article leaves it once it has been read; a bookmark stays until it is taken
   // away. Kept in extension storage, so every site sees the same lists.
   const SAVED = { later: 'saved-later', marks: 'saved-marks' }, isSaved = id => id === SAVED.later || id === SAVED.marks;
@@ -593,6 +594,8 @@ async function plainView(withImages, mix) {
     for (const kind of ['later', 'marks']) {
       const list = sections.get(SAVED[kind]); list.length = 0;
       for (const s of saved[kind]) {
+        // On a site's own list, only what was saved from that site; My news has all of it, from every site.
+        if (!mix && (s.host || host) !== host) continue;
         const it = byKey.get(s.key) || { ...s, section: SAVED[kind] };
         byKey.set(s.key, it); list.push(it);
       }
@@ -811,6 +814,10 @@ async function plainView(withImages, mix) {
     view.querySelector('[data-act="prev"]').disabled = i <= 0;
     view.querySelector('[data-act="next"]').disabled = i < 0 || i >= list.length - 1;
     reader.replaceChildren(el('p', T.loading, 'note'));
+    // While an article is open, the list behind it is out of reach for a screen reader (and so a braille display) and
+    // for the Tab key: the article is all there is, and it is named by its headline.
+    sh.querySelector('.wrap').inert = true;
+    view.setAttribute('aria-label', li?.querySelector('a.h').textContent || it.teaser);
     view.hidden = false; view.scrollTop = 0; view.focus({ preventScroll: true });
     // The address bar shows the article, so it can be copied or reloaded. A browser only allows that
     // within the site: an article on another site keeps the list's address.
@@ -937,7 +944,7 @@ async function plainView(withImages, mix) {
   function closeArticle(fromHistory) {
     if (!current) return;
     const key = current.key;
-    current = null; view.hidden = true; reader.replaceChildren();
+    current = null; view.hidden = true; reader.replaceChildren(); sh.querySelector('.wrap').inert = false;
     document.title = listTitle;
     if (!fromHistory) history.back();
     let back = key;

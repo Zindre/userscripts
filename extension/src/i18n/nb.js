@@ -23,7 +23,9 @@ STRINGS.nb = {
     plain: 'Ren visning', plainDesc: 'Sakene i seksjoner på en rolig side. Ingen reklame, video eller popup-vinduer',
     calm: 'Rolig', calmDesc: 'Det du følger, uten reklame, forslag, kortvideo-strømmer eller popup-vinduer som presser deg mot appen',
     isDefault: '✓ Standard for alle nettsteder', makeDefault: 'Bruk dette nivået på alle nettsteder',
-    calmHeading: 'Vis på dette nettstedet', neverHeading: 'Vis meg aldri', allSites: 'alle nettsteder',
+    calmHeading: 'Vis på dette nettstedet',
+    webCalmDesc: 'Nettstedet uten kjøpepress, sponsede produkter, popup-vinduer som ber om e-posten din, og videoer som starter av seg selv',
+    webHeading: 'Vis i nettbutikker og på andre nettsteder', neverHeading: 'Vis meg aldri', allSites: 'alle nettsteder',
     someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underemner i ${g}`,
     styleHeading: 'Tittelstil', styleRewrite: 'Skriv om', styleReveal: 'Vis ved trykk', styleStack: 'Vis begge',
     showOriginal: 'Vis opprinnelige titler', plainHeading: 'Ren visning', swipe: 'Animer sveip mellom saker',
@@ -61,7 +63,9 @@ STRINGS.nb = {
     weather: 'Vær',
   },
 
-  part: { birthdays: 'Bursdager', bait: 'Agn-innlegg («se kommentarene»)' },
+  part: { birthdays: 'Bursdager', bait: 'Agn-innlegg («se kommentarene»)',
+    pressure: 'Kjøpepress (nedtellinger, «kun 2 igjen»)', sponsored: 'Sponsede produkter', suggested: '«Du vil kanskje også like»-rader',
+    offers: 'Popup-vinduer for nyhetsbrev, rabatter og varsler', motion: 'Videoer som starter av seg selv' },
 
   app: {
     iconAlt: 'Web Detox-ikon',

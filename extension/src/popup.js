@@ -67,9 +67,12 @@ function show(s) {
   // A calm site (social media) has two levels, Vanilla and Calm; a news site the others.
   for (const r of document.querySelectorAll('input[name=level]')) {
     r.checked = r.value === s.level;
-    r.closest('label').hidden = !!s.calm !== (r.value === 'calm') && r.value !== 'vanilla';
+    // A site of the rest of the web (a shop, say) has Calm too, and the news levels for a news site we didn't know.
+    r.closest('label').hidden = r.value === 'calm' ? !(s.calm || s.web) : !!s.calm && !s.web && r.value !== 'vanilla';
   }
-  $('news-box').hidden = !!s.calm;
+  $('news-box').hidden = !!s.calm || !!s.web;
+  document.querySelector('[data-i18n=calmDesc]').textContent = s.web ? P.webCalmDesc : P.calmDesc;
+  document.querySelector('[data-i18n=calmHeading]').textContent = s.web ? P.webHeading : P.calmHeading;
   $('calm-box').hidden = s.off || !s.calmParts?.length;
   $('calm-parts').replaceChildren(...(s.calmParts || []).map(p => {
     const l = document.createElement('label'), t = document.createElement('span'), cb = document.createElement('input');
@@ -81,9 +84,9 @@ function show(s) {
   const isDefault = s.level === s.defaultLevel;
   $('default').textContent = isDefault ? P.isDefault : P.makeDefault;
   $('default').disabled = isDefault;
-  $('default').hidden = !!s.calm;
+  $('default').hidden = !!s.calm || !!s.web;
   // Headline style applies to the two rewriting levels, and to article pages under plain view.
-  $('style-box').hidden = s.off || s.plain || !!s.calm;
+  $('style-box').hidden = s.off || s.plain || !!s.calm || !!s.web;
   for (const r of document.querySelectorAll('input[name=display]')) r.checked = r.value === s.display;
   $('orig').checked = s.showOriginal;
   $('generic').checked = s.genericSites;

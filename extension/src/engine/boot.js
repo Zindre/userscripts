@@ -17,14 +17,20 @@ async function main() {
   CFG.genericSites = startup.genericSites ?? CFG.genericSites;
   hostEnabled = enabled.includes(host);
   const excluded = CFG.excludeHosts.some(h => h instanceof RegExp ? h.test(host) : host === h || host.endsWith('.' + h));
-  let off = disabled.includes(host) || (!hostEnabled && (excluded || (!site && !CFG.genericSites)));
+  // The rest of the web (calm-web.js), in the extension: a site that is neither news nor one of the calm sites gets the
+  // Calm level. Sites left alone by default (search, mail, code) get it only when chosen there.
+  const picked = (startup.siteLevels || {})[host];
+  const maybeWeb = EXT && !site && !calmSite && !hostEnabled && !globalThis.__wdMix;
+  webSite = maybeWeb && (picked === 'calm' || !(CFG.genericSites && isPublication()));
+  let off = disabled.includes(host) || (!hostEnabled && ((excluded && picked !== 'calm') || (!site && !CFG.genericSites && !webSite)));
   // A calm site (calm-sites.js) has two levels: Calm, unless you chose Vanilla there.
   if (calmSite) off = disabled.includes(host);
   // Reading level: per host, else the default: plain view with images unless you chose otherwise
   // (versions before 1.11 stored only includeLead).
   const legacy = startup.includeLead;
   defaultLevel = startup.level || (legacy === null || legacy === undefined ? 'pictures' : legacy ? 'synopsis' : 'headlines');
-  level = off ? 'vanilla' : calmSite ? 'calm' : (startup.siteLevels || {})[host] || defaultLevel;
+  webCalm = webSite && !off;
+  level = off ? 'vanilla' : calmSite || webCalm ? 'calm' : picked || defaultLevel;
   if (level === 'vanilla') off = true;
   hostOff = off;
   CFG.includeLead = level !== 'headlines';
@@ -58,8 +64,9 @@ async function main() {
   const paused = (startup.pausedHosts || {})[host];
   if (paused > Date.now()) fetchPausedUntil = paused;
   // A robot check instead of the front page: show it at once, under no cover, and fetch nothing from the site for now.
-  if (!calmSite && botWall()) { timeMark('robot-check'); pauseFetching(); uncover(); return; }
+  if (!calmSite && !webCalm && botWall()) { timeMark('robot-check'); pauseFetching(); uncover(); return; }
   if (calmSite) { calmPartsOff = (startup.calmParts || {})[calmSite.name] || []; uncover(); runCalm(calmSite); return; }
+  if (webCalm) { calmPartsOff = (startup.calmParts || {})['*'] || []; uncover(); runWebCalm(calmPartsOff); return; }
   // The article cache is large (up to 2,500 entries): Safari can take a while to hand it over while a heavy front page
   // loads, and the list doesn't need it to appear; its leads and pictures fill in once it is read.
   loadCache().then(() => timeMark('cache'));

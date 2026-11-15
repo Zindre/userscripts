@@ -18,7 +18,7 @@ const root = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
 // Order matters only for code that runs while the script loads; everything else runs from main().
-const ENGINE = ['config', 'i18n', 'hostkey', 'news-hosts', 'sites', 'calm-sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'calm', 'mix', 'settings'];
+const ENGINE = ['config', 'i18n', 'hostkey', 'news-hosts', 'sites', 'calm-sites', 'rules', 'env', 'text', 'meta', 'reader', 'choose', 'page', 'topics', 'levels', 'plain', 'article', 'calm', 'calm-web', 'mix', 'settings'];
 const USERSCRIPT_ONLY = ['userscript/panel'];
 // The texts in every language (src/i18n/): pick.js, then English, then the others. One bundle for the engine, the popup
 // (strings.js) and the app's page (APP_STRINGS in its Script.js).

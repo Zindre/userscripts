@@ -26,7 +26,10 @@ STRINGS.en = {
     plain: 'Plain view', plainDesc: 'The articles in sections on a calm page. No ads, video or pop-ups',
     calm: 'Calm', calmDesc: 'What you follow, without ads, suggestions, short-video feeds or pop-ups that push the app',
     isDefault: '✓ Default for all sites', makeDefault: 'Use this level on all sites',
-    calmHeading: 'Show on this site', neverHeading: 'Never show me', allSites: 'all sites',
+    calmHeading: 'Show on this site',
+    // Calm on shops and other websites: the level's description, and the heading over its choices (they apply to all websites).
+    webCalmDesc: 'The site without pressure to buy, sponsored products, pop-ups that ask for your e-mail, or videos that start by themselves',
+    webHeading: 'Show on shops and other websites', neverHeading: 'Never show me', allSites: 'all sites',
     someOf: (n, of) => `${n} of ${of}`, subtopicsOf: g => `Subtopics of ${g}`,
     styleHeading: 'Headline style', styleRewrite: 'Rewrite', styleReveal: 'Reveal on tap', styleStack: 'Show both',
     showOriginal: 'Show original headlines', plainHeading: 'Plain view', swipe: 'Animate swiping between articles',
@@ -68,7 +71,9 @@ STRINGS.en = {
   },
 
   // Parts of a social media site that can be shown or hidden (popup, "Show on this site").
-  part: { birthdays: 'Birthdays', bait: 'Bait posts ("see the comments")' },
+  part: { birthdays: 'Birthdays', bait: 'Bait posts ("see the comments")',
+    pressure: 'Pressure to buy now (countdowns, “only 2 left”)', sponsored: 'Sponsored products', suggested: '“You may also like” rows',
+    offers: 'Pop-ups for newsletters, discounts and notifications', motion: 'Videos that start by themselves' },
 
   // The app's own page on iPhone, iPad and Mac, in the device's language.
   app: {
