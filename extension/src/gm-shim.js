@@ -177,6 +177,13 @@
   // so a slow front page shows the headlines you saw last instead of a blank screen. A thin bar moves under the header
   // while it waits; its links are ordinary links. A day old at most, and gone after 20 s if the engine never starts.
   const shotKey = 'nothis-shot:' + location.pathname;
+  // Copies of lists from pages not visited for three days are taken away (each up to 400 kB of the site's storage).
+  setTimeout(() => { try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith('nothis-shot:') && k !== shotKey) {
+      const at = +(localStorage.getItem(k).match(/^\{"at":(\d+)/)?.[1] || 0);
+      if (Date.now() - at > 3 * 864e5) localStorage.removeItem(k);
+    }
+  } catch {} }, 8000);
   let shot = null, shotEl = null;
   try { const s = JSON.parse(localStorage.getItem(shotKey) || 'null'); if (s?.html && Date.now() - s.at < 24 * 3600e3) shot = s; } catch {}
   // A heavy front page (plain.js marks it when it measures one: nytimes.com) is not loaded at all. Its own scripts froze

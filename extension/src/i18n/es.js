@@ -12,6 +12,7 @@ STRINGS.es = {
   later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',
   myNews: 'Mis noticias', mixEmpty: 'Mis noticias reúne los sitios de noticias que más visitas. Visita algunos y aparecerán aquí.',
   mixLoading: (n, of) => `Leyendo las portadas… ${n} de ${of}`,
+  allRead: 'Has leído todo aquí.', showAllRead: 'Mostrar leídos',
   keys: 'Flechas para elegir · Enter abre · ← → anterior y siguiente al leer · L leer más tarde · B marcador · Esc cierra',
 
   pop: {
@@ -45,6 +46,7 @@ STRINGS.es = {
     privacyText: 'Tus ajustes, los artículos guardados y lo que has leído se quedan en este navegador y llegan a tus otros dispositivos a través de tu cuenta del navegador o de iCloud. No se nos envía nada.',
     erase: 'Borrar todo lo que Web Detox ha guardado',
     eraseAsk: 'Esto borra tus ajustes, «Leer más tarde», «Marcadores» y el historial de lectura aquí y en tus otros dispositivos la próxima vez que se sincronicen. No se puede deshacer.',
+    bigPics: 'Imágenes más grandes en la lista',
     gift: 'Apoyar Web Detox',
     eraseYes: 'Borrar todo', eraseNo: 'Cancelar', erased: 'Se ha borrado todo.',
   },

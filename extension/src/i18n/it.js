@@ -12,6 +12,7 @@ STRINGS.it = {
   later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',
   myNews: 'Le mie notizie', mixEmpty: 'Le mie notizie raccoglie i siti di notizie che visiti di più. Visitane qualcuno e compariranno qui.',
   mixLoading: (n, of) => `Lettura delle prime pagine … ${n} di ${of}`,
+  allRead: 'Hai letto tutto qui.', showAllRead: 'Mostra letti',
   keys: 'Frecce per scegliere · Enter apre · ← → precedente e successivo durante la lettura · L leggi dopo · B segnalibro · Esc chiude',
 
   pop: {
@@ -45,6 +46,7 @@ STRINGS.it = {
     privacyText: 'Le tue impostazioni, gli articoli salvati e ciò che hai letto restano in questo browser e arrivano sugli altri tuoi dispositivi tramite il tuo account del browser o iCloud. Non ci viene inviato nulla.',
     erase: 'Elimina tutto ciò che Web Detox ha salvato',
     eraseAsk: 'Questo elimina le tue impostazioni, Leggi dopo, Segnalibri e la cronologia di lettura qui e sugli altri tuoi dispositivi alla prossima sincronizzazione. Non si può annullare.',
+    bigPics: 'Immagini più grandi nell’elenco',
     gift: 'Sostieni Web Detox',
     eraseYes: 'Elimina tutto', eraseNo: 'Annulla', erased: 'Tutto è stato eliminato.',
   },

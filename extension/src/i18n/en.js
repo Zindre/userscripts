@@ -14,6 +14,7 @@ STRINGS.en = {
   later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
   myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
   mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
+  allRead: 'You have read everything here.', showAllRead: 'Show read articles',
   keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
 
   // The toolbar popup, in the browser's language.
@@ -53,6 +54,7 @@ STRINGS.en = {
     privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
     erase: 'Delete everything Web Detox has stored',
     eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
+    bigPics: 'Larger pictures in the list',
     gift: 'Support Web Detox',
     eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
   },

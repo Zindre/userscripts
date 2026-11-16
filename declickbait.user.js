@@ -92,6 +92,7 @@
       later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
       myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
       mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
+      allRead: 'You have read everything here.', showAllRead: 'Show read articles',
       keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
 
       // The toolbar popup, in the browser's language.
@@ -131,6 +132,7 @@
         privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
         erase: 'Delete everything Web Detox has stored',
         eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
+        bigPics: 'Larger pictures in the list',
         gift: 'Support Web Detox',
         eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
       },
@@ -185,6 +187,7 @@
       later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
       myNews: 'Mine nyheder', mixEmpty: 'Mine nyheder samler de nyhedssider, du besøger mest. Besøg et par stykker, så dukker de op her.',
       mixLoading: (n, of) => `Læser forsiderne … ${n} af ${of}`,
+      allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler',
       keys: 'Piletaster vælger · Enter åbner · ← → forrige og næste under læsning · L læs senere · B bogmærke · Esc lukker',
 
       // The toolbar popup, in the browser's language.
@@ -220,6 +223,7 @@
         privacyText: 'Dine indstillinger, gemte artikler og det, du har læst, bliver i denne browser og følger med til dine andre enheder via din browserkonto eller iCloud. Intet sendes til os.',
         erase: 'Slet alt, hvad Web Detox har gemt',
         eraseAsk: 'Dette sletter dine indstillinger, Læs senere, Bogmærker og læsehistorik her og på dine andre enheder, næste gang de synkroniserer. Det kan ikke fortrydes.',
+        bigPics: 'Større billeder i listen',
         gift: 'Støt Web Detox',
         eraseYes: 'Slet alt', eraseNo: 'Annuller', erased: 'Alt er slettet.',
       },
@@ -271,6 +275,7 @@
       later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
       myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
       mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
+      allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen',
       keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
 
       pop: {
@@ -304,6 +309,7 @@
         privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
         erase: 'Alles löschen, was Web Detox gespeichert hat',
         eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
+        bigPics: 'Größere Bilder in der Liste',
         gift: 'Web Detox unterstützen',
         eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
       },
@@ -352,6 +358,7 @@
       later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',
       myNews: 'Mis noticias', mixEmpty: 'Mis noticias reúne los sitios de noticias que más visitas. Visita algunos y aparecerán aquí.',
       mixLoading: (n, of) => `Leyendo las portadas… ${n} de ${of}`,
+      allRead: 'Has leído todo aquí.', showAllRead: 'Mostrar leídos',
       keys: 'Flechas para elegir · Enter abre · ← → anterior y siguiente al leer · L leer más tarde · B marcador · Esc cierra',
 
       pop: {
@@ -385,6 +392,7 @@
         privacyText: 'Tus ajustes, los artículos guardados y lo que has leído se quedan en este navegador y llegan a tus otros dispositivos a través de tu cuenta del navegador o de iCloud. No se nos envía nada.',
         erase: 'Borrar todo lo que Web Detox ha guardado',
         eraseAsk: 'Esto borra tus ajustes, «Leer más tarde», «Marcadores» y el historial de lectura aquí y en tus otros dispositivos la próxima vez que se sincronicen. No se puede deshacer.',
+        bigPics: 'Imágenes más grandes en la lista',
         gift: 'Apoyar Web Detox',
         eraseYes: 'Borrar todo', eraseNo: 'Cancelar', erased: 'Se ha borrado todo.',
       },
@@ -434,6 +442,7 @@
       later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
       myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
       mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
+      allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut',
       keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
 
       // The toolbar popup, in the browser's language.
@@ -469,6 +478,7 @@
         privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
         erase: 'Poista kaikki, mitä Web Detox on tallentanut',
         eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
+        bigPics: 'Suuremmat kuvat listassa',
         gift: 'Tue Web Detoxia',
         eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
       },
@@ -520,6 +530,7 @@
       later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
       myNews: 'Mes infos', mixEmpty: 'Mes infos rassemble les sites d’info que vous consultez le plus. Consultez-en quelques-uns, et ils apparaîtront ici.',
       mixLoading: (n, of) => `Lecture des pages d’accueil… ${n} sur ${of}`,
+      allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus',
       keys: 'Les flèches choisissent · Enter ouvre · ← → précédent et suivant en lecture · L à lire plus tard · B signet · Esc ferme',
 
       pop: {
@@ -553,6 +564,7 @@
         privacyText: 'Vos réglages, vos articles enregistrés et ce que vous avez lu restent dans ce navigateur et passent sur vos autres appareils via votre compte de navigateur ou iCloud. Rien ne nous est envoyé.',
         erase: 'Effacer tout ce que Web Detox a enregistré',
         eraseAsk: 'Cela efface vos réglages, « À lire plus tard », « Signets » et l’historique de lecture ici, ainsi que sur vos autres appareils lors de leur prochaine synchronisation. Cette action est irréversible.',
+        bigPics: 'Images plus grandes dans la liste',
         gift: 'Soutenir Web Detox',
         eraseYes: 'Tout effacer', eraseNo: 'Annuler', erased: 'Tout est effacé.',
       },
@@ -601,6 +613,7 @@
       later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',
       myNews: 'Le mie notizie', mixEmpty: 'Le mie notizie raccoglie i siti di notizie che visiti di più. Visitane qualcuno e compariranno qui.',
       mixLoading: (n, of) => `Lettura delle prime pagine … ${n} di ${of}`,
+      allRead: 'Hai letto tutto qui.', showAllRead: 'Mostra letti',
       keys: 'Frecce per scegliere · Enter apre · ← → precedente e successivo durante la lettura · L leggi dopo · B segnalibro · Esc chiude',
 
       pop: {
@@ -634,6 +647,7 @@
         privacyText: 'Le tue impostazioni, gli articoli salvati e ciò che hai letto restano in questo browser e arrivano sugli altri tuoi dispositivi tramite il tuo account del browser o iCloud. Non ci viene inviato nulla.',
         erase: 'Elimina tutto ciò che Web Detox ha salvato',
         eraseAsk: 'Questo elimina le tue impostazioni, Leggi dopo, Segnalibri e la cronologia di lettura qui e sugli altri tuoi dispositivi alla prossima sincronizzazione. Non si può annullare.',
+        bigPics: 'Immagini più grandi nell’elenco',
         gift: 'Sostieni Web Detox',
         eraseYes: 'Elimina tutto', eraseNo: 'Annulla', erased: 'Tutto è stato eliminato.',
       },
@@ -683,6 +697,7 @@
       later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
       myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
       mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
+      allRead: 'すべて読みました。', showAllRead: '既読を表示',
       keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
 
       // The toolbar popup, in the browser's language.
@@ -718,6 +733,7 @@
         privacyText: '設定、保存した記事、既読履歴はこのブラウザに保存され、ブラウザのアカウントまたはiCloudを通じてほかのデバイスに同期されます。私たちには何も送信されません。',
         erase: 'Web Detoxが保存したデータをすべて削除',
         eraseAsk: '設定、「あとで読む」、「ブックマーク」、既読履歴を、このブラウザと、次回の同期時にほかのデバイスからも削除します。元に戻すことはできません。',
+        bigPics: 'リストの画像を大きく',
         gift: 'Web Detoxを支援',
         eraseYes: 'すべて削除', eraseNo: 'キャンセル', erased: 'すべて削除しました。',
       },
@@ -769,6 +785,7 @@
       later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
       myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
       mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
+      allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker',
       keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
 
       pop: {
@@ -804,6 +821,7 @@
         privacyText: 'Innstillingene, de lagrede sakene og det du har lest, blir i denne nettleseren, og følger deg til de andre enhetene dine via nettleserkontoen eller iCloud. Ingenting sendes til oss.',
         erase: 'Slett alt Web Detox har lagret',
         eraseAsk: 'Dette sletter innstillingene, Les senere, Bokmerker og lesehistorikken her, og på de andre enhetene dine neste gang de synkroniserer. Det kan ikke angres.',
+        bigPics: 'Større bilder i listen',
         gift: 'Støtt Web Detox',
         eraseYes: 'Slett alt', eraseNo: 'Avbryt', erased: 'Alt er slettet.',
       },
@@ -854,6 +872,7 @@
       later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
       myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
       mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
+      allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen',
       keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
 
       pop: {
@@ -887,6 +906,7 @@
         privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
         erase: 'Alles wissen wat Web Detox heeft opgeslagen',
         eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
+        bigPics: 'Grotere foto’s in de lijst',
         gift: 'Steun Web Detox',
         eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
       },
@@ -939,6 +959,7 @@
       later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
       myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
       mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
+      allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane',
       keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
 
       pop: {
@@ -972,6 +993,7 @@
         privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
         erase: 'Usuń wszystko, co zapisał Web Detox',
         eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
+        bigPics: 'Większe zdjęcia na liście',
         gift: 'Wesprzyj Web Detox',
         eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
       },
@@ -1020,6 +1042,7 @@
       later: 'Ler depois', marks: 'Favoritos', mark: 'Favorito', unLater: 'Remover de Ler depois', unMark: 'Remover favorito',
       myNews: 'Minhas notícias', mixEmpty: 'Minhas notícias reúne os sites de notícias que você mais visita. Visite alguns e eles aparecem aqui.',
       mixLoading: (n, of) => `Lendo as páginas iniciais … ${n} de ${of}`,
+      allRead: 'Você leu tudo aqui.', showAllRead: 'Mostrar lidas',
       keys: 'Setas escolhem · Enter abre · ← → anterior e próxima durante a leitura · L ler depois · B favorito · Esc fecha',
 
       pop: {
@@ -1053,6 +1076,7 @@
         privacyText: 'Seus ajustes, as notícias salvas e o que você leu ficam neste navegador e vão para seus outros dispositivos pela sua conta do navegador ou pelo iCloud. Nada é enviado para nós.',
         erase: 'Apagar tudo o que o Web Detox salvou',
         eraseAsk: 'Isso apaga seus ajustes, Ler depois, Favoritos e o histórico de leitura aqui e nos seus outros dispositivos na próxima sincronização. Não dá para desfazer.',
+        bigPics: 'Imagens maiores na lista',
         gift: 'Apoiar o Web Detox',
         eraseYes: 'Apagar tudo', eraseNo: 'Cancelar', erased: 'Tudo foi apagado.',
       },
@@ -1101,6 +1125,7 @@
       later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
       myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
       mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
+      allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar',
       keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
 
       pop: {
@@ -1134,6 +1159,7 @@
         privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
         erase: 'Radera allt som Web Detox har sparat',
         eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
+        bigPics: 'Större bilder i listan',
         gift: 'Stöd Web Detox',
         eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
       },
@@ -1183,6 +1209,7 @@
       later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
       myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
       mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
+      allRead: '这里的内容已全部读完。', showAllRead: '显示已读',
       keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
 
       // The toolbar popup, in the browser's language.
@@ -1218,6 +1245,7 @@
         privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
         erase: '删除 Web Detox 存储的所有内容',
         eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
+        bigPics: '列表中显示更大的图片',
         gift: '支持 Web Detox',
         eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
       },
@@ -2284,6 +2312,25 @@
       if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
       // Headings with nothing after them are links to other stories (BBC's "more on this").
       while (blocks.length && blocks[blocks.length - 1].t === 'h') blocks.pop();
+      // A picture series (Amedia's "Bildeserie", /g/ pages): little text of its own, and pictures with captions that are not
+      // figures in the body the text was found in. All of them, each with its caption, in the order of the page.
+      let series = false;
+      const textLen = () => blocks.reduce((n, b) => n + (b.t === 'img' ? 0 : (b.text || '').length + (b.items || []).join(' ').length), 0);
+      if (withImages && !feed && !entry && textLen() < 200) {
+        const body = doc.querySelector('[itemprop="articleBody"], article, main'), pics = [], seen = new Set();
+        for (const img of body?.querySelectorAll('img') || []) {
+          if (img.closest(skip) || img.closest('a[href]')) continue;
+          const src = readerImage(img, url); if (!src || seen.has(src)) continue;
+          seen.add(src);
+          let cap = null;
+          for (let box = img.parentElement, i = 0; box && box !== body && i < 6 && !cap; box = box.parentElement, i++) {
+            if (box.querySelectorAll('img').length > 1) break;
+            cap = box.querySelector('figcaption, [class*="caption" i]');
+          }
+          pics.push({ t: 'img', src, caption: cap ? readerText(cap) : '' });
+        }
+        if (pics.length >= 3) { series = true; for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'img') blocks.splice(i, 1); blocks.push(...pics); }
+      }
       // The story's own picture leads when the body has none of its own.
       if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
         try {
@@ -2295,6 +2342,7 @@
       // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
       if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
       if (words >= 200) return { blocks, date, byline, paid, partial: false };
+      if (series) return { blocks, date, byline, paid, partial: false };
       return article ? { blocks, date, byline, paid, partial: false, short: !blocks.some(b => b.t === 'embed') } : null;
     }
 
@@ -2844,7 +2892,12 @@
       const card = a.closest('article, li');
       const imgs = [...a.querySelectorAll('img'), ...(card && card.querySelectorAll('a[href]').length <= 3 ? card.querySelectorAll('img') : [])];
       for (const img of imgs) {
-        const src = img.currentSrc || img.src || img.dataset.src || (img.getAttribute('srcset') || img.dataset.srcset || '').trim().split(/\s+/)[0];
+        // From every list of sizes on offer (a lazy-loading site keeps the real ones in data-srcset until the picture is in
+        // view, and shows an 80-pixel one meanwhile: NRK), the smallest that is still sharp at full width on a phone.
+        const sets = [img.dataset.srcset, img.getAttribute('srcset'), ...[...(img.closest('picture')?.querySelectorAll('source') || [])].flatMap(s => [s.dataset.srcset, s.getAttribute('srcset')])];
+        const sizes = sets.filter(Boolean).flatMap(set => set.split(/,\s+(?=\S)/).map(c => c.trim().split(/\s+/))).filter(c => c[0] && /^\d+w$/.test(c[1] || '')).map(c => [c[0], parseInt(c[1])]);
+        const fit = sizes.filter(c => c[1] >= 800).sort((a, b) => a[1] - b[1])[0] || sizes.sort((a, b) => b[1] - a[1])[0];
+        const src = (fit && fit[1] > 200 ? fit[0] : '') || img.currentSrc || img.src || img.dataset.src || (img.getAttribute('srcset') || img.dataset.srcset || '').trim().split(/\s+/)[0];
         if (!src || src.startsWith('data:') || /\.svg(?:[?#]|$)/i.test(src)) continue;
         const w = img.naturalWidth || +img.getAttribute('width') || 0;
         if (w && w < 80) continue;
@@ -3035,6 +3088,7 @@
       .view .bar button.save svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
       .view .bar button.save[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
       .view .bar button.save[aria-pressed="true"] .f{fill:currentColor}
+      .view .bar button.save[aria-pressed="true"] .h{stroke:var(--bg)}
       /* A long press on a card (touch screens) opens this small menu instead of the browser's own for the link. */
       main li[data-key],main li[data-key] a{-webkit-touch-callout:none}
       .hold{position:fixed;z-index:3;display:flex;flex-direction:column;min-width:210px;padding:6px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28)}
@@ -3103,10 +3157,22 @@
         .cols h2{break-after:avoid;-webkit-column-break-after:avoid}
         .cols > section:first-child{padding-top:0;margin-top:20px}
       }
+      /* Larger pictures (a choice in the popup): the picture over the card, as wide as the card. */
+      :host(.big-pics) li.pic{display:flex;flex-direction:column-reverse;gap:8px}
+      /* The whole picture, in its own shape: cut to one shape, faces lost their tops. A very tall one stops at the screen's width. */
+      :host(.big-pics) li.pic .pic-img{width:100%;height:auto;max-height:100vw;object-fit:contain;object-position:left top;background:none}
+      :host(.big-pics) li.pic .pic-img:not([src]){display:none}
+      /* A picture in the reader opens over the page when tapped; a tap there enlarges it, to be moved about with a finger. */
+      .reader img{cursor:zoom-in}
+      .zoom{position:fixed;inset:0;z-index:5;background:#000;overflow:auto;-webkit-overflow-scrolling:touch;display:flex}
+      .zoom img{margin:auto;display:block;width:100%;height:auto;max-height:100%;object-fit:contain;cursor:zoom-in}
+      .zoom.in{display:block}
+      .zoom.in img{width:250%;max-width:none;max-height:none;cursor:zoom-out}
+      .zoom button{position:fixed;top:calc(10px + env(safe-area-inset-top, 0px));right:12px;background:rgba(0,0,0,.6);color:#fff;border-color:rgba(255,255,255,.4);font-size:15px;padding:6px 12px}
       li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
       /* The picture is part of the card: a click on it goes to the card. In Safari on a Mac, a click on a picture could start
          dragging it instead, and then nothing opened. */
-      li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
+      li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;object-position:center 25%;background:var(--line);display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
       @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 84px;gap:10px} li.pic .pic-img{width:84px;height:56px}}
       .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
       footer{color:var(--muted);font-size:13px;padding-top:24px}
@@ -3118,6 +3184,8 @@
       .filters.editing .read-toggle{display:none}
       .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
       .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
+      .all-read{padding:48px 0;text-align:center;color:var(--muted)}
+      .all-read p{margin:0 0 12px;font-size:18px;color:var(--fg)}
       .edit-hint,.mix-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
       h2 a.site-link{color:inherit;text-decoration:none}
       h2 a.site-link:hover{color:var(--accent)}
@@ -3128,6 +3196,23 @@
 
 
     let plainHost = null, plainCount = 0;
+    // A picture from the reader, over the whole page: first as large as fits, a tap enlarges it two and a half times around
+    // the place tapped (scroll or drag to move), another tap brings it back. Close, Esc or Back takes it away.
+    function zoomImage(im) {
+      const root = im.getRootNode(), box = document.createElement('div'), big = document.createElement('img'), x = document.createElement('button');
+      box.className = 'zoom'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', im.alt || T.close);
+      big.src = im.currentSrc || im.src; big.alt = im.alt;
+      x.textContent = '✕ ' + T.close;
+      const close = () => { box.remove(); removeEventListener('keydown', key, true); };
+      const key = e => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); close(); } };
+      big.addEventListener('click', e => {
+        const r = big.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+        if (box.classList.toggle('in')) { box.scrollLeft = fx * box.scrollWidth - box.clientWidth / 2; box.scrollTop = fy * box.scrollHeight - box.clientHeight / 2; }
+      });
+      x.addEventListener('click', e => { e.stopPropagation(); close(); });
+      addEventListener('keydown', key, true);
+      box.append(big, x); root.append(box); x.focus({ preventScroll: true });
+    }
     // The page under the list is told it is light and dark, as our own view is. Dark-mode extensions (Noir) look at the page,
     // not inside our shadow root: they saw a light page and laid their own dark colours over it, the list included. With
     // color-scheme set, a page background in our colours, and our host's colours pinned, they see a page with its own dark mode.
@@ -3199,7 +3284,11 @@
     function readerContent(art, title, lede, url) {
       const el = readerEl, out = [el('h1', title)];
       if (lede) out.push(el('p', lede, 'lede'));
-      const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+      // Which site the article is from, first in the line under the headline: its name on its own site, else its address
+      // (an article from another site, in My news or among the saved ones).
+      let from = ''; try { from = new URL(art?.finalUrl || url, location.href).hostname.replace(/^www\./, ''); } catch {}
+      if (from === host && pageMeta.site) from = pageMeta.site;
+      const by = [from, art?.byline, art?.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
       if (by) out.push(el('div', by, 'byline'));
       for (const b of art?.blocks || []) {
         if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
@@ -3210,6 +3299,7 @@
           const f = el('figure'), im = el('img');
           im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
           im.addEventListener('error', () => f.remove());
+          im.addEventListener('click', () => zoomImage(im));
           f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
         }
         else if (b.t === 'embed') out.push(readerFrame(b.src));
@@ -3336,7 +3426,7 @@
         <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav aria-label="${T.sections}"></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
         <main></main><footer></footer><div class="keys"></div></div>
         <div class="hold" hidden role="menu"></div>
-        <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg aria-hidden="true" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev" aria-label="${T.prev}">‹</button><button data-act="next" aria-label="${T.next}">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
+        <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg aria-hidden="true" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path class="h" d="M12 7v5l3 2"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev" aria-label="${T.prev}">‹</button><button data-act="next" aria-label="${T.next}">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
       const h1 = sh.querySelector('h1'), mixNote = sh.querySelector('.mix-note');
       if (logo) {
         const chip = document.createElement('span'), name = document.createElement('span');
@@ -3346,6 +3436,7 @@
       } else h1.textContent = mix ? T.myNews : pageMeta.site || host;
       if (mix) sh.querySelector('[data-act="original"]').hidden = true;
       sh.querySelector('.keys').textContent = T.keys;
+      if (startup.plainBigPics) plainHost.classList.add('big-pics');
       document.documentElement.appendChild(plainHost); ownColors();
       onlyList();
       document.getElementById('nothis-cover')?.remove();
@@ -3386,7 +3477,7 @@
       // Another tab may have changed the lists meanwhile: the change is made to what is stored now.
       async function storeSaved(kind, entry, on) {
         const st = (await gm.get('plainSaved', {})) || {};
-        st[kind] = [...(on ? [entry] : []), ...(st[kind] || []).filter(s => s.key !== entry.key)].slice(0, 500);
+        st[kind] = [...(on ? [entry] : []), ...(st[kind] || []).filter(s => s.key !== entry.key)].slice(0, 2000);
         await gm.set('plainSaved', st);
       }
       let savedChanged = false;
@@ -3467,6 +3558,13 @@
       // A row whose article is still to be fetched keeps four lines free for its lead (p.lead.wait), and every lead takes
       // those four lines, no more (the whole of it is in the article view): the cards are alike, and a lead coming in
       // doesn't push the list down.
+      // Large pictures: a front page that offers its picture only small (CNN) gets the article's own share picture instead,
+      // once the article has been looked up, when the small one turns out narrower than a phone screen in pixels.
+      const sharpen = (im, m) => {
+        if (!im || !startup.plainBigPics || im.dataset.sharp || !m || m.err || !m.image || m.image === im.getAttribute('src')) return;
+        const swap = () => { if (im.naturalWidth && im.naturalWidth < 600) { im.dataset.sharp = '1'; im.src = m.image; } };
+        if (im.complete) swap(); else im.addEventListener('load', swap, { once: true });
+      };
       function fill(it, li, fetched = false) {
         const m = cache[it.key];
         if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
@@ -3479,7 +3577,8 @@
         p.textContent = lead; p.hidden = !lead && !waiting; p.classList.toggle('wait', waiting);
         const im = li.querySelector('.pic-img');
         const src = im && (it.img || (m && !m.err && m.image) || '');
-        if (src && im.getAttribute('src') !== src) im.src = src;
+        if (src && im.getAttribute('src') !== src && !im.dataset.sharp) im.src = src;
+        sharpen(im, m);
       }
       // The count, and how many read articles were left out, with a button that shows them on this visit.
       function updateFooter() {
@@ -3806,6 +3905,13 @@
         }
         else for (const id of order()) if (!layout.hidden.includes(id)) renderSection(id);
         groupSmall();
+        // Everything read and hidden: say so, with the way to see it again, instead of an empty page.
+        if (!rows.size && hiddenRead.size) {
+          const box = document.createElement('div'), b = document.createElement('button');
+          box.className = 'all-read'; b.dataset.act = 'show-read'; b.textContent = T.showAllRead;
+          box.append(Object.assign(document.createElement('p'), { textContent: T.allRead }), b);
+          main.append(box);
+        }
         plainCount = rows.size;
         updateFooter();
         plainHost.scrollTop = y;
@@ -3944,7 +4050,7 @@
       // previous article and Esc closes.
       // On the window, before the page: an older copy of the engine still listening on the document then lets it be.
       window.addEventListener('keydown', e => {
-        if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || editing) return;
+        if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || editing || sh.querySelector('.zoom')) return; // an enlarged picture has the keys
         const t = e.composedPath()[0];
         if (t && (/^(?:INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
         const k = e.key;
@@ -4606,6 +4712,7 @@
       }
       else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
       else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
+      else if (act === 'bigPics') { await gm.set('plainBigPics', !!arg); location.reload(); }
       else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
       else if (act === 'calmPart') {
         const [id, show] = arg, all = (await gm.get('calmParts', {})) || {}, key = calmSite ? calmSite.name : '*', partsOff = (all[key] || []).filter(p => p !== id);
@@ -4618,7 +4725,7 @@
     async function settingsState() {
       const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
       return { host, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
-        genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, showOriginal, mutedTopics: [...muted],
+        genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, bigPics: !!startup.plainBigPics, showOriginal, mutedTopics: [...muted],
         calmParts: (webCalm ? WEB_PARTS.filter(p => !p.shop || shopPage()) : calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label || p.id, show: !calmPartsOff.includes(p.id) })),
         fetchPausedUntil: fetchPausedUntil > Date.now() ? fetchPausedUntil : 0, topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
         disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
@@ -4769,7 +4876,7 @@
       // Every setting the start needs, in one read (plain view's too: startup below).
       startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
         siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
-        plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {} });
+        plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {}, plainBigPics: false });
       const disabled = startup.disabledHosts || [];
       const enabled = startup.enabledHosts || [];
       CFG.genericSites = startup.genericSites ?? CFG.genericSites;

@@ -91,6 +91,7 @@ function show(s) {
   $('orig').checked = s.showOriginal;
   $('generic').checked = s.genericSites;
   $('swipe').checked = s.swipeAnimation !== false;
+  $('big-pics').checked = !!s.bigPics;
 
   // Topics the reader never wants, for all sites: main topics with their subtopics, from the
   // script's own tree. A muted main topic covers its subtopics, so they show as on and locked.
@@ -159,6 +160,7 @@ $('default').addEventListener('click', async () => {
 });
 $('orig').addEventListener('change', async () => show(await ask({ act: 'orig' })));
 $('generic').addEventListener('change', () => actAndReload('generic'));
+$('big-pics').addEventListener('change', () => actAndReload('bigPics', $('big-pics').checked));
 $('swipe').addEventListener('change', async () => show(await ask({ act: 'swipeAnim', arg: $('swipe').checked })));
 
 (async () => {

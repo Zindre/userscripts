@@ -12,6 +12,7 @@ STRINGS.nl = {
   later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
   myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
   mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
+  allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen',
   keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
 
   pop: {
@@ -45,6 +46,7 @@ STRINGS.nl = {
     privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
     erase: 'Alles wissen wat Web Detox heeft opgeslagen',
     eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
+    bigPics: 'Grotere foto’s in de lijst',
     gift: 'Steun Web Detox',
     eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
   },

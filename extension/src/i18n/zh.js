@@ -13,6 +13,7 @@ STRINGS.zh = {
   later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
   myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
   mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
+  allRead: '这里的内容已全部读完。', showAllRead: '显示已读',
   keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
 
   // The toolbar popup, in the browser's language.
@@ -48,6 +49,7 @@ STRINGS.zh = {
     privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
     erase: '删除 Web Detox 存储的所有内容',
     eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
+    bigPics: '列表中显示更大的图片',
     gift: '支持 Web Detox',
     eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
   },

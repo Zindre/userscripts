@@ -13,6 +13,7 @@ STRINGS.ja = {
   later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
   myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
   mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
+  allRead: 'すべて読みました。', showAllRead: '既読を表示',
   keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
 
   // The toolbar popup, in the browser's language.
@@ -48,6 +49,7 @@ STRINGS.ja = {
     privacyText: '設定、保存した記事、既読履歴はこのブラウザに保存され、ブラウザのアカウントまたはiCloudを通じてほかのデバイスに同期されます。私たちには何も送信されません。',
     erase: 'Web Detoxが保存したデータをすべて削除',
     eraseAsk: '設定、「あとで読む」、「ブックマーク」、既読履歴を、このブラウザと、次回の同期時にほかのデバイスからも削除します。元に戻すことはできません。',
+    bigPics: 'リストの画像を大きく',
     gift: 'Web Detoxを支援',
     eraseYes: 'すべて削除', eraseNo: 'キャンセル', erased: 'すべて削除しました。',
   },

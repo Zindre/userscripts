@@ -73,12 +73,17 @@ const SYNCED = ['plainSaved', 'plainRead', 'plainReadSync', 'plainLayout', 'plai
 const DAY = 864e5, KEEP_GONE = 30 * DAY, KEEP_READ = 14;
 // The same hash as plain.js (readHash): FNV-1a, in base 36.
 const readHash = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+// How much goes along: the browsers' account sync holds about 100 kB in all, iCloud 1 MB. Read later is a queue and
+// needs little; bookmarks get the room. When it is full, the oldest stay on the device they are on and leave the sync.
+// SYNC_V: the document's format. A newer one, written by a newer Web Detox on another device, is read but never
+// written over.
+const SYNC_V = 1;
 const syncStore = api.runtime.getManifest().permissions?.includes('nativeMessaging')
-  ? { // Safari: the app's iCloud key-value store, through the extension's native handler.
+  ? { max: 900e3, keep: { later: 100, marks: 2000 }, // Safari: the app's iCloud key-value store, through the extension's native handler.
     async get() { const r = await api.runtime.sendNativeMessage('no.sedb.NoThis', { type: 'sync-get' }); return r?.data ? JSON.parse(r.data) : null; },
     async put(doc) { await api.runtime.sendNativeMessage('no.sedb.NoThis', { type: 'sync-put', data: JSON.stringify(doc) }); },
   }
-  : api.storage?.sync && { // The browser's account sync: at most 8 kB a key, so the document goes in pieces.
+  : api.storage?.sync && { max: 85e3, keep: { later: 100, marks: 300 }, // The browser's account sync: at most 8 kB a key, so the document goes in pieces.
     async get() {
       const all = await api.storage.sync.get(null), n = all['wd:n'];
       if (!n) return null;
@@ -102,7 +107,7 @@ function localDoc(l) {
   const doc = emptyDoc(), meta = l.syncMeta || {}, now = Date.now(), today = Math.floor(now / DAY);
   doc.erased = meta.erased || 0;
   for (const kind of ['later', 'marks']) {
-    for (const s of l.plainSaved?.[kind] || []) doc.saved[kind][s.key] = [s.url, String(s.teaser || '').slice(0, 140), s.host || '', s.at || 0, 0];
+    for (const s of l.plainSaved?.[kind] || []) doc.saved[kind][s.key] = [s.url, String(s.teaser || '').slice(0, 80), s.host || '', s.at || 0, 0];
     for (const [key, at] of Object.entries(meta.gone?.[kind] || {})) if (!(doc.saved[kind][key]?.[3] > at)) doc.saved[kind][key] = ['', '', '', at, 1];
   }
   doc.read = { ...(l.plainReadSync || {}) };
@@ -119,13 +124,13 @@ function mergeDocs(a, b) {
     const all = { ...b.saved?.[kind] };
     for (const [k, v] of Object.entries(a.saved?.[kind] || {})) all[k] = newer(v, all[k], e => e[3]);
     for (const [k, v] of Object.entries(all)) if (v[3] <= erased) delete all[k];
-    const live = Object.entries(all).filter(([, v]) => !v[4]).sort((x, y) => y[1][3] - x[1][3]).slice(0, 150);
+    const live = Object.entries(all).filter(([, v]) => !v[4]).sort((x, y) => y[1][3] - x[1][3]).slice(0, syncStore?.keep[kind] ?? 300);
     const gone = Object.entries(all).filter(([, v]) => v[4] && now - v[3] < KEEP_GONE);
     out.saved[kind] = Object.fromEntries([...live, ...gone]);
   }
   const read = { ...b.read };
   for (const [h, d] of Object.entries(a.read || {})) read[h] = Math.max(read[h] || 0, d);
-  out.read = Object.fromEntries(Object.entries(read).filter(([, d]) => today - d < KEEP_READ && d > erasedDay).sort((x, y) => y[1] - x[1]).slice(0, 800));
+  out.read = Object.fromEntries(Object.entries(read).filter(([, d]) => today - d < KEEP_READ && d > erasedDay).sort((x, y) => y[1] - x[1]).slice(0, 400));
   const hosts = new Set([...Object.keys(a.layout || {}), ...Object.keys(b.layout || {})]);
   out.layout = Object.fromEntries([...hosts].map(h => [h, newer(a.layout?.[h], b.layout?.[h], e => e.at || 0)]).filter(([, lay]) => (lay.at || 0) > erased).sort((x, y) => (y[1].at || 0) - (x[1].at || 0)).slice(0, 60));
   for (const p of ['sort', 'hideRead']) { const x = newer(a.prefs?.[p], b.prefs?.[p], e => e[1]); if (x && x[1] > erased) out.prefs[p] = x; }
@@ -140,8 +145,11 @@ function localFrom(doc, l) {
     const items = Object.entries(doc.saved[kind]);
     plainSaved[kind] = items.filter(([, v]) => !v[4]).sort((x, y) => y[1][3] - x[1][3]).map(([key, [url, teaser, host, at]]) => {
       const old = was[kind].get(key);
-      return { key, url, teaser, desc: old?.desc || '', img: old?.img || '', host, at };
+      return { key, url, teaser: old?.teaser || teaser, desc: old?.desc || '', img: old?.img || '', host, at }; // the title travels shortened
     });
+    // What this device has beyond what the sync holds (it was full) stays here, unless it was taken out or deleted.
+    const inDoc = new Set(items.map(([k]) => k));
+    plainSaved[kind].push(...(l.plainSaved?.[kind] || []).filter(s => !inDoc.has(s.key) && (s.at || 0) > (doc.erased || 0)));
     gone[kind] = Object.fromEntries(items.filter(([, v]) => v[4]).map(([k, v]) => [k, v[3]]));
   }
   // Deleted on another device since this one last looked: what this device read and set up before then goes too.
@@ -157,6 +165,17 @@ function localFrom(doc, l) {
   return out;
 }
 
+// Never more than the store holds: the oldest bookmarks leave the sync first (they stay on their device), then the
+// oldest read marks.
+function fitDoc(doc, max) {
+  const size = () => JSON.stringify(doc).replace(/[\u007f-\uffff]/g, '\\u0000').length;
+  for (let i = 0; i < 40 && size() > max; i++) {
+    const marks = Object.entries(doc.saved.marks).filter(([, v]) => !v[4]).sort((x, y) => x[1][3] - y[1][3]);
+    if (marks.length > 20) for (const [k] of marks.slice(0, Math.ceil(marks.length * 0.1))) delete doc.saved.marks[k];
+    else { const read = Object.entries(doc.read).sort((x, y) => x[1] - y[1]); if (!read.length) break; for (const [k] of read.slice(0, Math.ceil(read.length / 2))) delete doc.read[k]; }
+  }
+  return doc;
+}
 // One sync at a time; a change while one runs makes another follow it.
 let syncing = null, syncAgain = false, applying = 0, lastPull = 0;
 async function syncNow() {
@@ -164,9 +183,13 @@ async function syncNow() {
   if (syncing) { syncAgain = true; return syncing; }
   syncing = (async () => {
     try {
-      const l = await api.storage.local.get(SYNCED), remote = await syncStore.get().catch(() => null);
-      const merged = mergeDocs(localDoc(l), remote || emptyDoc());
-      if (JSON.stringify(merged) !== JSON.stringify(remote)) await syncStore.put(merged);
+      // What is stored can't be read (cut short, or not ours): nothing is written, so it is not replaced by this
+      // device's own. Tried again at the next sync.
+      const l = await api.storage.local.get(SYNCED), remote = await syncStore.get();
+      if (remote && (typeof remote !== 'object' || !remote.saved)) throw new Error('unreadable sync document');
+      const merged = fitDoc(mergeDocs(localDoc(l), remote || emptyDoc()), syncStore.max);
+      const newer = (remote?.v || 0) > SYNC_V; // a newer format: taken in, never written
+      if (!newer && JSON.stringify(merged) !== JSON.stringify(remote)) await syncStore.put(merged);
       const next = localFrom(merged, l), changed = Object.fromEntries(Object.entries(next).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(l[k] ?? null)));
       if (Object.keys(changed).length) { applying++; try { await api.storage.local.set(changed); } finally { setTimeout(() => applying--, 500); } }
       lastPull = Date.now();

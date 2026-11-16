@@ -12,6 +12,7 @@ STRINGS.nb = {
   later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
   myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
   mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
+  allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker',
   keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
 
   pop: {
@@ -47,6 +48,7 @@ STRINGS.nb = {
     privacyText: 'Innstillingene, de lagrede sakene og det du har lest, blir i denne nettleseren, og følger deg til de andre enhetene dine via nettleserkontoen eller iCloud. Ingenting sendes til oss.',
     erase: 'Slett alt Web Detox har lagret',
     eraseAsk: 'Dette sletter innstillingene, Les senere, Bokmerker og lesehistorikken her, og på de andre enhetene dine neste gang de synkroniserer. Det kan ikke angres.',
+    bigPics: 'Større bilder i listen',
     gift: 'Støtt Web Detox',
     eraseYes: 'Slett alt', eraseNo: 'Avbryt', erased: 'Alt er slettet.',
   },

@@ -13,6 +13,7 @@ STRINGS.fi = {
   later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
   myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
   mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
+  allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut',
   keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
 
   // The toolbar popup, in the browser's language.
@@ -48,6 +49,7 @@ STRINGS.fi = {
     privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
     erase: 'Poista kaikki, mitä Web Detox on tallentanut',
     eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
+    bigPics: 'Suuremmat kuvat listassa',
     gift: 'Tue Web Detoxia',
     eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
   },

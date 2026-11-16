@@ -12,6 +12,7 @@ STRINGS.de = {
   later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
   myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
   mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
+  allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen',
   keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
 
   pop: {
@@ -45,6 +46,7 @@ STRINGS.de = {
     privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
     erase: 'Alles löschen, was Web Detox gespeichert hat',
     eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
+    bigPics: 'Größere Bilder in der Liste',
     gift: 'Web Detox unterstützen',
     eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
   },

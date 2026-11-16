@@ -12,6 +12,7 @@ STRINGS.sv = {
   later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
   myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
   mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
+  allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar',
   keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
 
   pop: {
@@ -45,6 +46,7 @@ STRINGS.sv = {
     privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
     erase: 'Radera allt som Web Detox har sparat',
     eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
+    bigPics: 'Större bilder i listan',
     gift: 'Stöd Web Detox',
     eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
   },

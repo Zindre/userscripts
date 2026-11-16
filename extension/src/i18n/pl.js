@@ -16,6 +16,7 @@ STRINGS.pl = {
   later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
   myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
   mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
+  allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane',
   keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
 
   pop: {
@@ -49,6 +50,7 @@ STRINGS.pl = {
     privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
     erase: 'Usuń wszystko, co zapisał Web Detox',
     eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
+    bigPics: 'Większe zdjęcia na liście',
     gift: 'Wesprzyj Web Detox',
     eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
   },

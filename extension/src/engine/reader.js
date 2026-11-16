@@ -154,6 +154,25 @@ function readArticle(html, url, withImages) {
   if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
   // Headings with nothing after them are links to other stories (BBC's "more on this").
   while (blocks.length && blocks[blocks.length - 1].t === 'h') blocks.pop();
+  // A picture series (Amedia's "Bildeserie", /g/ pages): little text of its own, and pictures with captions that are not
+  // figures in the body the text was found in. All of them, each with its caption, in the order of the page.
+  let series = false;
+  const textLen = () => blocks.reduce((n, b) => n + (b.t === 'img' ? 0 : (b.text || '').length + (b.items || []).join(' ').length), 0);
+  if (withImages && !feed && !entry && textLen() < 200) {
+    const body = doc.querySelector('[itemprop="articleBody"], article, main'), pics = [], seen = new Set();
+    for (const img of body?.querySelectorAll('img') || []) {
+      if (img.closest(skip) || img.closest('a[href]')) continue;
+      const src = readerImage(img, url); if (!src || seen.has(src)) continue;
+      seen.add(src);
+      let cap = null;
+      for (let box = img.parentElement, i = 0; box && box !== body && i < 6 && !cap; box = box.parentElement, i++) {
+        if (box.querySelectorAll('img').length > 1) break;
+        cap = box.querySelector('figcaption, [class*="caption" i]');
+      }
+      pics.push({ t: 'img', src, caption: cap ? readerText(cap) : '' });
+    }
+    if (pics.length >= 3) { series = true; for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'img') blocks.splice(i, 1); blocks.push(...pics); }
+  }
   // The story's own picture leads when the body has none of its own.
   if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
     try {
@@ -165,6 +184,7 @@ function readArticle(html, url, withImages) {
   // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
   if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
   if (words >= 200) return { blocks, date, byline, paid, partial: false };
+  if (series) return { blocks, date, byline, paid, partial: false };
   return article ? { blocks, date, byline, paid, partial: false, short: !blocks.some(b => b.t === 'embed') } : null;
 }
 

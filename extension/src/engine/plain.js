@@ -70,7 +70,12 @@ function teaserImage(a) {
   const card = a.closest('article, li');
   const imgs = [...a.querySelectorAll('img'), ...(card && card.querySelectorAll('a[href]').length <= 3 ? card.querySelectorAll('img') : [])];
   for (const img of imgs) {
-    const src = img.currentSrc || img.src || img.dataset.src || (img.getAttribute('srcset') || img.dataset.srcset || '').trim().split(/\s+/)[0];
+    // From every list of sizes on offer (a lazy-loading site keeps the real ones in data-srcset until the picture is in
+    // view, and shows an 80-pixel one meanwhile: NRK), the smallest that is still sharp at full width on a phone.
+    const sets = [img.dataset.srcset, img.getAttribute('srcset'), ...[...(img.closest('picture')?.querySelectorAll('source') || [])].flatMap(s => [s.dataset.srcset, s.getAttribute('srcset')])];
+    const sizes = sets.filter(Boolean).flatMap(set => set.split(/,\s+(?=\S)/).map(c => c.trim().split(/\s+/))).filter(c => c[0] && /^\d+w$/.test(c[1] || '')).map(c => [c[0], parseInt(c[1])]);
+    const fit = sizes.filter(c => c[1] >= 800).sort((a, b) => a[1] - b[1])[0] || sizes.sort((a, b) => b[1] - a[1])[0];
+    const src = (fit && fit[1] > 200 ? fit[0] : '') || img.currentSrc || img.src || img.dataset.src || (img.getAttribute('srcset') || img.dataset.srcset || '').trim().split(/\s+/)[0];
     if (!src || src.startsWith('data:') || /\.svg(?:[?#]|$)/i.test(src)) continue;
     const w = img.naturalWidth || +img.getAttribute('width') || 0;
     if (w && w < 80) continue;
@@ -261,6 +266,7 @@ const PLAIN_CSS = `
   .view .bar button.save svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
   .view .bar button.save[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
   .view .bar button.save[aria-pressed="true"] .f{fill:currentColor}
+  .view .bar button.save[aria-pressed="true"] .h{stroke:var(--bg)}
   /* A long press on a card (touch screens) opens this small menu instead of the browser's own for the link. */
   main li[data-key],main li[data-key] a{-webkit-touch-callout:none}
   .hold{position:fixed;z-index:3;display:flex;flex-direction:column;min-width:210px;padding:6px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28)}
@@ -329,10 +335,22 @@ const PLAIN_CSS = `
     .cols h2{break-after:avoid;-webkit-column-break-after:avoid}
     .cols > section:first-child{padding-top:0;margin-top:20px}
   }
+  /* Larger pictures (a choice in the popup): the picture over the card, as wide as the card. */
+  :host(.big-pics) li.pic{display:flex;flex-direction:column-reverse;gap:8px}
+  /* The whole picture, in its own shape: cut to one shape, faces lost their tops. A very tall one stops at the screen's width. */
+  :host(.big-pics) li.pic .pic-img{width:100%;height:auto;max-height:100vw;object-fit:contain;object-position:left top;background:none}
+  :host(.big-pics) li.pic .pic-img:not([src]){display:none}
+  /* A picture in the reader opens over the page when tapped; a tap there enlarges it, to be moved about with a finger. */
+  .reader img{cursor:zoom-in}
+  .zoom{position:fixed;inset:0;z-index:5;background:#000;overflow:auto;-webkit-overflow-scrolling:touch;display:flex}
+  .zoom img{margin:auto;display:block;width:100%;height:auto;max-height:100%;object-fit:contain;cursor:zoom-in}
+  .zoom.in{display:block}
+  .zoom.in img{width:250%;max-width:none;max-height:none;cursor:zoom-out}
+  .zoom button{position:fixed;top:calc(10px + env(safe-area-inset-top, 0px));right:12px;background:rgba(0,0,0,.6);color:#fff;border-color:rgba(255,255,255,.4);font-size:15px;padding:6px 12px}
   li.pic{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:start}
   /* The picture is part of the card: a click on it goes to the card. In Safari on a Mac, a click on a picture could start
      dragging it instead, and then nothing opened. */
-  li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;background:var(--line);display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
+  li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;object-position:center 25%;background:var(--line);display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
   @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 84px;gap:10px} li.pic .pic-img{width:84px;height:56px}}
   .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
   footer{color:var(--muted);font-size:13px;padding-top:24px}
@@ -344,6 +362,8 @@ const PLAIN_CSS = `
   .filters.editing .read-toggle{display:none}
   .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
   .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
+  .all-read{padding:48px 0;text-align:center;color:var(--muted)}
+  .all-read p{margin:0 0 12px;font-size:18px;color:var(--fg)}
   .edit-hint,.mix-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
   h2 a.site-link{color:inherit;text-decoration:none}
   h2 a.site-link:hover{color:var(--accent)}
@@ -354,6 +374,23 @@ const PLAIN_CSS = `
 
 
 let plainHost = null, plainCount = 0;
+// A picture from the reader, over the whole page: first as large as fits, a tap enlarges it two and a half times around
+// the place tapped (scroll or drag to move), another tap brings it back. Close, Esc or Back takes it away.
+function zoomImage(im) {
+  const root = im.getRootNode(), box = document.createElement('div'), big = document.createElement('img'), x = document.createElement('button');
+  box.className = 'zoom'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', im.alt || T.close);
+  big.src = im.currentSrc || im.src; big.alt = im.alt;
+  x.textContent = '✕ ' + T.close;
+  const close = () => { box.remove(); removeEventListener('keydown', key, true); };
+  const key = e => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); close(); } };
+  big.addEventListener('click', e => {
+    const r = big.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    if (box.classList.toggle('in')) { box.scrollLeft = fx * box.scrollWidth - box.clientWidth / 2; box.scrollTop = fy * box.scrollHeight - box.clientHeight / 2; }
+  });
+  x.addEventListener('click', e => { e.stopPropagation(); close(); });
+  addEventListener('keydown', key, true);
+  box.append(big, x); root.append(box); x.focus({ preventScroll: true });
+}
 // The page under the list is told it is light and dark, as our own view is. Dark-mode extensions (Noir) look at the page,
 // not inside our shadow root: they saw a light page and laid their own dark colours over it, the list included. With
 // color-scheme set, a page background in our colours, and our host's colours pinned, they see a page with its own dark mode.
@@ -425,7 +462,11 @@ function readerTermsP(b) {
 function readerContent(art, title, lede, url) {
   const el = readerEl, out = [el('h1', title)];
   if (lede) out.push(el('p', lede, 'lede'));
-  const by = art && [art.byline, art.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
+  // Which site the article is from, first in the line under the headline: its name on its own site, else its address
+  // (an article from another site, in My news or among the saved ones).
+  let from = ''; try { from = new URL(art?.finalUrl || url, location.href).hostname.replace(/^www\./, ''); } catch {}
+  if (from === host && pageMeta.site) from = pageMeta.site;
+  const by = [from, art?.byline, art?.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
   if (by) out.push(el('div', by, 'byline'));
   for (const b of art?.blocks || []) {
     if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
@@ -436,6 +477,7 @@ function readerContent(art, title, lede, url) {
       const f = el('figure'), im = el('img');
       im.src = b.src; im.alt = b.caption || ''; im.loading = 'lazy'; im.decoding = 'async';
       im.addEventListener('error', () => f.remove());
+      im.addEventListener('click', () => zoomImage(im));
       f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
     }
     else if (b.t === 'embed') out.push(readerFrame(b.src));
@@ -562,7 +604,7 @@ async function plainView(withImages, mix) {
     <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav aria-label="${T.sections}"></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
     <main></main><footer></footer><div class="keys"></div></div>
     <div class="hold" hidden role="menu"></div>
-    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg aria-hidden="true" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke="var(--bg)"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev" aria-label="${T.prev}">‹</button><button data-act="next" aria-label="${T.next}">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
+    <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg aria-hidden="true" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path class="h" d="M12 7v5l3 2"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev" aria-label="${T.prev}">‹</button><button data-act="next" aria-label="${T.next}">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
   const h1 = sh.querySelector('h1'), mixNote = sh.querySelector('.mix-note');
   if (logo) {
     const chip = document.createElement('span'), name = document.createElement('span');
@@ -572,6 +614,7 @@ async function plainView(withImages, mix) {
   } else h1.textContent = mix ? T.myNews : pageMeta.site || host;
   if (mix) sh.querySelector('[data-act="original"]').hidden = true;
   sh.querySelector('.keys').textContent = T.keys;
+  if (startup.plainBigPics) plainHost.classList.add('big-pics');
   document.documentElement.appendChild(plainHost); ownColors();
   onlyList();
   document.getElementById('nothis-cover')?.remove();
@@ -612,7 +655,7 @@ async function plainView(withImages, mix) {
   // Another tab may have changed the lists meanwhile: the change is made to what is stored now.
   async function storeSaved(kind, entry, on) {
     const st = (await gm.get('plainSaved', {})) || {};
-    st[kind] = [...(on ? [entry] : []), ...(st[kind] || []).filter(s => s.key !== entry.key)].slice(0, 500);
+    st[kind] = [...(on ? [entry] : []), ...(st[kind] || []).filter(s => s.key !== entry.key)].slice(0, 2000);
     await gm.set('plainSaved', st);
   }
   let savedChanged = false;
@@ -693,6 +736,13 @@ async function plainView(withImages, mix) {
   // A row whose article is still to be fetched keeps four lines free for its lead (p.lead.wait), and every lead takes
   // those four lines, no more (the whole of it is in the article view): the cards are alike, and a lead coming in
   // doesn't push the list down.
+  // Large pictures: a front page that offers its picture only small (CNN) gets the article's own share picture instead,
+  // once the article has been looked up, when the small one turns out narrower than a phone screen in pixels.
+  const sharpen = (im, m) => {
+    if (!im || !startup.plainBigPics || im.dataset.sharp || !m || m.err || !m.image || m.image === im.getAttribute('src')) return;
+    const swap = () => { if (im.naturalWidth && im.naturalWidth < 600) { im.dataset.sharp = '1'; im.src = m.image; } };
+    if (im.complete) swap(); else im.addEventListener('load', swap, { once: true });
+  };
   function fill(it, li, fetched = false) {
     const m = cache[it.key];
     if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
@@ -705,7 +755,8 @@ async function plainView(withImages, mix) {
     p.textContent = lead; p.hidden = !lead && !waiting; p.classList.toggle('wait', waiting);
     const im = li.querySelector('.pic-img');
     const src = im && (it.img || (m && !m.err && m.image) || '');
-    if (src && im.getAttribute('src') !== src) im.src = src;
+    if (src && im.getAttribute('src') !== src && !im.dataset.sharp) im.src = src;
+    sharpen(im, m);
   }
   // The count, and how many read articles were left out, with a button that shows them on this visit.
   function updateFooter() {
@@ -1032,6 +1083,13 @@ async function plainView(withImages, mix) {
     }
     else for (const id of order()) if (!layout.hidden.includes(id)) renderSection(id);
     groupSmall();
+    // Everything read and hidden: say so, with the way to see it again, instead of an empty page.
+    if (!rows.size && hiddenRead.size) {
+      const box = document.createElement('div'), b = document.createElement('button');
+      box.className = 'all-read'; b.dataset.act = 'show-read'; b.textContent = T.showAllRead;
+      box.append(Object.assign(document.createElement('p'), { textContent: T.allRead }), b);
+      main.append(box);
+    }
     plainCount = rows.size;
     updateFooter();
     plainHost.scrollTop = y;
@@ -1170,7 +1228,7 @@ async function plainView(withImages, mix) {
   // previous article and Esc closes.
   // On the window, before the page: an older copy of the engine still listening on the document then lets it be.
   window.addEventListener('keydown', e => {
-    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || editing) return;
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || editing || sh.querySelector('.zoom')) return; // an enlarged picture has the keys
     const t = e.composedPath()[0];
     if (t && (/^(?:INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
     const k = e.key;
