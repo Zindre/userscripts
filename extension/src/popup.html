@@ -47,9 +47,12 @@
       <label class="switch"><span><span data-i18n="showOriginal">Show original headlines</span> <kbd>⌥⇧U</kbd></span><input type="checkbox" id="orig"></label>
     </section>
 
-    <h2 data-i18n="plainHeading">Plain view</h2>
-    <label class="switch"><span data-i18n="swipe">Animate swiping between articles</span><input type="checkbox" id="swipe"></label>
-    <label class="switch"><span data-i18n="bigPics">Larger pictures in the list</span><input type="checkbox" id="big-pics"></label>
+    <h2 data-i18n="plainHeading" class="everywhere">Plain view</h2>
+    <label class="switch everywhere"><span data-i18n="swipe">Animate swiping between articles</span><input type="checkbox" id="swipe"></label>
+    <label class="switch everywhere"><span data-i18n="bigPics">Larger pictures in the list</span><input type="checkbox" id="big-pics"></label>
+    <label class="switch choice everywhere"><span data-i18n="albumApp">Play albums in</span><select id="album-app">
+      <option value="" data-i18n="albumAppOff">Off</option><option value="ytm">YouTube Music</option><option value="apple">Apple Music</option><option value="spotify">Spotify</option><option value="kaset" id="kaset-opt">Kaset</option>
+    </select></label>
     </section>
 
     <h2 data-i18n="otherHeading">Other sites</h2>

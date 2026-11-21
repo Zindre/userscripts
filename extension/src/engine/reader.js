@@ -12,8 +12,9 @@
 // needs a real body, or plain view sends the reader to the site (a video, live page or app).
 const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
   '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
-  ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author', 'reels']
-    .map(c => `[class*="${c}" i]`)].join(', ');
+  ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author', 'reels', 'listenerscore']
+    // promo, but not Drupal's node-promoted: an article promoted to the front page (Clash's reviews).
+    .map(c => c === 'promo' ? `[class*="promo" i]:not([class*="promoted" i])` : `[class*="${c}" i]`)].join(', ');
 // Live pages ("Nyheter direkte"): a running feed of short news, each entry a story of its own.
 const LIVE_ENTRY = '[data-testid="liveblog-entry"], [itemtype$="/BlogPosting"]';
 // A frame that is part of the story: a quiz, a poll or a survey (never an ad, a video or a social post).
@@ -62,6 +63,17 @@ function readerImage(img, base) {
 // The element that holds the most paragraph text: a paragraph counts fully for its parent, half for
 // its grandparent, a third above that and so on for five levels, so a body whose paragraphs sit in
 // separate wrappers (BBC: a nest of blocks per paragraph) still wins as a whole.
+// The text can come in several boxes alike, with the reader score and an ad in between (Pitchfork's reviews: the opening
+// two paragraphs in one, the rest in the next). The others of the same kind and class in the same article, in order.
+// The article around it, not the root itself: when the text's element is the <article> (bt.no), there is nothing
+// alike to look for, and looking inside it found nothing at all, so the story read as having no text.
+function readerParts(root, skip) {
+  const cls = root.getAttribute('class'), within = root.parentElement?.closest('article, main');
+  if (!cls || !within) return [root];
+  const same = [...within.getElementsByTagName(root.tagName)].filter(el => el === root || (el.getAttribute('class') === cls && !el.contains(root) && !root.contains(el) && !el.closest(skip)
+    && [...el.querySelectorAll('p')].some(p => norm(p.textContent).length >= 40)));
+  return same.length <= 6 ? same : [root];
+}
 function readerRoot(doc, skip) {
   const score = new Map();
   for (const p of doc.querySelectorAll('p')) {
@@ -74,15 +86,54 @@ function readerRoot(doc, skip) {
   return best;
 }
 
+// A review's score on its own page (Pitchfork's "musicRating"), else schema.org's reviewRating.
+function pageRating(html, doc) {
+  const m = html.match(/"musicRating":\{([^{}]*)\}/);
+  if (m) return ratingFrom(m[1], /"isTrackReview":true/.test(html));
+  for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) try {
+    for (const it of [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent))) {
+      const r = it?.reviewRating, v = r && parseFloat(r.ratingValue), best = r && parseFloat(r.bestRating);
+      if (v >= 0) return { score: best && best !== 10 ? `${v}/${best}` : v.toFixed(1), best: '' };
+    }
+  } catch {}
+  return null;
+}
+// A music review's facts on its page (Pitchfork: {"genre":"Folk/Country","label":"Rough Trade",…,"releaseYear":"2026"}).
+function reviewFacts(html) {
+  const m = html.match(/\{("genre":"[^{}]*"releaseYear":"[^"]*"[^{}]*)\}/);
+  if (!m) return null;
+  try { const f = JSON.parse(`{${m[1]}}`); return { genre: norm(f.genre), label: norm(f.label), year: norm(f.releaseYear) }; } catch { return null; }
+}
+// What a music review is about, as schema.org names it (Pitchfork: "Radie Peat: No Human Tongue Can Tell").
+// The album or song a review is about, from the page's JSON-LD: { name: "Artist: Album" when the artist is given, album:
+// true for a MusicAlbum (musicOMH, The Independent, DIY, The Line of Best Fit: the album as the review's item, or the
+// album with the review inside it) }. null: none.
+function reviewedAlbum(doc) {
+  const artistOf = a => norm([].concat(a || []).map(x => typeof x === 'string' ? x : x?.name).filter(x => typeof x === 'string').join(', '));
+  const named = (r, album) => ({ name: (artistOf(r.byArtist) ? artistOf(r.byArtist) + ': ' : '') + unentity(norm(r.name)), album, artist: !!artistOf(r.byArtist) });
+  let found = null;
+  for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) try {
+    for (const it of [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent))) {
+      const r = it?.itemReviewed, type = t => [].concat(t || []).join(' ');
+      if (r && /\bMusic(?:Recording|Album)\b/.test(type(r['@type'])) && typeof r.name === 'string') return named(r, /MusicAlbum/.test(type(r['@type'])));
+      if (!found && /\bMusicAlbum\b/.test(type(it?.['@type'])) && typeof it.name === 'string') found = named(it, true);
+    }
+  } catch {}
+  return found;
+}
+function readArticle(html, url, withImages) {
+  const doc = parseHtml(html), art = readArticleIn(doc, url, withImages);
+  if (art) try { art.rating = pageRating(html, doc); const rv = reviewedAlbum(doc); art.album = rv?.name || ''; art.albumPair = !!(rv?.album && rv.artist); art.facts = reviewFacts(html); } catch {}
+  return art;
+}
 // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'embed', text, items, src, caption }], date, byline, paid, partial } or null
 // partial: a paid article that arrived with only its start. short: an article with little text.
-function readArticle(html, url, withImages) {
-  const doc = parseHtml(html);
+function readArticleIn(doc, url, withImages) {
   let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
   for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
     try {
       for (const it of [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent))) {
-        if (!it || !/Article|NewsArticle|Report/i.test(String(it['@type']))) continue;
+        if (!it || !/Article|NewsArticle|Report|^Review$/i.test(String(it['@type']))) continue;
         article = true;
         if (it.isAccessibleForFree === false || /^false$/i.test(String(it.isAccessibleForFree))) paid = true;
         date ||= it.datePublished || '';
@@ -139,7 +190,7 @@ function readArticle(html, url, withImages) {
   };
   if (entry) walk(entry); else if (feed) feed.forEach(walk);
   else {
-    if (root) walk(root);
+    if (root) readerParts(root, skip).forEach(walk);
     // A quiz can sit beside the element with the text (Amedia puts the week's quiz above it): keep that order.
     const above = [];
     for (const f of quizzes) {
@@ -201,7 +252,7 @@ let readerFor = false; // true while plain view is up
 function articleFetched(url, html, finalUrl) {
   if (readerFor && !readerCache.has(url)) readerCache.set(url, { at: Date.now(), raw: Promise.resolve({ html, finalUrl }) });
 }
-const SAYS_ARTICLE = /"@type"\s*:\s*\[?\s*"\w*Article"|<meta[^>]*og:type[^>]*content="article"/;
+const SAYS_ARTICLE = /"@type"\s*:\s*\[?\s*"(?:\w*Article|Review)"|<meta[^>]*og:type[^>]*content="article"/;
 async function fetchPage(url) {
   const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
   try {

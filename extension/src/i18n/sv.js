@@ -12,7 +12,7 @@ STRINGS.sv = {
   later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
   myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
   mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
-  allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar',
+  allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar', siteMenu: 'Webbplatsens meny', allGenres: 'Alla genrer', genre: 'Genre', byScore: 'Högst betyg först', dateFrom: 'Från', dateTo: 'Till', playAlbumIn: 'Spela albumet i %s', kasetNone: 'Hittades inte', recordLabel: 'Skivbolag', released: 'Utgiven',
   keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
 
   pop: {
@@ -27,7 +27,7 @@ STRINGS.sv = {
     calmHeading: 'Visa på den här sajten', neverHeading: 'Visa aldrig', allSites: 'alla sajter',
     someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underämnen till ${g}`,
     styleHeading: 'Rubrikstil', styleRewrite: 'Skriv om', styleReveal: 'Visa vid tryck', styleStack: 'Visa båda',
-    showOriginal: 'Visa ursprungliga rubriker', plainHeading: 'Enkel vy', swipe: 'Animera svep mellan artiklar',
+    showOriginal: 'Visa ursprungliga rubriker', plainHeading: 'Enkel vy', swipe: 'Animera svep mellan artiklar', albumApp: 'Spela album i', albumAppOff: 'Av',
     otherHeading: 'Andra sajter', generic: 'Känn igen nyhetssajter som inte är inställda',
     disabledOn: 'Avstängt på', enabledOn: 'Påslaget på', remove: h => `Ta bort ${h}`,
     notRunning: 'Web Detox körs inte på den här sidan.',

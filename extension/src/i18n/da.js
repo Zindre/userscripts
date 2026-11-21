@@ -13,7 +13,7 @@ STRINGS.da = {
   later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
   myNews: 'Mine nyheder', mixEmpty: 'Mine nyheder samler de nyhedssider, du besøger mest. Besøg et par stykker, så dukker de op her.',
   mixLoading: (n, of) => `Læser forsiderne … ${n} af ${of}`,
-  allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler',
+  allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler', siteMenu: 'Webstedets menu', allGenres: 'Alle genrer', genre: 'Genre', byScore: 'Højeste karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Afspil albummet i %s', kasetNone: 'Ikke fundet', recordLabel: 'Pladeselskab', released: 'Udgivet',
   keys: 'Piletaster vælger · Enter åbner · ← → forrige og næste under læsning · L læs senere · B bogmærke · Esc lukker',
 
   // The toolbar popup, in the browser's language.
@@ -29,7 +29,7 @@ STRINGS.da = {
     calmHeading: 'Vis på dette websted', neverHeading: 'Vis aldrig', allSites: 'alle websteder',
     someOf: (n, of) => `${n} af ${of}`, subtopicsOf: g => `Underemner i ${g}`,
     styleHeading: 'Overskriftsstil', styleRewrite: 'Omskriv', styleReveal: 'Vis ved tryk', styleStack: 'Vis begge',
-    showOriginal: 'Vis originale overskrifter', plainHeading: 'Enkel visning', swipe: 'Animér swipe mellem artikler',
+    showOriginal: 'Vis originale overskrifter', plainHeading: 'Enkel visning', swipe: 'Animér swipe mellem artikler', albumApp: 'Afspil albums i', albumAppOff: 'Fra',
     otherHeading: 'Andre websteder', generic: 'Find selv nyhedssider, der ikke er sat op',
     disabledOn: 'Slået fra på', enabledOn: 'Slået til på', remove: h => `Fjern ${h}`,
     notRunning: 'Web Detox kører ikke på denne side.',

@@ -16,7 +16,7 @@ STRINGS.pl = {
   later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
   myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
   mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
-  allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane',
+  allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane', siteMenu: 'Menu witryny', allGenres: 'Wszystkie gatunki', genre: 'Gatunek', byScore: 'Najwyższa ocena najpierw', dateFrom: 'Od', dateTo: 'Do', playAlbumIn: 'Odtwórz album w %s', kasetNone: 'Nie znaleziono', recordLabel: 'Wytwórnia', released: 'Wydano',
   keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
 
   pop: {
@@ -31,7 +31,7 @@ STRINGS.pl = {
     calmHeading: 'Pokazuj na tej stronie', neverHeading: 'Nigdy nie pokazuj', allSites: 'wszystkie strony',
     someOf: (n, of) => `${n} z ${of}`, subtopicsOf: g => `Podtematy: ${g}`,
     styleHeading: 'Styl nagłówków', styleRewrite: 'Przepisz', styleReveal: 'Pokaż po stuknięciu', styleStack: 'Pokaż oba',
-    showOriginal: 'Pokazuj oryginalne nagłówki', plainHeading: 'Widok prosty', swipe: 'Animuj przesuwanie między artykułami',
+    showOriginal: 'Pokazuj oryginalne nagłówki', plainHeading: 'Widok prosty', swipe: 'Animuj przesuwanie między artykułami', albumApp: 'Odtwarzaj albumy w', albumAppOff: 'Wyłączone',
     otherHeading: 'Inne strony', generic: 'Wykrywaj nieskonfigurowane serwisy informacyjne',
     disabledOn: 'Wyłączone na', enabledOn: 'Włączone na', remove: h => `Usuń ${h}`,
     notRunning: 'Web Detox nie działa na tej stronie.',

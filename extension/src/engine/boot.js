@@ -10,7 +10,7 @@ async function main() {
   document.documentElement.setAttribute('data-nothis-engine', '');
   // Every setting the start needs, in one read (plain view's too: startup below).
   startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
-    siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
+    siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, kasetLinks: false, pausedHosts: {}, calmParts: {},
     plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {}, plainBigPics: false });
   const disabled = startup.disabledHosts || [];
   const enabled = startup.enabledHosts || [];
@@ -37,6 +37,8 @@ async function main() {
   setMuted(startup.mutedTopics || []);
   CFG.display = startup.display ?? CFG.display;
   CFG.swipeAnimation = startup.swipeAnimation ?? CFG.swipeAnimation;
+  // Before 1.20 Kaset was the only choice, a switch (kasetLinks).
+  CFG.albumApp = startup.albumApp || (startup.kasetLinks ? 'kaset' : '');
   // The My news page (mix.html), in the extension's own page: nothing else of this applies there.
   if (globalThis.__wdMix) { await mixView(); return; }
   // A visit to a news site, for My news (mix.js).

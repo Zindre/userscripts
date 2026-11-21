@@ -26,6 +26,8 @@ const CFG = {
   minTeaserLen: 8,
   marker: true,            // blue left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
   plainSkipGames: true,
+  albumApp: '',            // plain view: a ▶ button on album reviews that opens the album in this app: 'ytm' (YouTube Music), 'apple' (Apple Music),
+                           // 'spotify', 'kaset' (Kaset on a Mac, with extension/kaset-album); '' none. Setting in the popup.
   swipeAnimation: true,    // plain view on a touch screen: the article follows the finger when you swipe to the next one (setting in the popup)    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
   inlineLinks: 'tooltip',  // links inside running text (article body, "Les også: …"): 'tooltip' keeps the text and
                            // shows headline + lead on hover; 'rewrite' treats them like teasers; 'off' ignores them

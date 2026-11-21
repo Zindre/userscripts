@@ -52,6 +52,8 @@
       minTeaserLen: 8,
       marker: true,            // blue left bar: solid = rewritten, hover shows the original; dashed = untouched, hover shows the expanded version
       plainSkipGames: true,
+      albumApp: '',            // plain view: a ▶ button on album reviews that opens the album in this app: 'ytm' (YouTube Music), 'apple' (Apple Music),
+                               // 'spotify', 'kaset' (Kaset on a Mac, with extension/kaset-album); '' none. Setting in the popup.
       swipeAnimation: true,    // plain view on a touch screen: the article follows the finger when you swipe to the next one (setting in the popup)    // plain view leaves out puzzles, quizzes, crosswords and horoscopes (BT's "Hjernetrim")
       inlineLinks: 'tooltip',  // links inside running text (article body, "Les også: …"): 'tooltip' keeps the text and
                                // shows headline + lead on hover; 'rewrite' treats them like teasers; 'off' ignores them
@@ -92,7 +94,7 @@
       later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
       myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
       mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
-      allRead: 'You have read everything here.', showAllRead: 'Show read articles',
+      allRead: 'You have read everything here.', showAllRead: 'Show read articles', siteMenu: 'The site’s menu', allGenres: 'All genres', genre: 'Genre', byScore: 'Highest score first', dateFrom: 'From', dateTo: 'To', playAlbumIn: 'Play the album in %s', kasetNone: 'Not found', recordLabel: 'Label', released: 'Released',
       keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
 
       // The toolbar popup, in the browser's language.
@@ -111,7 +113,7 @@
         webHeading: 'Show on shops and other websites', neverHeading: 'Never show me', allSites: 'all sites',
         someOf: (n, of) => `${n} of ${of}`, subtopicsOf: g => `Subtopics of ${g}`,
         styleHeading: 'Headline style', styleRewrite: 'Rewrite', styleReveal: 'Reveal on tap', styleStack: 'Show both',
-        showOriginal: 'Show original headlines', plainHeading: 'Plain view', swipe: 'Animate swiping between articles',
+        showOriginal: 'Show original headlines', plainHeading: 'Plain view', swipe: 'Animate swiping between articles', albumApp: 'Play albums in', albumAppOff: 'Off',
         otherHeading: 'Other sites', generic: "Auto-detect news sites I haven't set up",
         disabledOn: 'Disabled on', enabledOn: 'Enabled on', remove: h => `Remove ${h}`,
         notRunning: "Web Detox isn't running on this page.",
@@ -187,7 +189,7 @@
       later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
       myNews: 'Mine nyheder', mixEmpty: 'Mine nyheder samler de nyhedssider, du besøger mest. Besøg et par stykker, så dukker de op her.',
       mixLoading: (n, of) => `Læser forsiderne … ${n} af ${of}`,
-      allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler',
+      allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler', siteMenu: 'Webstedets menu', allGenres: 'Alle genrer', genre: 'Genre', byScore: 'Højeste karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Afspil albummet i %s', kasetNone: 'Ikke fundet', recordLabel: 'Pladeselskab', released: 'Udgivet',
       keys: 'Piletaster vælger · Enter åbner · ← → forrige og næste under læsning · L læs senere · B bogmærke · Esc lukker',
 
       // The toolbar popup, in the browser's language.
@@ -203,7 +205,7 @@
         calmHeading: 'Vis på dette websted', neverHeading: 'Vis aldrig', allSites: 'alle websteder',
         someOf: (n, of) => `${n} af ${of}`, subtopicsOf: g => `Underemner i ${g}`,
         styleHeading: 'Overskriftsstil', styleRewrite: 'Omskriv', styleReveal: 'Vis ved tryk', styleStack: 'Vis begge',
-        showOriginal: 'Vis originale overskrifter', plainHeading: 'Enkel visning', swipe: 'Animér swipe mellem artikler',
+        showOriginal: 'Vis originale overskrifter', plainHeading: 'Enkel visning', swipe: 'Animér swipe mellem artikler', albumApp: 'Afspil albums i', albumAppOff: 'Fra',
         otherHeading: 'Andre websteder', generic: 'Find selv nyhedssider, der ikke er sat op',
         disabledOn: 'Slået fra på', enabledOn: 'Slået til på', remove: h => `Fjern ${h}`,
         notRunning: 'Web Detox kører ikke på denne side.',
@@ -275,7 +277,7 @@
       later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
       myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
       mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
-      allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen',
+      allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen', siteMenu: 'Menü der Website', allGenres: 'Alle Genres', genre: 'Genre', byScore: 'Beste Wertung zuerst', dateFrom: 'Von', dateTo: 'Bis', playAlbumIn: 'Album in %s abspielen', kasetNone: 'Nicht gefunden', recordLabel: 'Label', released: 'Erschienen',
       keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
 
       pop: {
@@ -290,7 +292,7 @@
         calmHeading: 'Auf dieser Website anzeigen', neverHeading: 'Nie anzeigen', allSites: 'alle Websites',
         someOf: (n, of) => `${n} von ${of}`, subtopicsOf: g => `Unterthemen von ${g}`,
         styleHeading: 'Stil der Schlagzeilen', styleRewrite: 'Umschreiben', styleReveal: 'Beim Tippen zeigen', styleStack: 'Beide zeigen',
-        showOriginal: 'Original-Schlagzeilen zeigen', plainHeading: 'Schlichte Ansicht', swipe: 'Wischen zwischen Artikeln animieren',
+        showOriginal: 'Original-Schlagzeilen zeigen', plainHeading: 'Schlichte Ansicht', swipe: 'Wischen zwischen Artikeln animieren', albumApp: 'Alben abspielen in', albumAppOff: 'Aus',
         otherHeading: 'Andere Websites', generic: 'Nachrichtenseiten automatisch erkennen, die ich nicht eingerichtet habe',
         disabledOn: 'Deaktiviert auf', enabledOn: 'Aktiviert auf', remove: h => `${h} entfernen`,
         notRunning: 'Web Detox läuft nicht auf dieser Seite.',
@@ -358,7 +360,7 @@
       later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',
       myNews: 'Mis noticias', mixEmpty: 'Mis noticias reúne los sitios de noticias que más visitas. Visita algunos y aparecerán aquí.',
       mixLoading: (n, of) => `Leyendo las portadas… ${n} de ${of}`,
-      allRead: 'Has leído todo aquí.', showAllRead: 'Mostrar leídos',
+      allRead: 'Has leído todo aquí.', showAllRead: 'Mostrar leídos', siteMenu: 'Menú del sitio', allGenres: 'Todos los géneros', genre: 'Género', byScore: 'Mejor nota primero', dateFrom: 'Desde', dateTo: 'Hasta', playAlbumIn: 'Reproducir el álbum en %s', kasetNone: 'No encontrado', recordLabel: 'Sello', released: 'Publicado',
       keys: 'Flechas para elegir · Enter abre · ← → anterior y siguiente al leer · L leer más tarde · B marcador · Esc cierra',
 
       pop: {
@@ -373,7 +375,7 @@
         calmHeading: 'Mostrar en este sitio', neverHeading: 'No mostrar nunca', allSites: 'todos los sitios',
         someOf: (n, of) => `${n} de ${of}`, subtopicsOf: g => `Subtemas de ${g}`,
         styleHeading: 'Estilo de titulares', styleRewrite: 'Reescribir', styleReveal: 'Mostrar al tocar', styleStack: 'Mostrar ambos',
-        showOriginal: 'Mostrar titulares originales', plainHeading: 'Vista sencilla', swipe: 'Animar el deslizamiento entre artículos',
+        showOriginal: 'Mostrar titulares originales', plainHeading: 'Vista sencilla', swipe: 'Animar el deslizamiento entre artículos', albumApp: 'Reproducir álbumes en', albumAppOff: 'Desactivado',
         otherHeading: 'Otros sitios', generic: 'Detectar sitios de noticias que no he configurado',
         disabledOn: 'Desactivado en', enabledOn: 'Activado en', remove: h => `Quitar ${h}`,
         notRunning: 'Web Detox no está activo en esta página.',
@@ -442,7 +444,7 @@
       later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
       myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
       mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
-      allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut',
+      allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut', siteMenu: 'Sivuston valikko', allGenres: 'Kaikki tyylilajit', genre: 'Tyylilaji', byScore: 'Paras arvosana ensin', dateFrom: 'Alkaen', dateTo: 'Asti', playAlbumIn: 'Soita albumi: %s', kasetNone: 'Ei löytynyt', recordLabel: 'Levy-yhtiö', released: 'Julkaistu',
       keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
 
       // The toolbar popup, in the browser's language.
@@ -458,7 +460,7 @@
         calmHeading: 'Näytä tällä sivustolla', neverHeading: 'Älä näytä koskaan', allSites: 'kaikki sivustot',
         someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `Aiheen ${g} alaiheet`,
         styleHeading: 'Otsikkotyyli', styleRewrite: 'Kirjoita uudelleen', styleReveal: 'Näytä napauttamalla', styleStack: 'Näytä molemmat',
-        showOriginal: 'Näytä alkuperäiset otsikot', plainHeading: 'Pelkistetty näkymä', swipe: 'Animoi pyyhkäisy artikkelien välillä',
+        showOriginal: 'Näytä alkuperäiset otsikot', plainHeading: 'Pelkistetty näkymä', swipe: 'Animoi pyyhkäisy artikkelien välillä', albumApp: 'Soita albumit', albumAppOff: 'Pois',
         otherHeading: 'Muut sivustot', generic: 'Tunnista uutissivustot, joita ei ole määritetty',
         disabledOn: 'Pois käytöstä', enabledOn: 'Käytössä', remove: h => `Poista ${h}`,
         notRunning: 'Web Detox ei ole käytössä tällä sivulla.',
@@ -530,7 +532,7 @@
       later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
       myNews: 'Mes infos', mixEmpty: 'Mes infos rassemble les sites d’info que vous consultez le plus. Consultez-en quelques-uns, et ils apparaîtront ici.',
       mixLoading: (n, of) => `Lecture des pages d’accueil… ${n} sur ${of}`,
-      allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus',
+      allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus', siteMenu: 'Menu du site', allGenres: 'Tous les genres', genre: 'Genre', byScore: 'Meilleure note d’abord', dateFrom: 'Du', dateTo: 'Au', playAlbumIn: 'Écouter l’album dans %s', kasetNone: 'Introuvable', recordLabel: 'Label', released: 'Sortie',
       keys: 'Les flèches choisissent · Enter ouvre · ← → précédent et suivant en lecture · L à lire plus tard · B signet · Esc ferme',
 
       pop: {
@@ -545,7 +547,7 @@
         calmHeading: 'Afficher sur ce site', neverHeading: 'Ne jamais afficher', allSites: 'tous les sites',
         someOf: (n, of) => `${n} sur ${of}`, subtopicsOf: g => `Sous-thèmes de ${g}`,
         styleHeading: 'Style des titres', styleRewrite: 'Réécrire', styleReveal: 'Afficher au toucher', styleStack: 'Afficher les deux',
-        showOriginal: 'Afficher les titres d’origine', plainHeading: 'Vue simple', swipe: 'Animer le balayage entre les articles',
+        showOriginal: 'Afficher les titres d’origine', plainHeading: 'Vue simple', swipe: 'Animer le balayage entre les articles', albumApp: 'Écouter les albums dans', albumAppOff: 'Désactivé',
         otherHeading: 'Autres sites', generic: 'Détecter les sites d’info que je n’ai pas configurés',
         disabledOn: 'Désactivé sur', enabledOn: 'Activé sur', remove: h => `Retirer ${h}`,
         notRunning: 'Web Detox ne fonctionne pas sur cette page.',
@@ -613,7 +615,7 @@
       later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',
       myNews: 'Le mie notizie', mixEmpty: 'Le mie notizie raccoglie i siti di notizie che visiti di più. Visitane qualcuno e compariranno qui.',
       mixLoading: (n, of) => `Lettura delle prime pagine … ${n} di ${of}`,
-      allRead: 'Hai letto tutto qui.', showAllRead: 'Mostra letti',
+      allRead: 'Hai letto tutto qui.', showAllRead: 'Mostra letti', siteMenu: 'Menu del sito', allGenres: 'Tutti i generi', genre: 'Genere', byScore: 'Voto più alto prima', dateFrom: 'Dal', dateTo: 'Al', playAlbumIn: 'Riproduci l’album in %s', kasetNone: 'Non trovato', recordLabel: 'Etichetta', released: 'Uscita',
       keys: 'Frecce per scegliere · Enter apre · ← → precedente e successivo durante la lettura · L leggi dopo · B segnalibro · Esc chiude',
 
       pop: {
@@ -628,7 +630,7 @@
         calmHeading: 'Mostra su questo sito', neverHeading: 'Non mostrare mai', allSites: 'tutti i siti',
         someOf: (n, of) => `${n} di ${of}`, subtopicsOf: g => `Sottoargomenti di ${g}`,
         styleHeading: 'Stile dei titoli', styleRewrite: 'Riscrivi', styleReveal: 'Mostra al tocco', styleStack: 'Mostra entrambi',
-        showOriginal: 'Mostra i titoli originali', plainHeading: 'Vista semplice', swipe: 'Anima lo scorrimento tra gli articoli',
+        showOriginal: 'Mostra i titoli originali', plainHeading: 'Vista semplice', swipe: 'Anima lo scorrimento tra gli articoli', albumApp: 'Riproduci gli album in', albumAppOff: 'Disattivato',
         otherHeading: 'Altri siti', generic: 'Riconosci da solo i siti di notizie non ancora impostati',
         disabledOn: 'Disattivato su', enabledOn: 'Attivato su', remove: h => `Rimuovi ${h}`,
         notRunning: 'Web Detox non è attivo su questa pagina.',
@@ -697,7 +699,7 @@
       later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
       myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
       mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
-      allRead: 'すべて読みました。', showAllRead: '既読を表示',
+      allRead: 'すべて読みました。', showAllRead: '既読を表示', siteMenu: 'サイトのメニュー', allGenres: 'すべてのジャンル', genre: 'ジャンル', byScore: '評価の高い順', dateFrom: '開始', dateTo: '終了', playAlbumIn: '%s でアルバムを再生', kasetNone: '見つかりません', recordLabel: 'レーベル', released: 'リリース',
       keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
 
       // The toolbar popup, in the browser's language.
@@ -713,7 +715,7 @@
         calmHeading: 'このサイトで表示', neverHeading: '表示しない', allSites: 'すべてのサイト',
         someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}のサブトピック`,
         styleHeading: '見出しのスタイル', styleRewrite: '書き換え', styleReveal: 'タップで表示', styleStack: '両方を表示',
-        showOriginal: '元の見出しを表示', plainHeading: 'シンプル表示', swipe: '記事間のスワイプをアニメーション',
+        showOriginal: '元の見出しを表示', plainHeading: 'シンプル表示', swipe: '記事間のスワイプをアニメーション', albumApp: 'アルバムの再生', albumAppOff: 'オフ',
         otherHeading: 'ほかのサイト', generic: '未設定のニュースサイトを自動検出',
         disabledOn: '無効のサイト', enabledOn: '有効のサイト', remove: h => `${h}を削除`,
         notRunning: 'Web Detoxはこのページでは動作していません。',
@@ -785,7 +787,7 @@
       later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
       myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
       mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
-      allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker',
+      allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker', siteMenu: 'Nettstedets meny', allGenres: 'Alle sjangre', genre: 'Sjanger', byScore: 'Høyest karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Spill albumet i %s', kasetNone: 'Ikke funnet', recordLabel: 'Plateselskap', released: 'Utgitt',
       keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
 
       pop: {
@@ -802,7 +804,7 @@
         webHeading: 'Vis i nettbutikker og på andre nettsteder', neverHeading: 'Vis meg aldri', allSites: 'alle nettsteder',
         someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underemner i ${g}`,
         styleHeading: 'Tittelstil', styleRewrite: 'Skriv om', styleReveal: 'Vis ved trykk', styleStack: 'Vis begge',
-        showOriginal: 'Vis opprinnelige titler', plainHeading: 'Ren visning', swipe: 'Animer sveip mellom saker',
+        showOriginal: 'Vis opprinnelige titler', plainHeading: 'Ren visning', swipe: 'Animer sveip mellom saker', albumApp: 'Spill album i', albumAppOff: 'Av',
         otherHeading: 'Andre nettsteder', generic: 'Finn nyhetsnettsteder jeg ikke har satt opp',
         disabledOn: 'Slått av på', enabledOn: 'Slått på på', remove: h => `Fjern ${h}`,
         notRunning: 'Web Detox kjører ikke på denne siden.',
@@ -872,7 +874,7 @@
       later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
       myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
       mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
-      allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen',
+      allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen', siteMenu: 'Menu van de site', allGenres: 'Alle genres', genre: 'Genre', byScore: 'Hoogste score eerst', dateFrom: 'Van', dateTo: 'Tot', playAlbumIn: 'Album afspelen in %s', kasetNone: 'Niet gevonden', recordLabel: 'Label', released: 'Verschenen',
       keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
 
       pop: {
@@ -887,7 +889,7 @@
         calmHeading: 'Tonen op deze site', neverHeading: 'Nooit tonen', allSites: 'alle sites',
         someOf: (n, of) => `${n} van ${of}`, subtopicsOf: g => `Subonderwerpen van ${g}`,
         styleHeading: 'Stijl van koppen', styleRewrite: 'Herschrijven', styleReveal: 'Tonen bij tikken', styleStack: 'Beide tonen',
-        showOriginal: 'Originele koppen tonen', plainHeading: 'Eenvoudige weergave', swipe: 'Vegen tussen artikelen animeren',
+        showOriginal: 'Originele koppen tonen', plainHeading: 'Eenvoudige weergave', swipe: 'Vegen tussen artikelen animeren', albumApp: 'Albums afspelen in', albumAppOff: 'Uit',
         otherHeading: 'Andere sites', generic: 'Nieuwssites automatisch herkennen die ik niet heb ingesteld',
         disabledOn: 'Uitgeschakeld op', enabledOn: 'Ingeschakeld op', remove: h => `${h} verwijderen`,
         notRunning: 'Web Detox is niet actief op deze pagina.',
@@ -959,7 +961,7 @@
       later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
       myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
       mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
-      allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane',
+      allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane', siteMenu: 'Menu witryny', allGenres: 'Wszystkie gatunki', genre: 'Gatunek', byScore: 'Najwyższa ocena najpierw', dateFrom: 'Od', dateTo: 'Do', playAlbumIn: 'Odtwórz album w %s', kasetNone: 'Nie znaleziono', recordLabel: 'Wytwórnia', released: 'Wydano',
       keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
 
       pop: {
@@ -974,7 +976,7 @@
         calmHeading: 'Pokazuj na tej stronie', neverHeading: 'Nigdy nie pokazuj', allSites: 'wszystkie strony',
         someOf: (n, of) => `${n} z ${of}`, subtopicsOf: g => `Podtematy: ${g}`,
         styleHeading: 'Styl nagłówków', styleRewrite: 'Przepisz', styleReveal: 'Pokaż po stuknięciu', styleStack: 'Pokaż oba',
-        showOriginal: 'Pokazuj oryginalne nagłówki', plainHeading: 'Widok prosty', swipe: 'Animuj przesuwanie między artykułami',
+        showOriginal: 'Pokazuj oryginalne nagłówki', plainHeading: 'Widok prosty', swipe: 'Animuj przesuwanie między artykułami', albumApp: 'Odtwarzaj albumy w', albumAppOff: 'Wyłączone',
         otherHeading: 'Inne strony', generic: 'Wykrywaj nieskonfigurowane serwisy informacyjne',
         disabledOn: 'Wyłączone na', enabledOn: 'Włączone na', remove: h => `Usuń ${h}`,
         notRunning: 'Web Detox nie działa na tej stronie.',
@@ -1042,7 +1044,7 @@
       later: 'Ler depois', marks: 'Favoritos', mark: 'Favorito', unLater: 'Remover de Ler depois', unMark: 'Remover favorito',
       myNews: 'Minhas notícias', mixEmpty: 'Minhas notícias reúne os sites de notícias que você mais visita. Visite alguns e eles aparecem aqui.',
       mixLoading: (n, of) => `Lendo as páginas iniciais … ${n} de ${of}`,
-      allRead: 'Você leu tudo aqui.', showAllRead: 'Mostrar lidas',
+      allRead: 'Você leu tudo aqui.', showAllRead: 'Mostrar lidas', siteMenu: 'Menu do site', allGenres: 'Todos os gêneros', genre: 'Gênero', byScore: 'Maior nota primeiro', dateFrom: 'De', dateTo: 'Até', playAlbumIn: 'Reproduzir o álbum no %s', kasetNone: 'Não encontrado', recordLabel: 'Gravadora', released: 'Lançamento',
       keys: 'Setas escolhem · Enter abre · ← → anterior e próxima durante a leitura · L ler depois · B favorito · Esc fecha',
 
       pop: {
@@ -1057,7 +1059,7 @@
         calmHeading: 'Mostrar neste site', neverHeading: 'Nunca mostrar', allSites: 'todos os sites',
         someOf: (n, of) => `${n} de ${of}`, subtopicsOf: g => `Subtemas de ${g}`,
         styleHeading: 'Estilo dos títulos', styleRewrite: 'Reescrever', styleReveal: 'Revelar ao tocar', styleStack: 'Mostrar os dois',
-        showOriginal: 'Mostrar títulos originais', plainHeading: 'Visão simples', swipe: 'Animar a troca entre notícias',
+        showOriginal: 'Mostrar títulos originais', plainHeading: 'Visão simples', swipe: 'Animar a troca entre notícias', albumApp: 'Reproduzir álbuns no', albumAppOff: 'Desativado',
         otherHeading: 'Outros sites', generic: 'Detectar sites de notícias ainda não configurados',
         disabledOn: 'Desativado em', enabledOn: 'Ativado em', remove: h => `Remover ${h}`,
         notRunning: 'O Web Detox não está ativo nesta página.',
@@ -1125,7 +1127,7 @@
       later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
       myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
       mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
-      allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar',
+      allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar', siteMenu: 'Webbplatsens meny', allGenres: 'Alla genrer', genre: 'Genre', byScore: 'Högst betyg först', dateFrom: 'Från', dateTo: 'Till', playAlbumIn: 'Spela albumet i %s', kasetNone: 'Hittades inte', recordLabel: 'Skivbolag', released: 'Utgiven',
       keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
 
       pop: {
@@ -1140,7 +1142,7 @@
         calmHeading: 'Visa på den här sajten', neverHeading: 'Visa aldrig', allSites: 'alla sajter',
         someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underämnen till ${g}`,
         styleHeading: 'Rubrikstil', styleRewrite: 'Skriv om', styleReveal: 'Visa vid tryck', styleStack: 'Visa båda',
-        showOriginal: 'Visa ursprungliga rubriker', plainHeading: 'Enkel vy', swipe: 'Animera svep mellan artiklar',
+        showOriginal: 'Visa ursprungliga rubriker', plainHeading: 'Enkel vy', swipe: 'Animera svep mellan artiklar', albumApp: 'Spela album i', albumAppOff: 'Av',
         otherHeading: 'Andra sajter', generic: 'Känn igen nyhetssajter som inte är inställda',
         disabledOn: 'Avstängt på', enabledOn: 'Påslaget på', remove: h => `Ta bort ${h}`,
         notRunning: 'Web Detox körs inte på den här sidan.',
@@ -1209,7 +1211,7 @@
       later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
       myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
       mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
-      allRead: '这里的内容已全部读完。', showAllRead: '显示已读',
+      allRead: '这里的内容已全部读完。', showAllRead: '显示已读', siteMenu: '网站菜单', allGenres: '所有类型', genre: '类型', byScore: '评分最高优先', dateFrom: '从', dateTo: '到', playAlbumIn: '在 %s 中播放专辑', kasetNone: '未找到', recordLabel: '厂牌', released: '发行',
       keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
 
       // The toolbar popup, in the browser's language.
@@ -1225,7 +1227,7 @@
         calmHeading: '在此网站上显示', neverHeading: '永不显示', allSites: '所有网站',
         someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}的子话题`,
         styleHeading: '标题样式', styleRewrite: '改写', styleReveal: '轻点显示', styleStack: '同时显示',
-        showOriginal: '显示原标题', plainHeading: '简洁视图', swipe: '文章间轻扫时显示动画',
+        showOriginal: '显示原标题', plainHeading: '简洁视图', swipe: '文章间轻扫时显示动画', albumApp: '播放专辑', albumAppOff: '关闭',
         otherHeading: '其他网站', generic: '自动识别未设置的新闻网站',
         disabledOn: '已停用的网站', enabledOn: '已启用的网站', remove: h => `移除 ${h}`,
         notRunning: 'Web Detox 未在此页面上运行。',
@@ -1400,9 +1402,16 @@
       const segs = path.split('/').filter(Boolean);
       if (segs.some(sg => /^\d{5,}$/.test(sg))) return true;
       const last = (segs[segs.length - 1] || '').replace(/\.html?$/i, '');
-      const tokens = last.split('-');
-      return tokens.length >= 4 && tokens.filter(w => /^[a-z]{3,}$/i.test(w) && !/^[0-9a-f]+$/i.test(w)).length >= 3;
+      // Words joined by hyphens or underscores (Under the Radar: /reviews/as_killers_do_lael_neale); with the article's
+      // number at the end, two words are enough (laut.de: /Yung-FSK18-Rattenjunge/Alben/1000-Kleine-Tode-127758).
+      const tokens = last.split(/[-_]/), words = tokens.filter(w => /^[a-z]{3,}$/i.test(w) && !/^[0-9a-f]+$/i.test(w)).length;
+      return (tokens.length >= 4 && words >= 3) || (/[-_]\d{5,}$/.test(last) && words >= 2);
     }
+    // An article addressed by its number in the query, on a site run by scripts (Plattentests: /rezi.php?show=21968).
+    const ID_QUERY = /[?&](?:id|show|p|a|aid|art|article|story|rid|nr|item|review)=\d{2,}(?:&|$)/i;
+    const idQueryArticle = u => /\.(?:php|aspx?|cfm|jsp)$/i.test(u.pathname) && ID_QUERY.test(u.search);
+    // An article's key: its address without query or fragment, except for the number that tells such an article apart.
+    const articleKey = url => { const u = (url || '').replace(/#.*$/, ''), q = u.indexOf('?'); return q >= 0 && /\.(?:php|aspx?|cfm|jsp)$/i.test(u.slice(0, q)) && ID_QUERY.test(u.slice(q)) ? u : u.replace(/\?.*$/, ''); };
     // Generic mode only runs on pages that look like a news publication, never on web apps, shops,
     // price guides or wikis. Score: RSS/Atom feed 1, 5+ <article> elements 1 (20+: 2), article/frontpage og:type 1, news JSON-LD (NewsArticle, NewsMediaOrganization, …) 2,
     // other article JSON-LD (Article, BlogPosting, …) 1, news words in the site's title or description 1.
@@ -1410,6 +1419,10 @@
     // Shops (WooCommerce, Shopify, cart/checkout/product pages, product JSON-LD, pages full of prices,
     // such as price guides) and wikis (MediaWiki) are always out.
     const NEWS_WORDS = /\b(?:nyheter|nyheder|nyhet\w*|avis\w*|tidende|tidning\w*|news|newspaper|headlines|breaking|nachrichten|zeitung|aktuell\w*|actualit\w*|journal|noticias|notizie|nieuws|uutiset|uutis\w*)\b/i;
+    // Music magazines (Gaffa's "Anmeldelser", laut.de's "CD-Kritiken") rarely call themselves news: what they review, and
+    // that they review it, counts the same. Their review section's address counts as well (gaffa.no/anmeldelser).
+    const MEDIA_WORDS = /\b(?:music|musikk?\w*|musique|m[uú]sica|muziek|muzyka|albums?|reviews|rezension\w*|kritiken|recension\w*|recensioni|recensies|anmeldelse\w*|arviot|levyarviot|critiques|cr[ií]ticas|magazine|magasin\w*|webzine)\b/i;
+    const REVIEW_SECTION = /\/(?:reviews?|album-reviews|anmeldelser|plateanmeldelser|recensioner|recensioni|recensies|rezensionen|kritiken|critiques|criticas|arviot|levyarviot|alben|albums)(?:\/|\.html?|$)/i;
     let publication = false;
     // Shops, price guides and wikis: never news, whatever lists or scores say. On a listed host
     // (`listed`), WooCommerce and cart buttons alone don't count: papers sell subscriptions that way.
@@ -1417,7 +1430,9 @@
       const q = sel => document.querySelector(sel);
       const body = document.body?.className || '';
       const ogType = q('meta[property="og:type"]')?.getAttribute('content') || '';
-      const cart = /\b(woocommerce|cart|checkout|product|shop)\b/i.test(body) ||
+      // Whole classes: a WordPress site with a shop has woocommerce-js on every page (JazzTimes, VISIONS), and themes name
+      // their options after products (Treble: thb-single-product-ajax-on). WooCommerce's own pages say woocommerce.
+      const cart = body.split(/\s+/).some(c => /^(?:woocommerce(?:-page|-shop|-cart|-checkout)?|single-product|post-type-archive-product|tax-product_(?:cat|tag)|cart|checkout|product|shop)$/i.test(c)) ||
         !!q('form[action*="/cart"], [class*="add-to-cart"], [class*="add_to_cart"], [name="add-to-cart"]');
       const shop = (cart && !listed) || /\bshopify\b/i.test(body) || /^product/i.test(ogType) || !!q('script[src*="shopify"], link[href*="cdn.shopify.com"]') ||
         /\/(cart|checkout|basket|handlekurv|kasse|product|products|produkt|shop|store)(\/|$)/i.test(location.pathname);
@@ -1439,14 +1454,16 @@
       if (articles >= 20) score += 2; else if (articles >= 5) score += 1;
       if (/^(article|frontpage|blog)$/i.test(ogType)) score += 1;
       if (/"@type"\s*:\s*"(?:NewsArticle|NewsMediaOrganization|ReportageNewsArticle|AnalysisNewsArticle|LiveBlogPosting)"/.test(ld)) score += 2;
-      else if (/"@type"\s*:\s*"(?:Article|BlogPosting|Blog|CollectionPage|ItemList)"/.test(ld)) score += 1;
+      else if (/"@type"\s*:\s*"(?:Article|BlogPosting|Blog|CollectionPage|ItemList|Review)"/.test(ld)) score += 1; // Review: Pitchfork
       const about = [document.title, q('meta[property="og:site_name"]')?.content, q('meta[name="description"]')?.content].join(' ');
-      if (NEWS_WORDS.test(about)) score += 1;
+      if (NEWS_WORDS.test(about) || MEDIA_WORDS.test(about)) score += 1;
+      if (REVIEW_SECTION.test(location.pathname)) score += 1;
       publication = score >= 2;
       return publication;
     }
     const registrable = h => { const p = h.split('.'); return (p.length > 2 && /^(co|com|org|net|gov|ac|edu)$/.test(p[p.length - 2]) && p[p.length - 1].length === 2 ? p.slice(-3) : p.slice(-2)).join('.'); };
-    const SKIP_CONTAINERS = 'nav, header, footer, [role="navigation"], [role="banner"], [role="contentinfo"]';
+    // A <header> inside an <article> is that article's own heading (WordPress: Headphone Commute's cards), not the site's.
+    const SKIP_CONTAINERS = 'nav, header:not(article header), footer, [role="navigation"], [role="banner"], [role="contentinfo"]';
     // aria-hidden marks duplicated carousel teasers (skip), but consent dialogs also hide the whole
     // page behind them with it (keep: the teasers are real, just covered for now).
     function skipLink(a) {
@@ -1965,6 +1982,13 @@
 
     // ───────────────────────────── Text: cleanup and bait scoring ─────────────────────────────
     const norm = s => (s || '').replace(/[\u00AD\u200B\u2060\uFEFF]/g, '').replace(/\s+/g, ' ').trim(); // drop soft hyphens / zero-width joiners
+    // HTML entities left in text that was escaped twice (WordPress themes' aria-labels: "The Avalanches &#8211; No Bad Memories").
+    const TEXT_ENTITIES = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', nbsp: ' ', ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', laquo: '«', raquo: '»', hellip: '…' };
+    const unentity = s => (s || '').replace(/&(?:#(\d{1,6})|#x([0-9a-f]{1,6})|([a-z]{2,6}));/gi, (m, d, x, n) => {
+      if (!d && !x) return TEXT_ENTITIES[n.toLowerCase()] ?? m;
+      const c = parseInt(d || x, d ? 10 : 16);
+      return c > 0 && c <= 0x10FFFF ? String.fromCodePoint(c) : m;
+    });
 
     function fixCase(s) {
       const CAPS = /^[A-ZÆØÅÄÖÜ]{3,}$/, ANYCAPS = /^[A-ZÆØÅÄÖÜ]+$/;
@@ -2067,7 +2091,8 @@
           const items = [].concat(j['@graph'] || j);
           for (const it of items) {
             if (!it || !/Article|NewsArticle|Report/i.test(String(it['@type']))) continue;
-            ldTitle = ldTitle || norm(it.headline); ldDesc = ldDesc || norm(it.description); ldImage = ldImage || imageOf(it.image);
+            // WordPress (Yoast) escapes its JSON-LD twice: "The Avalanches &#8211; No Bad Memories".
+            ldTitle = ldTitle || unentity(norm(it.headline)); ldDesc = ldDesc || unentity(norm(it.description)); ldImage = ldImage || imageOf(it.image);
             ldSection = ldSection || [].concat(it.articleSection || []).join(', '); ldKeywords = ldKeywords || [].concat(it.keywords || []).join(', ');
           }
         } catch {}
@@ -2129,7 +2154,7 @@
 
     const fetchCount = { n: 0 };
     async function getMeta(url) {
-      const key = url.replace(/[?#].*$/, '');
+      const key = articleKey(url);
       if (!cache[key]) await loadCache();
       if (cache[key]) return cache[key];
       if (!CFG.fetch || fetchCount.n >= CFG.maxFetchesPerPage) return null;
@@ -2170,8 +2195,9 @@
     // needs a real body, or plain view sends the reader to the site (a video, live page or app).
     const READER_SKIP = ['script', 'style', 'noscript', 'template', 'nav', 'aside', 'footer', 'form', 'button', 'iframe', 'svg', 'dialog',
       '[role="complementary"]', '[role="navigation"]', '[aria-hidden="true"]', '[hidden]', '[data-ad]', '[id^="ad-" i]', '[id^="ad_" i]',
-      ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author', 'reels']
-        .map(c => `[class*="${c}" i]`)].join(', ');
+      ...['related', 'share', 'social', 'newsletter', 'advert', 'ad-slot', 'adslot', 'promo', 'recommend', 'comment', 'teaser', 'byline', 'breadcrumb', 'author', 'reels', 'listenerscore']
+        // promo, but not Drupal's node-promoted: an article promoted to the front page (Clash's reviews).
+        .map(c => c === 'promo' ? `[class*="promo" i]:not([class*="promoted" i])` : `[class*="${c}" i]`)].join(', ');
     // Live pages ("Nyheter direkte"): a running feed of short news, each entry a story of its own.
     const LIVE_ENTRY = '[data-testid="liveblog-entry"], [itemtype$="/BlogPosting"]';
     // A frame that is part of the story: a quiz, a poll or a survey (never an ad, a video or a social post).
@@ -2220,6 +2246,17 @@
     // The element that holds the most paragraph text: a paragraph counts fully for its parent, half for
     // its grandparent, a third above that and so on for five levels, so a body whose paragraphs sit in
     // separate wrappers (BBC: a nest of blocks per paragraph) still wins as a whole.
+    // The text can come in several boxes alike, with the reader score and an ad in between (Pitchfork's reviews: the opening
+    // two paragraphs in one, the rest in the next). The others of the same kind and class in the same article, in order.
+    // The article around it, not the root itself: when the text's element is the <article> (bt.no), there is nothing
+    // alike to look for, and looking inside it found nothing at all, so the story read as having no text.
+    function readerParts(root, skip) {
+      const cls = root.getAttribute('class'), within = root.parentElement?.closest('article, main');
+      if (!cls || !within) return [root];
+      const same = [...within.getElementsByTagName(root.tagName)].filter(el => el === root || (el.getAttribute('class') === cls && !el.contains(root) && !root.contains(el) && !el.closest(skip)
+        && [...el.querySelectorAll('p')].some(p => norm(p.textContent).length >= 40)));
+      return same.length <= 6 ? same : [root];
+    }
     function readerRoot(doc, skip) {
       const score = new Map();
       for (const p of doc.querySelectorAll('p')) {
@@ -2232,15 +2269,54 @@
       return best;
     }
 
+    // A review's score on its own page (Pitchfork's "musicRating"), else schema.org's reviewRating.
+    function pageRating(html, doc) {
+      const m = html.match(/"musicRating":\{([^{}]*)\}/);
+      if (m) return ratingFrom(m[1], /"isTrackReview":true/.test(html));
+      for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) try {
+        for (const it of [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent))) {
+          const r = it?.reviewRating, v = r && parseFloat(r.ratingValue), best = r && parseFloat(r.bestRating);
+          if (v >= 0) return { score: best && best !== 10 ? `${v}/${best}` : v.toFixed(1), best: '' };
+        }
+      } catch {}
+      return null;
+    }
+    // A music review's facts on its page (Pitchfork: {"genre":"Folk/Country","label":"Rough Trade",…,"releaseYear":"2026"}).
+    function reviewFacts(html) {
+      const m = html.match(/\{("genre":"[^{}]*"releaseYear":"[^"]*"[^{}]*)\}/);
+      if (!m) return null;
+      try { const f = JSON.parse(`{${m[1]}}`); return { genre: norm(f.genre), label: norm(f.label), year: norm(f.releaseYear) }; } catch { return null; }
+    }
+    // What a music review is about, as schema.org names it (Pitchfork: "Radie Peat: No Human Tongue Can Tell").
+    // The album or song a review is about, from the page's JSON-LD: { name: "Artist: Album" when the artist is given, album:
+    // true for a MusicAlbum (musicOMH, The Independent, DIY, The Line of Best Fit: the album as the review's item, or the
+    // album with the review inside it) }. null: none.
+    function reviewedAlbum(doc) {
+      const artistOf = a => norm([].concat(a || []).map(x => typeof x === 'string' ? x : x?.name).filter(x => typeof x === 'string').join(', '));
+      const named = (r, album) => ({ name: (artistOf(r.byArtist) ? artistOf(r.byArtist) + ': ' : '') + unentity(norm(r.name)), album, artist: !!artistOf(r.byArtist) });
+      let found = null;
+      for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) try {
+        for (const it of [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent))) {
+          const r = it?.itemReviewed, type = t => [].concat(t || []).join(' ');
+          if (r && /\bMusic(?:Recording|Album)\b/.test(type(r['@type'])) && typeof r.name === 'string') return named(r, /MusicAlbum/.test(type(r['@type'])));
+          if (!found && /\bMusicAlbum\b/.test(type(it?.['@type'])) && typeof it.name === 'string') found = named(it, true);
+        }
+      } catch {}
+      return found;
+    }
+    function readArticle(html, url, withImages) {
+      const doc = parseHtml(html), art = readArticleIn(doc, url, withImages);
+      if (art) try { art.rating = pageRating(html, doc); const rv = reviewedAlbum(doc); art.album = rv?.name || ''; art.albumPair = !!(rv?.album && rv.artist); art.facts = reviewFacts(html); } catch {}
+      return art;
+    }
     // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'embed', text, items, src, caption }], date, byline, paid, partial } or null
     // partial: a paid article that arrived with only its start. short: an article with little text.
-    function readArticle(html, url, withImages) {
-      const doc = parseHtml(html);
+    function readArticleIn(doc, url, withImages) {
       let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
       for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
         try {
           for (const it of [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent))) {
-            if (!it || !/Article|NewsArticle|Report/i.test(String(it['@type']))) continue;
+            if (!it || !/Article|NewsArticle|Report|^Review$/i.test(String(it['@type']))) continue;
             article = true;
             if (it.isAccessibleForFree === false || /^false$/i.test(String(it.isAccessibleForFree))) paid = true;
             date ||= it.datePublished || '';
@@ -2297,7 +2373,7 @@
       };
       if (entry) walk(entry); else if (feed) feed.forEach(walk);
       else {
-        if (root) walk(root);
+        if (root) readerParts(root, skip).forEach(walk);
         // A quiz can sit beside the element with the text (Amedia puts the week's quiz above it): keep that order.
         const above = [];
         for (const f of quizzes) {
@@ -2359,7 +2435,7 @@
     function articleFetched(url, html, finalUrl) {
       if (readerFor && !readerCache.has(url)) readerCache.set(url, { at: Date.now(), raw: Promise.resolve({ html, finalUrl }) });
     }
-    const SAYS_ARTICLE = /"@type"\s*:\s*\[?\s*"\w*Article"|<meta[^>]*og:type[^>]*content="article"/;
+    const SAYS_ARTICLE = /"@type"\s*:\s*\[?\s*"(?:\w*Article|Review)"|<meta[^>]*og:type[^>]*content="article"/;
     async function fetchPage(url) {
       const domainOf = u => { try { return registrable(new URL(u, url).hostname); } catch { return ''; } };
       try {
@@ -2426,8 +2502,8 @@
       const h = href.hostname.replace(/^www\./, '');
       const target = SITES.find(s => s.host.test(h));
       if (target) { if (!target.article.test(href.pathname)) return false; }
-      else if (newsHost(h)) { if (!genericArticlePath(href.pathname)) return false; }
-      else if (site || registrable(h) !== registrable(host) || !genericArticlePath(href.pathname)) return false;
+      else if (newsHost(h)) { if (!genericArticlePath(href.pathname) && !idQueryArticle(href)) return false; }
+      else if (site || registrable(h) !== registrable(host) || !(genericArticlePath(href.pathname) || idQueryArticle(href))) return false;
       if (href.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '')) return false;
       return href.href;
     }
@@ -2442,13 +2518,13 @@
       let t = '';
       try { t = norm(el.innerText.replace(/\u00AD/g, '')).replace(/\s*[▸▾]$/, ''); } catch {}
       if (t) return t;
-      const al = norm(el.getAttribute && el.getAttribute('aria-label'));
+      const al = unentity(norm(el.getAttribute && el.getAttribute('aria-label')));
       if (al) return al;
       const c = el.cloneNode(true);
       c.querySelectorAll('style, script, template, noscript').forEach(e => e.remove());
       const all = c.textContent;
       c.querySelectorAll('[aria-hidden="true"]').forEach(e => e.remove());
-      return norm((norm(c.textContent) ? c.textContent : all).replace(/\u00AD/g, ''));
+      return unentity(norm((norm(c.textContent) ? c.textContent : all).replace(/\u00AD/g, '')));
     }
 
     // A link is "inline" when its text-flow container has other words around it.
@@ -2633,7 +2709,7 @@
             }
             const topic = job.a && mutedTopicOf(job.url, orig, meta);
             if (topic) { muteTeaser(job.a, topic); return; }
-            jobs.set(job.el, { orig, url: job.url, key: job.url.replace(/[?#].*$/, '') });
+            jobs.set(job.el, { orig, url: job.url, key: articleKey(job.url) });
             const { text, lead } = choose(orig, cleanMeta(meta, job.url));
             apply(job.el, orig, text, lead);
           } finally { active--; pump(); }
@@ -2812,12 +2888,20 @@
     let level = 'pictures', defaultLevel = 'pictures';
 
     // Many front pages call themselves og:type=article (Express, NPR, FAZ, SZ, NDTV), so a page only
-    // counts as an article when its URL looks like one, or when og:type says so deeper than one section.
+    // counts as an article when its URL looks like one, or when og:type says so deeper than one section, on a page that
+    // doesn't say it is a list: WordPress's archives (body class archive, category, …: Angry Metal Guy's
+    // /category/reviews/, musicOMH's /reviews/albums) and CollectionPage in the page's JSON-LD (NME's /reviews/album).
     function onArticlePage() {
       const path = location.pathname;
-      if (site?.article ? site.article.test(path) : genericArticlePath(path)) return true;
+      if (site?.article ? site.article.test(path) : genericArticlePath(path) || idQueryArticle(location)) return true;
       const og = document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '';
-      return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2;
+      return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2 && !listPage();
+    }
+    function listPage() {
+      if (NOT_ARTICLE.test(location.pathname)) return true; // /category/…, /tag/…, /author/… (Stereogum's /category/reviews/album-of-the-week)
+      if (/(?:^|\s)(?:archive|category|tag|tax-[\w-]+|post-type-archive|blog|home)(?:\s|$)/.test(document.body?.className || '')) return true;
+      return [...document.querySelectorAll('script[type="application/ld+json"]')].some(s => /"@type"\s*:\s*"(?:CollectionPage|ItemList)"/.test(s.textContent) &&
+        !/"@type"\s*:\s*"(?:NewsArticle|Article|BlogPosting|Review|ReportageNewsArticle)"/.test(s.textContent));
     }
 
     // ───────────────────────────── Plain view ─────────────────────────────
@@ -2857,7 +2941,292 @@
         if (m && registrable(u.hostname) === registrable(host) && t.length >= 2 && t.length <= 30 && !had) sectionNames.set(id, t);
       }
     }
-    const sectionLabel = id => id === 'latest' ? T.latest : id === 'other' ? T.other : id === 'saved-later' ? T.later : id === 'saved-marks' ? T.marks : sectionNames.get(id) || (id[0].toUpperCase() + id.slice(1)).replace(/-/g, ' ');
+    // The site's own menu (Pitchfork: News, Reviews, Best New Music …) and each section's own row of filters (Reviews:
+    // Best New Albums, Best New Reissues, 8.0+ reviews, Sunday Reviews, Tracks). Plain view lists articles only, so without
+    // these the site's other pages are out of reach; they open as plain view too. Links to the same site that are not
+    // articles, from menus outside the footer and from rows of tabs or switches; never account, subscription, sales,
+    // settings, game, contact or legal pages. { top, groups } — groups: a section's path → its filters. null: fewer than three.
+    const MENU_SKIP = /\b(?:account|profile|log ?in|log ?out|sign ?(?:in|out|up)|register|subscri\w*|abonn\w*|newsletters?|nyhetsbrev|privacy|personvern|cookies?|contact|kontakt|about|om oss|rss|advertis\w*|annonse\w*|faq|help|hjelp|masthead|jobs?|careers?|terms|vilkår|shop|butikk|search|søk|tips?|events?|kjøp|kjop|buy|tilbud|offers?|deals?|innstillinger|settings|preferences?|edition|kundeservice|customer|bedrift\w*|e-?avis|e-?paper|games?|spill|quiz|kryssord|crosswords?|black (?:week|friday)|plus|pluss|premium)\b|annonse|anzeige|sponsor|[+!*]$/i;
+    const TAB_LINKS = 'a[href][role="switch"], a[href][role="tab"], [role="tablist"] a[href]';
+    const menuPath = u => u.pathname.replace(/\/$/, '');
+    function menuLinks(els, base) {
+      const out = new Map();
+      for (const a of els) {
+        let u; try { u = new URL(a.getAttribute('href'), base); } catch { continue; }
+        const path = menuPath(u), t = norm(a.textContent);
+        if (!/^https?:$/.test(u.protocol) || registrable(u.hostname) !== registrable(host) || !path || out.has(path)) continue;
+        if (t.length < 2 || t.length > 32 || MENU_SKIP.test(t) || MENU_SKIP.test(path.replace(/[/_-]/g, ' '))) continue;
+        if (site ? site.article.test(u.pathname) : genericArticlePath(u.pathname)) continue;
+        out.set(path, { href: u.origin + u.pathname, path, text: t });
+        if (out.size >= 16) break;
+      }
+      return out;
+    }
+    // A page's filters, without the ones already in the main menu. Its section: the menu item among them (Pitchfork's
+    // "Albums" is Reviews' own page), else the one given (the section whose page this is), else the menu item this page is.
+    function menuGroup(root, base, top, parent) {
+      const tabs = menuLinks(root.querySelectorAll(TAB_LINKS), base);
+      parent = [...tabs.keys()].find(p => top.has(p)) || parent;
+      const links = [...tabs.values()].filter(l => !top.has(l.path));
+      return parent && links.length >= 2 ? [parent, links] : null;
+    }
+    function siteMenu(root = document) {
+      const navs = [...root.querySelectorAll('nav a[href], [role="navigation"] a[href]')].filter(a => !a.closest('footer, [role="contentinfo"]') && !a.matches(TAB_LINKS));
+      const top = menuLinks(navs, location.href), here = menuPath(location);
+      if (top.size < 3) return null;
+      const g = menuGroup(root, location.href, top, top.has(here) ? here : null);
+      return { top: [...top.values()], groups: new Map(g ? [g] : []) };
+    }
+    // The genre a card is filed under, as a link to the site's page for it (Pitchfork: "Rock" → /genre/rock). Looked for in
+    // the teaser's own card: the nearest box around the link that has one, as long as it holds no more than one teaser's links.
+    // When a card says it was published, from a <time> in the teaser's own card (Pitchfork: "November 19, 2026"). 0: unknown.
+    function dateOf(a) {
+      // In the address (WordPress: /2026/02/27/the-inward-circles-shadow-reflex/), when the card shows none.
+      const fromUrl = () => { const m = (a.getAttribute('href') || '').match(/\/(20\d\d|19\d\d)\/([01]\d)\/([0-3]\d)\//); return m ? Date.parse(`${m[1]}-${m[2]}-${m[3]}T12:00`) || 0 : 0; };
+      for (let el = a.parentElement, i = 0; el && i < 6; el = el.parentElement, i++) {
+        const t = el.querySelector('time'); if (!t) continue;
+        if (el.querySelectorAll('a[href]').length > 6) return fromUrl();
+        return Date.parse(t.getAttribute('datetime') || norm(t.textContent)) || fromUrl();
+      }
+      return fromUrl();
+    }
+    const GENRE_LINK = 'a[href*="/genre/" i], a[href*="/genres/" i], a[href*="/sjanger/" i]';
+    function genreOf(a) {
+      for (let el = a.parentElement, i = 0; el && i < 6; el = el.parentElement, i++) {
+        const g = el.querySelector(GENRE_LINK); if (!g) continue;
+        const t = norm(g.textContent);
+        return el.querySelectorAll('a[href]').length <= 6 && t.length >= 2 && t.length <= 30 ? t : '';
+      }
+      return '';
+    }
+    // A review's score (Pitchfork), kept in the page's data rather than on its card: path → "7.1", and Best New Music.
+    const ratings = new Map(), ratingsRead = new WeakSet();
+    function ratingFrom(fields, track) {
+      const score = fields.match(/"score":(\d+(?:\.\d+)?)/);
+      const best = /"isBestNewMusic":true/.test(fields) ? (track ? 'Best New Track' : 'Best New Music') : /"isBestNewReissue":true/.test(fields) ? 'Best New Reissue' : '';
+      return score || best ? { score: score ? (+score[1]).toFixed(1) : '', best } : null;
+    }
+    // ── An album review's album, in the reader's music app ──
+    // The review's "Artist: Album" is looked up in the app chosen in the popup (CFG.albumApp), and the ▶ button opens it
+    // there. On a phone the link to the service's site opens its app when it is installed.
+    //   ytm: YouTube Music, the album's own playlist from its first song (it plays at once).
+    //   apple: Apple Music, the album's page (Apple's public search; its own links open the Music app).
+    //   spotify: Spotify's search for it (Spotify has no lookup without an account).
+    //   kaset: Kaset, the YouTube Music app for the Mac. The album's songs, in order, go to the Kaset Album helper
+    //     (extension/kaset-album) as kasetalbum://play?v=ID,ID,…, which has Kaset replace its queue with them and play; Kaset's
+    //     own links can only start one song.
+    const ALBUM_APPS = { ytm: 'YouTube Music', apple: 'Apple Music', spotify: 'Spotify', kaset: 'Kaset' };
+    const albumAppOn = () => !!ALBUM_APPS[CFG.albumApp];
+    const ALBUM_REVIEW = /\/reviews\/albums\//;
+    const findAll = (o, key, out = []) => {
+      if (Array.isArray(o)) for (const v of o) findAll(v, key, out);
+      else if (o && typeof o === 'object') for (const k in o) { if (k === key) out.push(o[k]); findAll(o[k], key, out); }
+      return out;
+    };
+    // A YouTube Music page's own data: the page carries it as JavaScript strings (initialData.push({ …, data: '…' })).
+    // Read from the page as anyone opens it; YouTube Music's search service turns away requests from an extension.
+    async function ytmData(path) {
+      // ucbcb=1: the page itself rather than YouTube's cookie question (which YouTube adds by itself on its way there), so
+      // nothing is consented to on the reader's behalf.
+      const r = await gm.rawXhr({ url: 'https://music.youtube.com' + path + (path.includes('?') ? '&' : '?') + 'cbrd=1&ucbcb=1', headers: { Accept: 'text/html' } });
+      const out = [];
+      for (const m of (r.responseText || '').matchAll(/initialData\.push\(\{path: '[^']*', params: JSON\.parse\('(?:[^'\\]|\\.)*'\), data: '((?:[^'\\]|\\.)*)'\}\)/g)) try {
+        out.push(JSON.parse(m[1].replace(/\\(?:x([0-9a-f]{2})|(.))/gi, (_, hex, c) => hex ? String.fromCharCode(parseInt(hex, 16)) : c)));
+      } catch {}
+      return out;
+    }
+    const lowWords = s => s.toLowerCase().normalize('NFKD').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+    function albumParts(name) {
+      const at = name.indexOf(': '), artist = at > 0 ? name.slice(0, at) : '', album = at > 0 ? name.slice(at + 2) : name;
+      // "Rubber Soul (Super Deluxe)": the album's own name, its first words, is what has to match, with the artist.
+      return { artist, album, core: lowWords(album.replace(/\s*[([].*$/, '')).split(' ').slice(0, 3).join(' ') };
+    }
+    // The album on YouTube Music: { playlist: its own playlist (OLAK5uy_…), songs: its songs' video ids, in order }.
+    async function ytmAlbum(name) {
+      const { artist, album, core } = albumParts(name);
+      const found = await ytmData('/search?q=' + encodeURIComponent(`${artist} ${album}`.trim()));
+      // The album itself (the top result's card, or a row that leads to the album), before a song from it: the title
+      // song's own row leads to its single (Baby Osamaa's "On Tha Run": one song).
+      const album1 = id => /^MPRE/.test(id || '') ? id : '';
+      const hits = [...findAll(found, 'musicCardShelfRenderer').map(it => ({ own: album1(findAll([it.title, it.onTap], 'browseId')[0]), parts: [it.title, it.subtitle] })),
+        ...findAll(found, 'musicResponsiveListItemRenderer').map(it => ({ own: album1(it.navigationEndpoint?.browseEndpoint?.browseId), parts: it.flexColumns }))]
+        .map(h => ({ ...h, from: findAll(h.parts, 'browseId').find(id => /^MPRE/.test(id)), text: lowWords(findAll(h.parts, 'runs').flat().map(r => r.text).join(' ')) }))
+        .filter(h => h.text.includes(core) && (!artist || h.text.includes(lowWords(artist))));
+      const hit = hits.find(h => h.own) || hits.find(h => h.from);
+      if (!hit) return null;
+      const page = await ytmData('/browse/' + (hit.own || hit.from));
+      const playlist = (findAll(page, 'urlCanonical').join(' ').match(/list=(OLAK5uy_[\w-]+)/) || [])[1] || '';
+      // Its songs: the rows of its track list (a phone gets them without playlistItemData), each played in its playlist.
+      const songs = [...findAll(page, 'playlistItemData').map(p => p.videoId),
+        ...findAll(findAll(page, 'musicShelfRenderer'), 'watchEndpoint').filter(w => !playlist || w.playlistId === playlist).map(w => w.videoId)];
+      return { playlist, songs: [...new Set(songs.filter(v => /^[\w-]{11}$/.test(v || '')))].slice(0, 200) };
+    }
+    // The album on Apple Music: its page (https://music.apple.com/…/album/…), in the reader's own country's store.
+    async function appleAlbum(name) {
+      const { artist, album, core } = albumParts(name);
+      const country = (navigator.language.match(/-([a-z]{2})$/i)?.[1] || 'us').toLowerCase();
+      const r = await gm.rawXhr({ url: `https://itunes.apple.com/search?entity=album&limit=10&country=${country}&term=` + encodeURIComponent(`${artist} ${album}`.trim()) });
+      const res = JSON.parse(r.responseText || '{}').results || [];
+      const hit = res.find(x => lowWords(x.collectionName || '').includes(core) && (!artist || lowWords(x.artistName || '').includes(lowWords(artist)) || lowWords(artist).includes(lowWords(x.artistName || '-'))));
+      return hit?.collectionViewUrl ? hit.collectionViewUrl.replace(/[?&]uo=\d+/, '') : '';
+    }
+    // ── Which album a review is about, on any music site ──
+    // Not per site: a review's address says it is one (review, anmeldelse, recensione, …), outside the sections for concerts,
+    // films, books, songs or news, and its headline names artist and album the way music sites do:
+    //   "Artist – Album" (Clash, musicOMH, DIY), "Artist – Album Review" (Angry Metal Guy), "… (Album Review)" (Folk Radio),
+    //   "Album review: Artist – Album" (Kerrang), "Artist: Album review – …" (The Guardian), "Artist – ‘Album’ review: …"
+    //   (NME), "Artist review, Album – …" (The Independent), "Artist, crítica de Album" (MondoSonoro), and, where the
+    //   review's own address says so, "Artist's ‘Album’ …" (Exclaim, HipHopDX).
+    // "Artist: Album", or '' when the headline doesn't name both.
+    // An album's own page under /albums/ or /alben/ counts too (laut.de: /Tieflader/Alben/Juenger-Des-Mammon-127776), and
+    // Plattentests' rezi.php.
+    const REVIEW_WORD = /review|recens|rezension|\brezi\b|anmeld|kritik|cr[ií]tica|critique|chroniqu|arvio|bespreking|\/alb(?:ums?|en)\//i;
+    const NOT_ALBUM_DIR = /\/(?:[\w-]*-)?(?:photos?|fotos?|bilder|bildeserie|galler(?:y|ies|i)|live|concerts?|konserte?r?|koncerte?r?|konzerte?|conciertos?|gigs?|festivals?|films?|movies?|cine|cinema|tv|series|serier|books?|bøker|boker|games?|spill|theat\w*|teater|restaurants?|gear|tech|tracks?|songs?|singles?|news|nyheter|nyheder|nieuws|nachrichten|noticias|notizie|uutiset)(?:-[\w-]*)?\//i;
+    const NOT_ALBUM_SLUG = /(?:^|-)(?:live-review|concerts?|konsert|koncert|konzert|concierto|gig|festival|film|movie|book|game|song-review|track-review|single)(?:-|$)/i;
+    // 1: the address of a review (that isn't of a concert, film, …), -1: of something else, 0: neither.
+    function reviewUrl(url) {
+      let path; try { path = decodeURIComponent(new URL(url, location.href).pathname); } catch { return 0; }
+      const segs = path.split('/').filter(Boolean), slug = segs.pop() || '', dirs = '/' + segs.join('/') + '/';
+      if (NOT_ALBUM_DIR.test(dirs) || NOT_ALBUM_SLUG.test(slug)) return -1;
+      return REVIEW_WORD.test(path) ? 1 : 0;
+    }
+    const ALBUM_LABEL = /^(?:(?:album|ep|lp|cd|record|plate|skive|disco|disque|levy)[\s-]*)?(?:review|anmeldelse|plateanmeldelse|recension|recensione|recensie|rezension|kritik|cr[ií]tica|critique|arvio|levyarvio)\s*[:|–—-]\s+/i;
+    const OTHER_LABEL = /^[\p{L} ]{1,24}(?:review|anmeldelse|recension|recensione|rezension|kritik|cr[ií]tica|critique|arvio)\s*:/iu; // "Live review:", "Film review:"
+    // A monthly column, a concert on a date (The Jazz Mann: "…, Worcester, 12/11/2026"), an edition rather than an album.
+    const NOT_ALBUM_TEXT = /\b(?:reviewed|round-?up|column|best of|for (?:january|february|march|april|may|june|july|august|september|october|november|december))\b|\b\d{1,2}[/.]\d{1,2}[/.]\d{2,4}\b|^\d+(?:st|nd|rd|th) anniversary/i;
+    // The site's name or address, or a note that this is a review, after the headline: "… - Loud And Quiet",
+    // "… - Die Review zum neuen Album bei metal.de", "… – jenesaispop.com".
+    const REVIEW_NOTE = /^(?:(?:die|the|our|unsere?|ausführliche|full|album|ep|lp)\s+)*(?:review|rezension|kritik|anmeldelse|recensione|critique|cr[ií]tica)\b|^[\w.-]+\.[a-z]{2,6}$/i;
+    const siteTail = s => { const n = lowWords(s); return !!n && (n === lowWords(pageMeta.site || '') || n === lowWords(host) || n === lowWords(host.replace(/\.[a-z]+$/, ''))); };
+    const NOT_ARTIST = /\b(?:best|albums?|reviews?|week|month|year|new|top|playlist|songs|tracks|interview|premiere|watch|listen|stream)\b|[?!@]/i;
+    function albumFromTitle(raw, loose) {
+      let t = norm(unentity(raw || '')).replace(/\s+[|»•]\s+.*$/, ''), m, artist = '', album = '', reviewed = false;
+      for (let tail; (tail = t.match(/^(.+)\s+[-–—]\s+([^-–—]+)$/)) && (REVIEW_NOTE.test(tail[2]) || siteTail(tail[2]));) t = tail[1];
+      if (ALBUM_LABEL.test(t)) t = t.replace(ALBUM_LABEL, '');
+      else if (OTHER_LABEL.test(t) || /^(?:mp3|video|watch|listen|premiere|stream|song|track|single|news|interview)\s*:/i.test(t)) return ''; // "MP3: Kanye West – “Runaway”
+      if ((m = t.match(/^(.{1,60}?)\s*::?\s*([„“"«‘][^”"»’“]{1,120}[”"»’“])(?:\s|$)/)) || // Rolling Stone (DE): "Abba :: „The Visitors“ – …"
+        (m = t.match(/^(.{1,60}?),?\s+(?:review|anmeldelse|recension|rezension)\s*,\s+(.{1,120}?)(?:\s+[–—:-]\s+.*)?$/i)) ||
+        (m = t.match(/^(.{1,60}?),\s+(?:cr[ií]tica de|critique de|recensione di|review of|anmeldelse av|kritik av|rezension zu)\s+(.{1,120})$/i))) [, artist, album] = m;
+      else {
+        const said = t;
+        t = t.replace(/\s*[(\[](?:album |ep |lp )?(?:review|recensione|rezension|anmeldelse|kritik|crítica|critique)[)\]]\s*$/i, '')
+          .replace(/\s+(?:(?:album|ep|lp|record)\s+)?(?:review|recensione|rezension|anmeldelse|crítica|critique|recension)\b(?:\s*[:–—,-].*)?$/i, '');
+        reviewed = t !== said; // "Artist: Album review – …": the colon is the artist's only with the word, or on a review's own address
+        t = t.replace(/\s*[-–(\[]?\s*(?:[★☆✩✭⭐½]+|\d+(?:[.,]\d)?\s*\/\s*(?:10|5|100)|terningkast\s*\d)\s*[)\]]?\s*$/i, '');
+        if ((m = t.match(/^(.+?)\s+[–—-]\s+(.+)$/))) { [, artist, album] = m; const c = artist.lastIndexOf(': '); if (c > 0) artist = artist.slice(c + 2); }
+        else if ((reviewed || loose) && (m = t.match(/^(.+?):\s+(.+)$/))) {
+          [, artist, album] = m;
+          const by = album.match(/^(.{1,80}?)\s+by\s+(.{1,60})$/); // "Worlds Apart: Noon by Richard Skelton" (The Quietus)
+          if (by) [, album, artist] = by;
+          else {
+            const own = artist.match(/^(.{1,40}?)['’]s\s+(.+)$/); // "Taylor Swift's Showgirl: The Encore Review"
+            if (own) { artist = own[1]; album = own[2] + ': ' + album; }
+            // Without the word, only a short "Artist: Album" (Pitchfork), not a headline ("Rachel Chinouriri: An Indie-Pop …").
+            else if (!reviewed && (album.split(' ').length > 6 || artist.split(' ').length > 5)) return '';
+          }
+        }
+        else if (loose && (m = t.match(/^([^/]{1,60}) \/ ([^/]{1,100})$/))) [, artist, album] = m; // "2hollis / Pirouette"
+        else if (loose && (m = t.match(/^(.{1,50}?)['’]s?\s+(?:(?:new|debut|latest|sophomore|second|third)\s+)?(?:(?:album|LP|EP|record)\s+)?[‘'"“«]([^’'"”»]{1,100})[’'"”»]/i))) [, artist, album] = m;
+        else return '';
+      }
+      const q = album.match(/^([‘'"“«„])(.{1,120})([’'"”»“])(?:\s+(?:EP|LP|album))?$/i);
+      const QUOTES = { '‘': '’', "'": "'", '"': '"', '“': '”', '«': '»', '„': '“' };
+      if (q && QUOTES[q[1]] === q[3]) album = q[2];
+      else { const lead = album.match(/^([‘"“«„])([^’"”»“]{1,120})([’"”»“])/); if (lead && QUOTES[lead[1]] === lead[3]) album = lead[2]; } // "“Light Eater” – Chemnitz"
+      // Taken from a list of reviews alone, not the review's own address: a plain "Artist – Album", not a sentence with a
+      // dash in it (Rolling Stone's news among its reviews: "„Kevin – Allein zu Haus“-Sequel mit …").
+      const open = s => /[„“«‘"]/.test(s) && !/[”»’"“]$/.test(s.trim()) && !/[„“«‘"].*[”»’"“]/.test(s);
+      if (!loose && !reviewed && (/\s[–—-]\s/.test(album) || album.split(' ').length > 8 || open(artist) || open(album))) return '';
+      artist = norm(artist); album = norm(album).replace(/[.,;:]$/, '');
+      if (!artist || !album || artist.length > 60 || artist.split(' ').length > 7 || album.length > 120 || album.split(' ').length > 14 || NOT_ARTIST.test(artist) || NOT_ALBUM_TEXT.test(album)) return '';
+      return `${artist}: ${album}`;
+    }
+    // A list's article: its album, from its card's two headings (headingPair), its headline, or (also) the headline on its
+    // own page (The Line of Best Fit's cards: "2hollis sides with romance on …"; its page: "2hollis – Pirouette review: …"),
+    // on its own review's address or in a list of reviews (Folk Radio's reviews link to its sister site, without the word
+    // in their addresses). Kept on it.
+    let listReviews = null;
+    function albumOf(it, also) {
+      if (it.album) return it.album;
+      listReviews ??= reviewUrl(location.href) > 0 || REVIEW_SECTION.test(location.pathname);
+      const own = reviewUrl(it.url);
+      if (!(own > 0 || (own === 0 && listReviews))) return '';
+      const tried = it.albumTried ||= new Set();
+      for (const t of [it.teaser, also]) if (t && !tried.has(t)) { tried.add(t); if ((it.album = albumFromTitle(t, own > 0))) break; }
+      return it.album || '';
+    }
+    // A review opened directly: the album from the page's headline, when its address (or its JSON-LD) says it is a review.
+    function pageAlbum() {
+      const own = reviewUrl(location.href);
+      if (own < 0) return '';
+      if (!own && ![...document.querySelectorAll('script[type="application/ld+json"]')].some(s => /"@type"\s*:\s*\[?\s*"(?:Review|ReviewNewsArticle)"/.test(s.textContent))) return '';
+      // The review's own headline, not a logo in an h1 above it (Blabbermouth).
+      const h1s = [...document.querySelectorAll('article h1, main h1, h1')].slice(0, 4).map(h => h.textContent);
+      for (const t of [document.querySelector('meta[property="og:title"]')?.getAttribute('content'), ...h1s, document.title]) {
+        const a = albumFromTitle(t, true); if (a) return a;
+      }
+      return '';
+    }
+    // Where the ▶ button goes: a URL, or '' when the album is not found.
+    const albumLinks = new Map();
+    function albumLink(name) {
+      const app = CFG.albumApp, key = app + '\n' + name;
+      if (!albumLinks.has(key)) albumLinks.set(key, (async () => {
+        if (app === 'spotify') { const { artist, album } = albumParts(name); return 'https://open.spotify.com/search/' + encodeURIComponent(`${artist} ${album}`.trim()); }
+        if (app === 'apple') return await appleAlbum(name);
+        const a = await ytmAlbum(name);
+        if (app === 'kaset') return a?.songs.length ? 'kasetalbum://play?v=' + a.songs.join(',') : '';
+        if (!a?.playlist) return '';
+        return 'https://music.youtube.com/' + (a.songs[0] ? `watch?v=${a.songs[0]}&list=` : 'playlist?list=') + a.playlist;
+      })().catch(() => ''));
+      return albumLinks.get(key);
+    }
+    function albumButton(name) {
+      const b = document.createElement('button'), label = '▶ ' + ALBUM_APPS[CFG.albumApp];
+      b.type = 'button'; b.className = 'kaset'; b.textContent = label; b.title = b.ariaLabel = T.playAlbumIn.replace('%s', ALBUM_APPS[CFG.albumApp]);
+      b.addEventListener('click', async e => {
+        e.preventDefault(); e.stopPropagation();
+        // With a mouse, the service's site opens in a tab of its own, opened now (a tab opened after the lookup is blocked as
+        // a pop-up). On a phone the page itself goes there, which is what has the service's app take it over.
+        const tab = CFG.albumApp !== 'kaset' && matchMedia('(hover: hover) and (pointer: fine)').matches ? window.open('about:blank', '_blank') : null;
+        b.textContent = '…'; b.disabled = true;
+        const url = await albumLink(name);
+        b.disabled = false; b.textContent = url ? label : T.kasetNone;
+        if (tab) { if (url) tab.location.href = url; else tab.close(); }
+        else if (url) location.href = url;
+      });
+      return b;
+    }
+    const ratingText = r => [r.score, r.best].filter(Boolean).join(' · ');
+    function readRatings(root) {
+      for (const s of root.querySelectorAll('script:not([src])')) {
+        if (ratingsRead.has(s)) continue;
+        ratingsRead.add(s);
+        readRatingsIn(s.textContent);
+      }
+    }
+    // From the page's text itself: an older page of a list (moreForFilters) is read this way, then parsed without its scripts.
+    function readRatingsIn(t) {
+      if (!t.includes('"ratingValue"')) return;
+      for (const m of t.matchAll(/"ratingValue":\{([^{}]*)\},"url":"([^"]{1,300})"/g)) try {
+        const r = ratingFrom(m[1], /"channelType":"Tracks"/.test(m[1])), path = menuPath(new URL(JSON.parse(`"${m[2]}"`), location.origin));
+        if (r) ratings.set(path, r);
+        // The rest of the review's entry: who wrote it, when, and its summary (the card's own line from the site, where
+        // the review page's description only says "Read … review of the album").
+        const start = t.lastIndexOf('{"id":"', m.index), o = start >= 0 && m.index - start < 30000 ? t.slice(start, m.index) : '';
+        const str = re => { const x = o.match(re); try { return x ? JSON.parse(`"${x[1]}"`) : ''; } catch { return ''; } };
+        const ai = o.indexOf('"author":{"items":['), authors = ai < 0 ? '' : o.slice(ai, o.indexOf('}]}', ai) >>> 0); // not a photographer's
+        const by = [...authors.matchAll(/"name":"((?:[^"\\]|\\.){1,80})"/g)].map(x => { try { return JSON.parse(`"${x[1]}"`); } catch { return ''; } }).filter(Boolean).slice(0, 3);
+        reviewInfo.set(path, { by, artist: norm(str(/"subHed":\{"name":"((?:[^"\\]|\\.)*)"/)), dek: plainText(str(/"dangerousDek":"((?:[^"\\]|\\.)*)"/)), at: Date.parse(str(/"pubDate":"([^"]*)"/)) || 0 });
+      } catch {}
+    }
+    // HTML as plain text, without parsing a document for it: "<em>Echo</em>", "R&amp;B".
+    const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+    const plainText = html => norm(String(html).replace(/<[^>]*>/g, '').replace(/&(?:#(\d+)|#x([0-9a-f]+)|(\w+));/gi, (m, d, x, n) => d ? String.fromCodePoint(+d) : x ? String.fromCodePoint(parseInt(x, 16)) : ENTITIES[n.toLowerCase()] ?? m));
+    const reviewInfo = new Map(), reviewOf = url => { try { return reviewInfo.get(menuPath(new URL(url))) || null; } catch { return null; } };
+    const ratingOf = url => { if (!ratings.size) return null; try { return ratings.get(menuPath(new URL(url))) || null; } catch { return null; } };
+    let pageName = ''; // the site's name for the page plain view lists, when not its front page (plainView)
+    const sectionLabel = id => id === 'latest' ? T.latest : id === 'other' ? pageName || T.other : id === 'saved-later' ? T.later : id === 'saved-marks' ? T.marks : sectionNames.get(id) || (id[0].toUpperCase() + id.slice(1)).replace(/-/g, ' ');
     // Advertorials dressed as articles carry a small label; plain view leaves them out with the other ads.
     const AD_LABEL = /^(?:annonse|annons|annonsørinnhold|annonsorinnhold|sponset|sponsrat|sponsoreret|sponsored|sponsored content|anzeige|werbung|advertisement|advertorial|reklame|paid post|partner content|i samarbeid med\b.*|i samarbete med\b.*|in partnership with\b.*)$/i;
     function isAd(a) {
@@ -2929,22 +3298,40 @@
       return items;
     }
 
+    // A card that heads a review with the artist and the album as two headings, each a link to the review (Headphone
+    // Commute: "The Inward Circles" / "Shadow Reflex"): both, as "Artist – Album", and the album for the ▶ button when the
+    // card or the page is filed under reviews or albums. null: not such a card.
+    const REVIEWS_PATH = /review|album|\beps?\b|plate|disque|schallplatte/i;
+    function headingPair(a, url) {
+      const card = a.closest('article, li'); if (!card || card.querySelectorAll('a[href]').length > 8) return null;
+      const same = h => [...h.querySelectorAll('a[href]')].some(l => { try { return new URL(l.getAttribute('href'), location.href).href === url; } catch { return false; } });
+      const hs = [...card.querySelectorAll('h1, h2, h3, h4, h5')].filter(h => same(h) && textOf(h)).slice(0, 3);
+      if (hs.length !== 2) return null;
+      const [artist, album] = hs.map(textOf);
+      const filed = [...card.querySelectorAll('a[href]')].some(l => !same(l) && !l.closest('h1, h2, h3, h4, h5') && REVIEWS_PATH.test(l.getAttribute('href'))) || REVIEWS_PATH.test(location.pathname);
+      return { teaser: `${artist} – ${album}`, album: filed ? `${artist}: ${album}` : '' };
+    }
+
     // known: articles already collected, skipped without measuring (harvest() calls this repeatedly).
     // measure false: without prominence(), which needs the page laid out (the heavy-page path at the end of plainView); the
     // headline's level stands in for its size. root: a downloaded copy of the page instead (plainView, a stopped heavy page).
     const LEVEL_SIZE = { H1: 40, H2: 32, H3: 26, H4: 22 };
     function frontPageItems(known, measure = true, root = document) {
       const items = new Map();
+      readRatings(root);
       for (const a of root.querySelectorAll('a[href]')) {
         if (skipLink(a)) continue;
         const url = isArticleLink(a); if (!url) continue;
-        const key = url.replace(/[?#].*$/, '');
+        const key = articleKey(url);
         if (known?.has(key) || isAd(a) || AD_SECTION.test(sectionOf(url))) continue;
-        const el = headlineEl(a), teaser = el ? textOf(el) : '';
+        const el = headlineEl(a), rv = reviewOf(url), named = el ? textOf(el) : '';
+        // A review headed by the album alone (Pitchfork's "An Exchange of Information"): its artist first, as on its page.
+        const pair = el && el.closest('h1, h2, h3, h4, h5') ? headingPair(a, url) : null;
+        const teaser = pair ? pair.teaser : named && rv?.artist && !named.toLowerCase().includes(rv.artist.toLowerCase()) ? `${rv.artist}: ${named}` : named;
         const it = items.get(key);
         const m = el && measure ? prominence(a, el) : { fs: (el && LEVEL_SIZE[el.tagName]) || 0, area: 0, y: Infinity };
-        if (it) { it.teaser ||= teaser; it.paid ||= isPaid(a); it.img ||= teaserImage(a); if (m.fs * Math.sqrt(m.area) > it.m.fs * Math.sqrt(it.m.area)) it.m = { ...m, y: Math.min(m.y, it.m.y) }; }
-        else items.set(key, { url, key, teaser, paid: isPaid(a), section: sectionOf(url), img: teaserImage(a), m });
+        if (it) { if (pair) { it.teaser = teaser; it.album ||= pair.album; } it.teaser ||= teaser; it.paid ||= isPaid(a); it.genre ||= genreOf(a); it.date ||= dateOf(a); it.img ||= teaserImage(a); if (m.fs * Math.sqrt(m.area) > it.m.fs * Math.sqrt(it.m.area)) it.m = { ...m, y: Math.min(m.y, it.m.y) }; }
+        else items.set(key, { url, key, teaser, paid: isPaid(a), rating: ratingOf(url), genre: genreOf(a), date: dateOf(a) || rv?.at || 0, by: rv?.by, dek: rv?.dek, album: pair?.album || '', section: sectionOf(url), img: teaserImage(a), m });
       }
       return [...items.values()].filter(it => it.teaser.length >= CFG.minTeaserLen && !isGame(it.url, it.teaser) && !mutedTopicOf(it.url, it.teaser));
     }
@@ -2960,7 +3347,7 @@
           const get = tag => it.getElementsByTagName(tag)[0];
           const url = get('link')?.getAttribute('href') || norm(get('link')?.textContent);
           const feedImg = get('enclosure')?.getAttribute('url') || it.getElementsByTagNameNS('*', 'thumbnail')[0]?.getAttribute('url') || it.getElementsByTagNameNS('*', 'content')[0]?.getAttribute('url') || norm(get('image')?.textContent);
-          return { url, key: (url || '').replace(/[?#].*$/, ''), teaser: text(get('title')?.textContent), desc: text((get('description') || get('summary'))?.textContent), img: /^https?:/.test(feedImg || '') ? feedImg : '', section: 'latest' };
+          return { url, key: articleKey(url), teaser: text(get('title')?.textContent), desc: text((get('description') || get('summary'))?.textContent), img: /^https?:/.test(feedImg || '') ? feedImg : '', section: 'latest' };
         }).filter(it => { try { return it.teaser && registrable(new URL(it.url).hostname) === registrable(host) && !isGame(it.url, it.teaser) && !mutedTopicOf(it.url, it.teaser); } catch { return false; } });
       } catch { return []; }
     }
@@ -2996,13 +3383,18 @@
       // nytimes.com in Safari a pass took over a second, and passes every quarter second kept the page frozen for 24 s, so a
       // click in the list waited. So it rests four times as long as its last pass took, keeping it to a fifth of the time.
       // While the page is still loading (plain view can start before, see build.mjs), it waits for the loading to end.
-      let rest = 250, passes = 0, spent = 0;
+      // A list that goes on in pages (a next-page link) and loads them as the reader nears its end (Headphone Commute, with
+      // Infinite Scroll): past the page's own end there are only older pages, so scrolling stops there. It loaded 25 pages.
+      const paged = !!document.querySelector('link[rel="next"], a[rel="next"], .nav-previous a, .pagination a.next, a.next.page-numbers');
+      let rest = 250, passes = 0, spent = 0, end = 0;
       for (let i = 0, idle = 0; i < 40 && idle < 6 && !done(); i++) {
         while (hold()) await new Promise(r => setTimeout(r, 400));
         if (document.readyState === 'loading') {
           await new Promise(r => { document.addEventListener('readystatechange', r, { once: true }); setTimeout(r, 3000); });
           i--; continue;
         }
+        end ||= document.documentElement.scrollHeight;
+        if (paged && scrollY + innerHeight >= end - 2) break;
         window.scrollBy(0, innerHeight * 1.5);
         await new Promise(r => setTimeout(r, rest));
         const t0 = performance.now();
@@ -3062,6 +3454,21 @@
       h1:has(.logo){margin-left:-8px}
       /* The buttons keep their size and one line; the site's name or logo gets what is left, and a logo shrinks to fit. */
       .top button{flex:none;white-space:nowrap}
+      .top [data-act="menu"]{display:inline-flex;align-items:center;padding:5px 7px}
+      .top [data-act="menu"][hidden]{display:none}
+      .top [data-act="menu"] svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+      .top [data-act="menu"][aria-expanded="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+      h1:has(.page){display:flex;align-items:center;gap:10px}
+      h1 .page{min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:17px;font-weight:600;color:var(--muted)}
+      @media (max-width: 480px){h1:has(.page){display:block} h1 .page{display:none}}
+      .site-menu{padding:10px 0 2px;font-size:15px}
+      .site-menu .row,.site-menu .sub{display:flex;flex-wrap:wrap;gap:2px 16px}
+      .site-menu .sub{gap:2px 14px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);font-size:14px}
+      .site-menu .sub span{color:var(--muted);padding:3px 0}
+      .site-menu[hidden]{display:none}
+      .site-menu a{color:var(--fg);text-decoration:none;padding:3px 0}
+      .site-menu a:hover{text-decoration:underline}
+      .site-menu a[aria-current="page"]{color:var(--accent);font-weight:600}
       @media (max-width: 480px){.top{gap:6px} .top button{font-size:13px;padding:5px 8px}}
       @media (max-width: 360px){.top{gap:4px} .top button{font-size:12px;padding:4px 6px}}
       button{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
@@ -3076,6 +3483,14 @@
       nav{display:flex;gap:6px;overflow-x:auto;min-width:0;flex:1;scrollbar-width:none}
       nav::-webkit-scrollbar{display:none}
       nav button{white-space:nowrap;border-radius:999px}
+      .refine[hidden],.refine [hidden]{display:none}
+      .genres{display:flex;gap:6px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+      .genres::-webkit-scrollbar{display:none}
+      .refine button{white-space:nowrap;border-radius:999px;font-size:13px;padding:3px 10px}
+      .refine button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+      .range{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding-top:8px;font-size:13px;color:var(--muted)}
+      .range input{font:inherit;color:var(--fg);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:2px 6px;margin-left:4px}
+      .refine.loading .range::after,.refine.loading .genres::after{content:'…';align-self:center;color:var(--muted);padding:0 4px}
       nav button[aria-current="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
       section{padding-top:20px;scroll-margin-top:110px}
       h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 2px}
@@ -3140,6 +3555,7 @@
       .reader .explain[hidden]{display:none}
       .reader figcaption{font-size:14px;color:var(--muted);margin-top:4px}
       .reader .byline{font-size:14px;color:var(--muted);margin-bottom:14px}
+      .reader .byline .rating{margin:0 8px 0 0;font-size:15px;padding:1px 7px}
       .reader .end{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding-top:8px;border-top:1px solid var(--line)}
       .reader .end a{color:var(--accent);font-weight:600;text-decoration:none}
       .reader .end a:hover{text-decoration:underline}
@@ -3174,6 +3590,14 @@
          dragging it instead, and then nothing opened. */
       li.pic .pic-img{width:120px;height:80px;border-radius:6px;object-fit:cover;object-position:center 25%;background:var(--line);display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
       @media (max-width: 480px){li.pic{grid-template-columns:minmax(0,1fr) 84px;gap:10px} li.pic .pic-img{width:84px;height:56px}}
+      .rating{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;font-size:13px;font-weight:700;background:var(--fg);color:var(--bg);vertical-align:2px;white-space:nowrap}
+      .rating.best{background:var(--accent)}
+      li .meta{font-size:13px;color:var(--muted);margin-top:2px}
+      .reader .facts{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;margin:-6px 0 16px;color:var(--fg)}
+      .reader .facts span{color:var(--muted);margin-right:5px}
+      button.kaset{margin-left:6px;padding:0 7px;font-size:12px;line-height:1.5;border-radius:4px;vertical-align:2px;white-space:nowrap}
+      .reader .byline button.kaset{margin-left:10px;font-size:13px}
+      .genre{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px;white-space:nowrap}
       .paid{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--line);border-radius:4px;font-size:12px;color:var(--muted);vertical-align:2px}
       footer{color:var(--muted);font-size:13px;padding-top:24px}
       footer button{font-size:13px;padding:2px 8px;margin-top:6px}
@@ -3238,7 +3662,9 @@
       // Once the list is up, what is in the body is skipped by layout and paint, but keeps its boxes: with display:none, the
       // anti-adblock script on bild.de (Ad Shield, html-load.com) saw its bait ads without a size and sent the tab to its
       // adblock wall and back, again and again.
-      st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body>*{content-visibility:hidden!important}';
+      // They keep their height too (the size they had when last drawn): with none, the page was all "bottom", and a site
+      // that loads more as the reader nears the end (Headphone Commute) loaded page after page of its archive, unseen.
+      st.textContent = 'html.cb-plain{overflow:hidden!important} html.cb-plain>body *{visibility:hidden!important;pointer-events:none!important} html.cb-plain.cb-plain-done>body>*{content-visibility:hidden!important;contain-intrinsic-size:auto 1px auto 3000px!important}';
       document.head.appendChild(st);
       document.documentElement.classList.add('cb-plain');
       for (const m of document.querySelectorAll('video, audio')) try { m.pause(); m.muted = true; } catch {}
@@ -3289,7 +3715,22 @@
       let from = ''; try { from = new URL(art?.finalUrl || url, location.href).hostname.replace(/^www\./, ''); } catch {}
       if (from === host && pageMeta.site) from = pageMeta.site;
       const by = [from, art?.byline, art?.date && new Date(art.date).toLocaleString(T.lang === 'en' ? undefined : T.lang, { dateStyle: 'medium', timeStyle: 'short' })].filter(x => x && x !== 'Invalid Date').join(' · ');
-      if (by) out.push(el('div', by, 'byline'));
+      // A review's score, from the list or from the review's own page.
+      const rating = art?.rating || ratingOf(url);
+      if (by || rating) {
+        const line = el('div', by, 'byline');
+        if (rating) line.prepend(el('span', ratingText(rating), 'rating' + (rating.best ? ' best' : '')));
+        const album = art?.album || (/: /.test(title) ? title : '');
+        if (albumAppOn() && album && (ALBUM_REVIEW.test(url) || art?.albumPair)) line.append(albumButton(album));
+        out.push(line);
+      }
+      // A review's facts from its page: genre, record label, the year the music came out.
+      const facts = [[T.genre, art?.facts?.genre], [T.recordLabel, art?.facts?.label], [T.released, art?.facts?.year]].filter(f => f[1]);
+      if (facts.length) {
+        const box = el('div', '', 'facts');
+        for (const [k, v] of facts) { const f = el('div'); f.append(el('span', k), v); box.append(f); }
+        out.push(box);
+      }
       for (const b of art?.blocks || []) {
         if (b.t === 'p') out.push(b.terms ? readerTermsP(b) : el('p', b.text));
         else if (b.t === 'h') out.push(el('h3', b.text));
@@ -3329,8 +3770,15 @@
     }
     async function articleView(withImages) {
       const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => s.textContent).join('');
-      if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"\w*Article"/.test(ld)) return false;
-      const url = location.href.split('#')[0], title = norm(document.querySelector('h1')?.textContent) || document.title;
+      if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"(?:\w*Article|Review)"/.test(ld)) return false; // Pitchfork's reviews: a Review
+      const url = location.href.split('#')[0], h1 = document.querySelector('h1');
+      let title = norm(h1?.textContent) || document.title;
+      // A review headed by the artist, with the album as the heading under it (Headphone Commute): both, and the album for
+      // the ▶ button when the review is filed under reviews or albums.
+      const h2 = h1?.nextElementSibling?.matches('h2') ? norm(h1.nextElementSibling.textContent) : '';
+      const pairAlbum = h2 && h2.length <= 120 && title.length <= 80 ? `${title}: ${h2}` : '';
+      if (pairAlbum) title = `${title} – ${h2}`;
+      const filed = pairAlbum && ([...(h1.closest('header, article') || h1.parentElement).querySelectorAll('a[href]')].some(l => REVIEWS_PATH.test(l.getAttribute('href') || '')) || reviewUrl(location.href) > 0); // or its own address says so (Blabbermouth)
       const giveBack = swallowSite();
       // The article is in this page already: read it from here, at once. Only when that finds no text (a page that adds
       // its text with scripts later) is it fetched again, which in Safari could keep the screen blank for many seconds.
@@ -3341,6 +3789,8 @@
       timeMark('article');
       // A paid article can come with no text at all: its headline, lead and a note about the subscription.
       if (!art || (!art.blocks.length && !art.partial)) { giveBack(); return false; }
+      if (filed && !art.albumPair) { art.album = pairAlbum; art.albumPair = true; }
+      if (!art.albumPair && albumAppOn()) { const a = pageAlbum(); if (a) { art.album = a; art.albumPair = true; } }
       const desc = norm(document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '');
       const lede = desc && !art.blocks.some(b => b.text?.startsWith(desc.slice(0, 40))) ? desc : '';
       document.documentElement.classList.add('cb-plain-done');
@@ -3378,7 +3828,7 @@
       const listUrl = location.href, listTitle = document.title;
       // The logo is the first thing here that needs the page laid out, so it pays for the first layout: on nytimes.com in
       // Safari 1.2 s. It counts towards the first pass, which decides whether the page is heavy (the end of plainView).
-      let logo = null, items = [], toLinks = 0, giveBack = () => {}, known = new Map();
+      let logo = null, menu = null, items = [], toLinks = 0, giveBack = () => {}, known = new Map();
       if (!mix) {
         const t0 = performance.now();
         if (stopped) {
@@ -3391,6 +3841,7 @@
         if (items.length < 8 && !stopped) items = await frontPageSoon(8, 2400);
         toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
         timeMark('links');
+        try { menu = siteMenu(src); } catch {}
         giveBack = swallowSite();
         known = new Map(items.map(it => [it.key, it]));
         if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
@@ -3423,7 +3874,7 @@
       plainHost.id = 'declickbait-plain';
       const sh = plainHost.attachShadow({ mode: 'open' });
       sh.innerHTML = `<style>${PLAIN_CSS}</style>
-        <div class="wrap"><header><div class="top"><h1></h1><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav aria-label="${T.sections}"></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
+        <div class="wrap"><header><div class="top"><h1></h1><button data-act="menu" aria-expanded="false" aria-label="${T.siteMenu}" title="${T.siteMenu}" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><button data-act="sort"></button><button data-act="original">${T.original}</button></div><div class="site-menu" role="navigation" aria-label="${T.siteMenu}" hidden></div><div class="filters"><button class="read-toggle" data-act="hide-read" role="switch"></button><nav aria-label="${T.sections}"></nav><button class="edit-secs" data-act="sections" aria-label="${T.editSections}" title="${T.editSections}">✎</button></div><div class="refine" hidden><div class="genres" role="group" aria-label="${T.genre}"></div><div class="range"><label>${T.dateFrom} <input type="date" data-f="from"></label><label>${T.dateTo} <input type="date" data-f="to"></label><button data-f="score" aria-pressed="false">${T.byScore}</button></div></div><p class="edit-hint" hidden>${T.editHint}</p><p class="mix-note" hidden></p></header>
         <main></main><footer></footer><div class="keys"></div></div>
         <div class="hold" hidden role="menu"></div>
         <div class="view" hidden role="dialog" aria-modal="true" tabindex="-1"><div class="bar"><div><span></span><button class="save" data-act="later" aria-pressed="false" aria-label="${T.later}" title="${T.later} (L)"><svg aria-hidden="true" viewBox="0 0 24 24"><circle class="f" cx="12" cy="12" r="9"/><path class="h" d="M12 7v5l3 2"/></svg></button><button class="save" data-act="mark" aria-pressed="false" aria-label="${T.mark}" title="${T.mark} (B)"><svg aria-hidden="true" viewBox="0 0 24 24"><path class="f" d="M6 3h12v18l-6-4.5L6 21z"/></svg></button><button data-act="prev" aria-label="${T.prev}">‹</button><button data-act="next" aria-label="${T.next}">›</button><button data-act="close-reader"></button></div></div><article class="reader"></article></div>`;
@@ -3435,6 +3886,56 @@
         h1.append(chip, name);
       } else h1.textContent = mix ? T.myNews : pageMeta.site || host;
       if (mix) sh.querySelector('[data-act="original"]').hidden = true;
+      // The site's menu, behind a button: the front page first when this is another page of the site (Best New Music), then
+      // each section's filters on a line of their own. Those of the other sections are fetched the first time it opens (and
+      // kept for three days), since the front page doesn't have them: Pitchfork's 8.0+ reviews are on its reviews page.
+      const siteMenuEl = sh.querySelector('.site-menu'), menuBtn = sh.querySelector('[data-act="menu"]');
+      let fillSubMenus = () => {};
+      if (menu) {
+        const here = menuPath(location), top = new Map(menu.top.map(m => [m.path, m]));
+        const link = m => { const a = document.createElement('a'); a.href = m.href; a.textContent = m.text; if (m.path === here) a.setAttribute('aria-current', 'page'); return a; };
+        const row = document.createElement('div'); row.className = 'row';
+        if (here) row.append(link({ href: location.origin + '/', path: '', text: pageMeta.site || host }));
+        row.append(...menu.top.map(link));
+        siteMenuEl.append(row);
+        const shown = new Map();
+        const showGroup = (parent, links) => {
+          if (shown.has(parent) || !top.has(parent)) return;
+          const div = document.createElement('div'), name = document.createElement('span');
+          div.className = 'sub'; name.textContent = top.get(parent).text; div.append(name, ...links.map(link));
+          shown.set(parent, div);
+          // In the main menu's order.
+          const after = menu.top.map(m => m.path).filter(p => shown.has(p));
+          const next = after[after.indexOf(parent) + 1];
+          siteMenuEl.insertBefore(div, next ? shown.get(next) : null);
+        };
+        for (const [p, links] of menu.groups) showGroup(p, links);
+        const KEY = 'siteMenuGroups', fresh = 3 * 864e5;
+        gm.get(KEY, {}).then(all => { for (const [p, links] of Object.entries(all?.[host]?.groups || {})) showGroup(p, links); });
+        let fetched = false;
+        fillSubMenus = async () => {
+          if (fetched || !CFG.fetch) return; fetched = true;
+          const all = (await gm.get(KEY, {})) || {}, mine = all[host];
+          if (mine && Date.now() - mine.t < fresh) return;
+          const groups = {};
+          await Promise.all(menu.top.filter(m => m.path !== here).slice(0, 8).map(async m => {
+            try {
+              const r = await gm.xhr({ url: m.href, headers: { Accept: 'text/html' } });
+              const g = r.status < 400 && menuGroup(parseHtml(r.responseText), r.finalUrl || m.href, top, m.path);
+              if (g && !menu.groups.has(g[0])) { groups[g[0]] = g[1]; showGroup(...g); }
+            } catch {}
+          }));
+          for (const [p, links] of menu.groups) groups[p] = links;
+          const kept = Object.entries({ ...all, [host]: { t: Date.now(), groups } }).sort((a, b) => b[1].t - a[1].t).slice(0, 60);
+          gm.set(KEY, Object.fromEntries(kept));
+        };
+        menuBtn.hidden = false;
+        // On one of those pages, its name next to the site's: "Pitchfork  8.0+ reviews".
+        const cur = here && (top.get(here) || [...menu.groups.values()].flat().find(m => m.path === here));
+        if (cur) { const pg = document.createElement('span'); pg.className = 'page'; pg.textContent = cur.text; h1.append(pg); }
+        // Its articles whose address names no section (WordPress: /2026/02/27/…) are this page's own: named after it.
+        if (cur) pageName = cur.text;
+      }
       sh.querySelector('.keys').textContent = T.keys;
       if (startup.plainBigPics) plainHost.classList.add('big-pics');
       document.documentElement.appendChild(plainHost); ownColors();
@@ -3444,6 +3945,77 @@
       if (!mix) gm.get('plainHosts', []).then(hs => gm.set('plainHosts', [host, ...(hs || []).filter(h => h !== host)].slice(0, 300)));
 
       const sections = new Map(), byKey = new Map();
+      // Narrowing a list of reviews (Pitchfork): by genre, when most cards name one (several can be on at once), by when they
+      // were published, and the highest score first. Kept for an hour on the site, so it holds while moving on to another of
+      // its lists (8.0+ reviews, Best New Albums).
+      const refineEl = sh.querySelector('.refine'), genresEl = refineEl.querySelector('.genres');
+      const fromEl = refineEl.querySelector('[data-f="from"]'), toEl = refineEl.querySelector('[data-f="to"]'), scoreEl = refineEl.querySelector('[data-f="score"]');
+      let picked = new Set(), shown = new Set(), from = 0, to = 0, byScore = false;
+      const day = v => v ? Date.parse(v + 'T00:00') || 0 : 0;
+      const readRange = () => { from = day(fromEl.value); to = day(toEl.value) && day(toEl.value) + 864e5; };
+      gm.get('plainRefine', {}).then(all => {
+        const r = all?.[host]; if (!r || Date.now() - r.t > 36e5) return;
+        picked = new Set(r.g || []); fromEl.value = r.from || ''; toEl.value = r.to || ''; byScore = !!r.score; readRange();
+        renderSoon(0); setTimeout(moreForFilters, 1500); // once the list is up
+      });
+      const saveRefine = () => gm.get('plainRefine', {}).then(all => gm.set('plainRefine', { ...Object.fromEntries(Object.entries(all || {}).filter(([, r]) => Date.now() - r.t < 36e5)), [host]: { g: [...picked], from: fromEl.value, to: toEl.value, score: byScore, t: Date.now() } }));
+      const offFilters = it => (shown.size && !shown.has(it.genre)) || (from && !(it.date >= from)) || (to && !(it.date < to));
+      const rated = it => parseFloat(it.rating?.score) || (it.rating ? 0 : -1);
+      const scoreFirst = (a, b) => rated(b) - rated(a);
+      function showRefine() {
+        const all = [...byKey.values()].filter(it => !isSaved(it.section)), n = new Map();
+        for (const it of all) if (it.genre) n.set(it.genre, (n.get(it.genre) || 0) + 1);
+        const most = k => all.filter(k).length >= all.length * 0.4;
+        const genres = n.size >= 2 && most(it => it.genre), scores = most(it => it.rating), dates = (genres || scores) && most(it => it.date);
+        refineEl.hidden = !(genres || scores) || !!editing;
+        shown = genres && !refineEl.hidden ? new Set([...picked].filter(g => n.has(g))) : new Set();
+        genresEl.hidden = !genres; refineEl.querySelector('.range').hidden = !dates;
+        if (!dates) from = to = 0; else readRange();
+        scoreEl.hidden = !scores; if (!scores) byScore = false;
+        scoreEl.setAttribute('aria-pressed', String(byScore));
+        if (refineEl.hidden) return;
+        const chip = (g, text, on) => { const b = document.createElement('button'); b.dataset.genre = g; b.textContent = text; b.setAttribute('aria-pressed', String(on)); return b; };
+        genresEl.replaceChildren(chip('', T.allGenres, !shown.size), ...[...n.keys()].sort((a, b) => a.localeCompare(b)).map(g => chip(g, g, shown.has(g))));
+      }
+      // Few left after narrowing: the site's older pages of the same list, followed by its rel="next" link (Pitchfork:
+      // ?page=2, 30 reviews a page), until there are 20, or with a start date until they go back past it; 20 more pages at most.
+      const nextOf = (doc, base) => { try { const u = new URL(doc.querySelector('link[rel="next"]')?.getAttribute('href'), base); return u.origin === location.origin ? u.href : ''; } catch { return ''; } };
+      let nextPage = mix ? '' : nextOf(src, location.href), paging = false;
+      // A review open, or a finger or button held on a card (both declared further down, in place once the list is up).
+      const inUse = () => { try { return !!(current || pressed); } catch { return false; } };
+      async function moreForFilters() {
+        if (paging || !nextPage || !CFG.fetch || !(shown.size || from || to)) return;
+        paging = true; refineEl.classList.add('loading');
+        // The page stays usable meanwhile: a pause between pages (Safari parses a 2 MB page for a good while), none fetched
+        // while a review is open or a button held, and the page parsed without its scripts once its data is read.
+        for (let n = 0; n < (from ? 20 : 8) && nextPage && (shown.size || from || to); n++) {
+          if (n) await new Promise(r => setTimeout(r, 600));
+          while (inUse()) await new Promise(r => setTimeout(r, 500));
+          const list = [...byKey.values()], oldest = Math.min(...list.map(it => it.date || Infinity));
+          // The list runs newest first: once past the start date, older pages can only be outside it.
+          if (from ? oldest < from : list.filter(it => !offFilters(it)).length >= 20) break;
+          try {
+            const url = nextPage, r = await gm.xhr({ url, headers: { Accept: 'text/html' } });
+            if (r.status >= 400) break;
+            readRatingsIn(r.responseText);
+            const doc = parseHtml(r.responseText);
+            nextPage = nextOf(doc, url);
+            const fresh = frontPageItems(known, false, doc);
+            fresh.forEach(it => known.set(it.key, it));
+            if (fresh.length) more(fresh);
+          } catch { break; }
+        }
+        paging = false; refineEl.classList.remove('loading');
+      }
+      const refined = () => { saveRefine(); render(); plainHost.scrollTop = 0; moreForFilters(); };
+      genresEl.addEventListener('click', e => {
+        const b = e.target.closest('button[data-genre]'); if (!b) return;
+        const g = b.dataset.genre;
+        if (!g) picked.clear(); else if (shown.has(g)) picked.delete(g); else picked.add(g);
+        refined();
+      });
+      for (const el of [fromEl, toEl]) el.addEventListener('change', () => { readRange(); refined(); });
+      scoreEl.addEventListener('click', () => { byScore = !byScore; refined(); });
       const add = it => { if (!byKey.has(it.key)) byKey.set(it.key, it); if (!sections.has(it.section)) sections.set(it.section, []); sections.get(it.section).push(it); };
       // Read later and Bookmarks: a site's list shows the articles saved from that site, first; My news shows them all
       // (unless hidden or moved like any
@@ -3568,11 +4140,17 @@
       function fill(it, li, fetched = false) {
         const m = cache[it.key];
         if (m && !m.err && mutedTopicOf(it.url, it.teaser, m)) { dropRow(it.key, li); return; }
-        const meta = m && !m.err ? cleanMeta(m, it.url) : it.desc ? { title: '', desc: it.desc } : null;
+        const found = m && !m.err ? cleanMeta(m, it.url) : it.desc ? { title: '', desc: it.desc } : null;
+        // The site's own summary on its list (Pitchfork) says more than the review page's description.
+        const meta = it.dek ? { ...(found || { title: '' }), desc: it.dek } : found;
         const { text, lead } = choose(it.teaser, meta);
         const a = li.querySelector('a.h'), p = li.querySelector('p.lead');
         a.textContent = text;
         if (norm(text) !== norm(it.teaser)) a.title = 'Original: ' + it.teaser;
+        if (meta?.title && albumAppOn() && !li.querySelector('button.kaset')) {
+          const album = albumOf(it, meta.title);
+          if (album) a.parentElement.insertBefore(albumButton(album), a.parentElement.querySelector('div.meta, p.lead'));
+        }
         const waiting = !lead && !m && !fetched && CFG.fetch;
         p.textContent = lead; p.hidden = !lead && !waiting; p.classList.toggle('wait', waiting);
         const im = li.querySelector('.pic-img');
@@ -3631,7 +4209,7 @@
         } else delete li.dataset.tier;
       };
       function row(it, withSection) {
-        const look = `${withSection ? 1 : 0}${it.paid ? 1 : 0}`, prev = oldRows?.get(it.key);
+        const look = `${withSection ? 1 : 0}${it.paid ? 1 : 0}${it.rating ? 1 : 0}${it.genre ? 1 : 0}${it.by?.length ? 1 : 0}`, prev = oldRows?.get(it.key);
         if (prev && prev.dataset.look === look) {
           if ((+prev.dataset.tier || 1) !== (it.tier || 1)) setTier(prev, it.tier);
           rows.set(it.key, prev);
@@ -3649,6 +4227,17 @@
         const text = withImages ? document.createElement('div') : li;
         text.append(a);
         if (it.paid) { const b = document.createElement('span'); b.className = 'paid'; b.textContent = T.paid; text.append(b); }
+        // A review's score, as the site gives it: "8.4", and "Best New Music".
+        if (it.rating) { const b = document.createElement('span'); b.className = 'rating' + (it.rating.best ? ' best' : ''); b.textContent = ratingText(it.rating); text.append(b); }
+        // Its genre, as the site files it (Pitchfork: "Rock").
+        if (it.genre) { const g = document.createElement('span'); g.className = 'genre'; g.textContent = it.genre; text.append(g); }
+        const album = albumAppOn() && (albumOf(it) || (it.rating && ALBUM_REVIEW.test(it.url) && it.teaser));
+        if (album) text.append(albumButton(album));
+        // Who wrote a review, and when: "19 Nov 2026 · Olivier Lafontant".
+        if (it.by?.length) {
+          const day = it.date ? new Date(it.date).toLocaleDateString(T.lang === 'en' ? undefined : T.lang, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+          const d = document.createElement('div'); d.className = 'meta'; d.textContent = [day, it.by.join(', ')].filter(Boolean).join(' · '); text.append(d);
+        }
         // The site, for an article from elsewhere: a saved one, or one in My news shown outside its site's section.
         const from = it.host && it.host !== host && it.section !== it.host ? it.host.replace(/^www\./, '') : '';
         if (withSection || from) { const sl = document.createElement('span'); sl.className = 'sec-label'; sl.textContent = from || sectionLabel(it.section); text.append(sl); }
@@ -3849,12 +4438,15 @@
         const art = await fetchArticle(it.url, withImages, FRESH);
         if (current !== it) return; // closed, or another one opened meanwhile
         const li = rows.get(it.key), lede = li?.querySelector('p.lead')?.textContent;
+        const album = albumAppOn() ? albumOf(it) : ''; // from its card's two headings, or its headline
+        if (art && album && !art.albumPair) { art.album = album; art.albumPair = true; }
         reader.replaceChildren(...readerContent(art, li?.querySelector('a.h').textContent || it.teaser, lede, it.url));
       }
       function renderSection(id) {
         const ol = document.createElement('ol');
-        for (const it of sections.get(id)) {
+        for (const it of byScore ? [...sections.get(id)].sort(scoreFirst) : sections.get(id)) {
           if (rows.has(it.key)) continue; // an article in two sections is shown once
+          if (offFilters(it) && !isSaved(id)) continue;
           if (skipRead(it) && !isSaved(id)) { hiddenRead.add(it.key); continue; } // a saved article stays until it is taken out
           const li = row(it, false); if (li) ol.append(li);
         }
@@ -3888,6 +4480,7 @@
         syncSaved();
         oldRows = new Map(rows);
         main.replaceChildren(); nav.replaceChildren(); rows.clear(); want.length = 0; seenRows.disconnect(); hiddenRead.clear();
+        showRefine();
         // Read articles in or out of the list, like unread-only mail.
         const readToggle = sh.querySelector('.read-toggle');
         readToggle.textContent = T.hideRead; readToggle.setAttribute('aria-checked', String(hideRead && !showReadNow));
@@ -3897,7 +4490,7 @@
           const ol = document.createElement('ol'), seenKeys = new Set();
           for (const id of order()) if (isSaved(id) && !layout.hidden.includes(id)) renderSection(id);
           const all = order().filter(id => !isSaved(id) && !layout.hidden.includes(id)).flatMap(id => sections.get(id))
-            .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key) && !(skipRead(it) && hiddenRead.add(it.key))).sort((a, b) => (b.score || 0) - (a.score || 0));
+            .filter(it => !seenKeys.has(it.key) && seenKeys.add(it.key) && !offFilters(it) && !(skipRead(it) && hiddenRead.add(it.key))).sort(byScore ? scoreFirst : (a, b) => (b.score || 0) - (a.score || 0));
           for (const it of all) if (!rows.has(it.key)) { const li = row(it, true); if (li) ol.append(li); }
           const sec = document.createElement('section'), h2 = document.createElement('h2');
           sec.id = 's-importance'; h2.textContent = T.byImportance;
@@ -4016,6 +4609,7 @@
         else if (b.dataset.act === 'prev') step(-1);
         else if (b.dataset.act === 'next') step(1);
         else if (b.dataset.act === 'sections') { if (editing) finishEditing(); else startEditing(); }
+        else if (b.dataset.act === 'menu') { const open = siteMenuEl.hidden; siteMenuEl.hidden = !open; b.setAttribute('aria-expanded', String(open)); if (open) fillSubMenus(); }
         else if (b.dataset.act === 'sort') { sortMode = sortMode === 'importance' ? 'site' : 'importance'; gm.set('plainSort', sortMode); plainHost.scrollTop = 0; render(); }
         else if (b.dataset.act === 'show-read') { showReadNow = true; render(); }
         else if (b.dataset.act === 'later') toggleSaved('later', current);
@@ -4185,7 +4779,7 @@
         while (b.parentElement && b.parentElement !== document.body && !hasProse(b.parentElement) && !b.parentElement.querySelector('h1')) b = b.parentElement;
         if (hasProse(b) || b.querySelector('h1')) continue;
         b.classList.add('cb-related-hidden');
-        const key = url.replace(/[?#].*$/, ''), teaser = textOf(el);
+        const key = articleKey(url), teaser = textOf(el);
         if (!related.items.has(key) && teaser.length >= CFG.minTeaserLen && !isAd(a) && !isGame(url, teaser) && !mutedTopicOf(url, teaser)) {
           const it = { url, key, teaser, img: teaserImage(a), paid: isPaid(a) };
           related.items.set(key, it); fresh.push(it);
@@ -4713,6 +5307,7 @@
       else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
       else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
       else if (act === 'bigPics') { await gm.set('plainBigPics', !!arg); location.reload(); }
+      else if (act === 'albumApp') { CFG.albumApp = ALBUM_APPS[arg] ? arg : ''; await gm.set('albumApp', CFG.albumApp); await gm.set('kasetLinks', false); location.reload(); }
       else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
       else if (act === 'calmPart') {
         const [id, show] = arg, all = (await gm.get('calmParts', {})) || {}, key = calmSite ? calmSite.name : '*', partsOff = (all[key] || []).filter(p => p !== id);
@@ -4725,7 +5320,7 @@
     async function settingsState() {
       const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
       return { host, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
-        genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, bigPics: !!startup.plainBigPics, showOriginal, mutedTopics: [...muted],
+        genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, bigPics: !!startup.plainBigPics, showOriginal, mutedTopics: [...muted],
         calmParts: (webCalm ? WEB_PARTS.filter(p => !p.shop || shopPage()) : calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label || p.id, show: !calmPartsOff.includes(p.id) })),
         fetchPausedUntil: fetchPausedUntil > Date.now() ? fetchPausedUntil : 0, topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
         disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
@@ -4875,7 +5470,7 @@
       document.documentElement.setAttribute('data-nothis-engine', '');
       // Every setting the start needs, in one read (plain view's too: startup below).
       startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
-        siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, pausedHosts: {}, calmParts: {},
+        siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, kasetLinks: false, pausedHosts: {}, calmParts: {},
         plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {}, plainBigPics: false });
       const disabled = startup.disabledHosts || [];
       const enabled = startup.enabledHosts || [];
@@ -4902,6 +5497,8 @@
       setMuted(startup.mutedTopics || []);
       CFG.display = startup.display ?? CFG.display;
       CFG.swipeAnimation = startup.swipeAnimation ?? CFG.swipeAnimation;
+      // Before 1.20 Kaset was the only choice, a switch (kasetLinks).
+      CFG.albumApp = startup.albumApp || (startup.kasetLinks ? 'kaset' : '');
       // The My news page (mix.html), in the extension's own page: nothing else of this applies there.
       if (globalThis.__wdMix) { await mixView(); return; }
       // A visit to a news site, for My news (mix.js).

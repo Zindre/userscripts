@@ -81,9 +81,16 @@ function genericArticlePath(path) {
   const segs = path.split('/').filter(Boolean);
   if (segs.some(sg => /^\d{5,}$/.test(sg))) return true;
   const last = (segs[segs.length - 1] || '').replace(/\.html?$/i, '');
-  const tokens = last.split('-');
-  return tokens.length >= 4 && tokens.filter(w => /^[a-z]{3,}$/i.test(w) && !/^[0-9a-f]+$/i.test(w)).length >= 3;
+  // Words joined by hyphens or underscores (Under the Radar: /reviews/as_killers_do_lael_neale); with the article's
+  // number at the end, two words are enough (laut.de: /Yung-FSK18-Rattenjunge/Alben/1000-Kleine-Tode-127758).
+  const tokens = last.split(/[-_]/), words = tokens.filter(w => /^[a-z]{3,}$/i.test(w) && !/^[0-9a-f]+$/i.test(w)).length;
+  return (tokens.length >= 4 && words >= 3) || (/[-_]\d{5,}$/.test(last) && words >= 2);
 }
+// An article addressed by its number in the query, on a site run by scripts (Plattentests: /rezi.php?show=21968).
+const ID_QUERY = /[?&](?:id|show|p|a|aid|art|article|story|rid|nr|item|review)=\d{2,}(?:&|$)/i;
+const idQueryArticle = u => /\.(?:php|aspx?|cfm|jsp)$/i.test(u.pathname) && ID_QUERY.test(u.search);
+// An article's key: its address without query or fragment, except for the number that tells such an article apart.
+const articleKey = url => { const u = (url || '').replace(/#.*$/, ''), q = u.indexOf('?'); return q >= 0 && /\.(?:php|aspx?|cfm|jsp)$/i.test(u.slice(0, q)) && ID_QUERY.test(u.slice(q)) ? u : u.replace(/\?.*$/, ''); };
 // Generic mode only runs on pages that look like a news publication, never on web apps, shops,
 // price guides or wikis. Score: RSS/Atom feed 1, 5+ <article> elements 1 (20+: 2), article/frontpage og:type 1, news JSON-LD (NewsArticle, NewsMediaOrganization, …) 2,
 // other article JSON-LD (Article, BlogPosting, …) 1, news words in the site's title or description 1.
@@ -91,6 +98,10 @@ function genericArticlePath(path) {
 // Shops (WooCommerce, Shopify, cart/checkout/product pages, product JSON-LD, pages full of prices,
 // such as price guides) and wikis (MediaWiki) are always out.
 const NEWS_WORDS = /\b(?:nyheter|nyheder|nyhet\w*|avis\w*|tidende|tidning\w*|news|newspaper|headlines|breaking|nachrichten|zeitung|aktuell\w*|actualit\w*|journal|noticias|notizie|nieuws|uutiset|uutis\w*)\b/i;
+// Music magazines (Gaffa's "Anmeldelser", laut.de's "CD-Kritiken") rarely call themselves news: what they review, and
+// that they review it, counts the same. Their review section's address counts as well (gaffa.no/anmeldelser).
+const MEDIA_WORDS = /\b(?:music|musikk?\w*|musique|m[uú]sica|muziek|muzyka|albums?|reviews|rezension\w*|kritiken|recension\w*|recensioni|recensies|anmeldelse\w*|arviot|levyarviot|critiques|cr[ií]ticas|magazine|magasin\w*|webzine)\b/i;
+const REVIEW_SECTION = /\/(?:reviews?|album-reviews|anmeldelser|plateanmeldelser|recensioner|recensioni|recensies|rezensionen|kritiken|critiques|criticas|arviot|levyarviot|alben|albums)(?:\/|\.html?|$)/i;
 let publication = false;
 // Shops, price guides and wikis: never news, whatever lists or scores say. On a listed host
 // (`listed`), WooCommerce and cart buttons alone don't count: papers sell subscriptions that way.
@@ -98,7 +109,9 @@ function notNewsPage(listed) {
   const q = sel => document.querySelector(sel);
   const body = document.body?.className || '';
   const ogType = q('meta[property="og:type"]')?.getAttribute('content') || '';
-  const cart = /\b(woocommerce|cart|checkout|product|shop)\b/i.test(body) ||
+  // Whole classes: a WordPress site with a shop has woocommerce-js on every page (JazzTimes, VISIONS), and themes name
+  // their options after products (Treble: thb-single-product-ajax-on). WooCommerce's own pages say woocommerce.
+  const cart = body.split(/\s+/).some(c => /^(?:woocommerce(?:-page|-shop|-cart|-checkout)?|single-product|post-type-archive-product|tax-product_(?:cat|tag)|cart|checkout|product|shop)$/i.test(c)) ||
     !!q('form[action*="/cart"], [class*="add-to-cart"], [class*="add_to_cart"], [name="add-to-cart"]');
   const shop = (cart && !listed) || /\bshopify\b/i.test(body) || /^product/i.test(ogType) || !!q('script[src*="shopify"], link[href*="cdn.shopify.com"]') ||
     /\/(cart|checkout|basket|handlekurv|kasse|product|products|produkt|shop|store)(\/|$)/i.test(location.pathname);
@@ -120,14 +133,16 @@ function isPublication() {
   if (articles >= 20) score += 2; else if (articles >= 5) score += 1;
   if (/^(article|frontpage|blog)$/i.test(ogType)) score += 1;
   if (/"@type"\s*:\s*"(?:NewsArticle|NewsMediaOrganization|ReportageNewsArticle|AnalysisNewsArticle|LiveBlogPosting)"/.test(ld)) score += 2;
-  else if (/"@type"\s*:\s*"(?:Article|BlogPosting|Blog|CollectionPage|ItemList)"/.test(ld)) score += 1;
+  else if (/"@type"\s*:\s*"(?:Article|BlogPosting|Blog|CollectionPage|ItemList|Review)"/.test(ld)) score += 1; // Review: Pitchfork
   const about = [document.title, q('meta[property="og:site_name"]')?.content, q('meta[name="description"]')?.content].join(' ');
-  if (NEWS_WORDS.test(about)) score += 1;
+  if (NEWS_WORDS.test(about) || MEDIA_WORDS.test(about)) score += 1;
+  if (REVIEW_SECTION.test(location.pathname)) score += 1;
   publication = score >= 2;
   return publication;
 }
 const registrable = h => { const p = h.split('.'); return (p.length > 2 && /^(co|com|org|net|gov|ac|edu)$/.test(p[p.length - 2]) && p[p.length - 1].length === 2 ? p.slice(-3) : p.slice(-2)).join('.'); };
-const SKIP_CONTAINERS = 'nav, header, footer, [role="navigation"], [role="banner"], [role="contentinfo"]';
+// A <header> inside an <article> is that article's own heading (WordPress: Headphone Commute's cards), not the site's.
+const SKIP_CONTAINERS = 'nav, header:not(article header), footer, [role="navigation"], [role="banner"], [role="contentinfo"]';
 // aria-hidden marks duplicated carousel teasers (skip), but consent dialogs also hide the whole
 // page behind them with it (keep: the teasers are real, just covered for now).
 function skipLink(a) {

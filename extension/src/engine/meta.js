@@ -44,7 +44,8 @@ function extractMeta(html, url) {
       const items = [].concat(j['@graph'] || j);
       for (const it of items) {
         if (!it || !/Article|NewsArticle|Report/i.test(String(it['@type']))) continue;
-        ldTitle = ldTitle || norm(it.headline); ldDesc = ldDesc || norm(it.description); ldImage = ldImage || imageOf(it.image);
+        // WordPress (Yoast) escapes its JSON-LD twice: "The Avalanches &#8211; No Bad Memories".
+        ldTitle = ldTitle || unentity(norm(it.headline)); ldDesc = ldDesc || unentity(norm(it.description)); ldImage = ldImage || imageOf(it.image);
         ldSection = ldSection || [].concat(it.articleSection || []).join(', '); ldKeywords = ldKeywords || [].concat(it.keywords || []).join(', ');
       }
     } catch {}
@@ -106,7 +107,7 @@ const jobs = new Map();       // el -> { orig, url, key }
 
 const fetchCount = { n: 0 };
 async function getMeta(url) {
-  const key = url.replace(/[?#].*$/, '');
+  const key = articleKey(url);
   if (!cache[key]) await loadCache();
   if (cache[key]) return cache[key];
   if (!CFG.fetch || fetchCount.n >= CFG.maxFetchesPerPage) return null;

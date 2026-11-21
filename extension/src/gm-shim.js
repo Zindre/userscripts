@@ -64,7 +64,7 @@
   // Only the settings: the article cache (cache_v2, about a megabyte) made this one read slow in Safari, which turns it
   // into JSON and sends it across to the page. A key not listed here is read when asked for.
   const SETTINGS = new Set(['calmParts', 'disabledHosts', 'display', 'enabledHosts', 'genericSites', 'includeLead', 'level',
-    'mutedTopics', 'pausedHosts', 'plainHosts', 'plainLayout', 'plainSort', 'siteLevels', 'swipeAnimation']);
+    'mutedTopics', 'pausedHosts', 'plainHosts', 'plainLayout', 'plainSort', 'siteLevels', 'swipeAnimation', 'kasetLinks', 'albumApp']);
   let snap = api.storage.local.get([...SETTINGS]).catch(() => ({}));
   snap.then(() => mark('settings'));
   // On a news site the engine will want the cache: its read starts now too, beside the page, and is used once.

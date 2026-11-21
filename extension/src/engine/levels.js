@@ -11,10 +11,18 @@ const LEVEL_NAMES = { vanilla: 'Vanilla: the site as published', headlines: 'Cle
 let level = 'pictures', defaultLevel = 'pictures';
 
 // Many front pages call themselves og:type=article (Express, NPR, FAZ, SZ, NDTV), so a page only
-// counts as an article when its URL looks like one, or when og:type says so deeper than one section.
+// counts as an article when its URL looks like one, or when og:type says so deeper than one section, on a page that
+// doesn't say it is a list: WordPress's archives (body class archive, category, …: Angry Metal Guy's
+// /category/reviews/, musicOMH's /reviews/albums) and CollectionPage in the page's JSON-LD (NME's /reviews/album).
 function onArticlePage() {
   const path = location.pathname;
-  if (site?.article ? site.article.test(path) : genericArticlePath(path)) return true;
+  if (site?.article ? site.article.test(path) : genericArticlePath(path) || idQueryArticle(location)) return true;
   const og = document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '';
-  return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2;
+  return /^article$/i.test(og) && path.split('/').filter(Boolean).length >= 2 && !listPage();
+}
+function listPage() {
+  if (NOT_ARTICLE.test(location.pathname)) return true; // /category/…, /tag/…, /author/… (Stereogum's /category/reviews/album-of-the-week)
+  if (/(?:^|\s)(?:archive|category|tag|tax-[\w-]+|post-type-archive|blog|home)(?:\s|$)/.test(document.body?.className || '')) return true;
+  return [...document.querySelectorAll('script[type="application/ld+json"]')].some(s => /"@type"\s*:\s*"(?:CollectionPage|ItemList)"/.test(s.textContent) &&
+    !/"@type"\s*:\s*"(?:NewsArticle|Article|BlogPosting|Review|ReportageNewsArticle)"/.test(s.textContent));
 }

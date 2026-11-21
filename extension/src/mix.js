@@ -21,4 +21,11 @@ globalThis.__wdMix = true;
     },
     exposeSettings() {},
   };
+  // The toolbar popup can't reach this page the way it reaches a site: it asks whether its tab is this one, and then
+  // shows the settings that apply everywhere (popup.js, showMix).
+  api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg?.type !== 'wd-mix-here') return;
+    api.tabs.getCurrent().then(t => { if (t?.id === msg.tabId) sendResponse(true); }, () => {});
+    return true;
+  });
 }

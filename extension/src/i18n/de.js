@@ -12,7 +12,7 @@ STRINGS.de = {
   later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
   myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
   mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
-  allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen',
+  allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen', siteMenu: 'Menü der Website', allGenres: 'Alle Genres', genre: 'Genre', byScore: 'Beste Wertung zuerst', dateFrom: 'Von', dateTo: 'Bis', playAlbumIn: 'Album in %s abspielen', kasetNone: 'Nicht gefunden', recordLabel: 'Label', released: 'Erschienen',
   keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
 
   pop: {
@@ -27,7 +27,7 @@ STRINGS.de = {
     calmHeading: 'Auf dieser Website anzeigen', neverHeading: 'Nie anzeigen', allSites: 'alle Websites',
     someOf: (n, of) => `${n} von ${of}`, subtopicsOf: g => `Unterthemen von ${g}`,
     styleHeading: 'Stil der Schlagzeilen', styleRewrite: 'Umschreiben', styleReveal: 'Beim Tippen zeigen', styleStack: 'Beide zeigen',
-    showOriginal: 'Original-Schlagzeilen zeigen', plainHeading: 'Schlichte Ansicht', swipe: 'Wischen zwischen Artikeln animieren',
+    showOriginal: 'Original-Schlagzeilen zeigen', plainHeading: 'Schlichte Ansicht', swipe: 'Wischen zwischen Artikeln animieren', albumApp: 'Alben abspielen in', albumAppOff: 'Aus',
     otherHeading: 'Andere Websites', generic: 'Nachrichtenseiten automatisch erkennen, die ich nicht eingerichtet habe',
     disabledOn: 'Deaktiviert auf', enabledOn: 'Aktiviert auf', remove: h => `${h} entfernen`,
     notRunning: 'Web Detox läuft nicht auf dieser Seite.',

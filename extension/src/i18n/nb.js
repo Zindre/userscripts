@@ -12,7 +12,7 @@ STRINGS.nb = {
   later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
   myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
   mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
-  allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker',
+  allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker', siteMenu: 'Nettstedets meny', allGenres: 'Alle sjangre', genre: 'Sjanger', byScore: 'Høyest karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Spill albumet i %s', kasetNone: 'Ikke funnet', recordLabel: 'Plateselskap', released: 'Utgitt',
   keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
 
   pop: {
@@ -29,7 +29,7 @@ STRINGS.nb = {
     webHeading: 'Vis i nettbutikker og på andre nettsteder', neverHeading: 'Vis meg aldri', allSites: 'alle nettsteder',
     someOf: (n, of) => `${n} av ${of}`, subtopicsOf: g => `Underemner i ${g}`,
     styleHeading: 'Tittelstil', styleRewrite: 'Skriv om', styleReveal: 'Vis ved trykk', styleStack: 'Vis begge',
-    showOriginal: 'Vis opprinnelige titler', plainHeading: 'Ren visning', swipe: 'Animer sveip mellom saker',
+    showOriginal: 'Vis opprinnelige titler', plainHeading: 'Ren visning', swipe: 'Animer sveip mellom saker', albumApp: 'Spill album i', albumAppOff: 'Av',
     otherHeading: 'Andre nettsteder', generic: 'Finn nyhetsnettsteder jeg ikke har satt opp',
     disabledOn: 'Slått av på', enabledOn: 'Slått på på', remove: h => `Fjern ${h}`,
     notRunning: 'Web Detox kjører ikke på denne siden.',

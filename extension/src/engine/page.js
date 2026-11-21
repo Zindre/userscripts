@@ -11,8 +11,8 @@ function isArticleLink(a) {
   const h = href.hostname.replace(/^www\./, '');
   const target = SITES.find(s => s.host.test(h));
   if (target) { if (!target.article.test(href.pathname)) return false; }
-  else if (newsHost(h)) { if (!genericArticlePath(href.pathname)) return false; }
-  else if (site || registrable(h) !== registrable(host) || !genericArticlePath(href.pathname)) return false;
+  else if (newsHost(h)) { if (!genericArticlePath(href.pathname) && !idQueryArticle(href)) return false; }
+  else if (site || registrable(h) !== registrable(host) || !(genericArticlePath(href.pathname) || idQueryArticle(href))) return false;
   if (href.pathname.replace(/\/$/, '') === location.pathname.replace(/\/$/, '')) return false;
   return href.href;
 }
@@ -27,13 +27,13 @@ function textOf(el) {
   let t = '';
   try { t = norm(el.innerText.replace(/\u00AD/g, '')).replace(/\s*[▸▾]$/, ''); } catch {}
   if (t) return t;
-  const al = norm(el.getAttribute && el.getAttribute('aria-label'));
+  const al = unentity(norm(el.getAttribute && el.getAttribute('aria-label')));
   if (al) return al;
   const c = el.cloneNode(true);
   c.querySelectorAll('style, script, template, noscript').forEach(e => e.remove());
   const all = c.textContent;
   c.querySelectorAll('[aria-hidden="true"]').forEach(e => e.remove());
-  return norm((norm(c.textContent) ? c.textContent : all).replace(/\u00AD/g, ''));
+  return unentity(norm((norm(c.textContent) ? c.textContent : all).replace(/\u00AD/g, '')));
 }
 
 // A link is "inline" when its text-flow container has other words around it.
@@ -218,7 +218,7 @@ async function pump() {
         }
         const topic = job.a && mutedTopicOf(job.url, orig, meta);
         if (topic) { muteTeaser(job.a, topic); return; }
-        jobs.set(job.el, { orig, url: job.url, key: job.url.replace(/[?#].*$/, '') });
+        jobs.set(job.el, { orig, url: job.url, key: articleKey(job.url) });
         const { text, lead } = choose(orig, cleanMeta(meta, job.url));
         apply(job.el, orig, text, lead);
       } finally { active--; pump(); }

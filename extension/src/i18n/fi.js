@@ -13,7 +13,7 @@ STRINGS.fi = {
   later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
   myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
   mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
-  allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut',
+  allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut', siteMenu: 'Sivuston valikko', allGenres: 'Kaikki tyylilajit', genre: 'Tyylilaji', byScore: 'Paras arvosana ensin', dateFrom: 'Alkaen', dateTo: 'Asti', playAlbumIn: 'Soita albumi: %s', kasetNone: 'Ei löytynyt', recordLabel: 'Levy-yhtiö', released: 'Julkaistu',
   keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
 
   // The toolbar popup, in the browser's language.
@@ -29,7 +29,7 @@ STRINGS.fi = {
     calmHeading: 'Näytä tällä sivustolla', neverHeading: 'Älä näytä koskaan', allSites: 'kaikki sivustot',
     someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `Aiheen ${g} alaiheet`,
     styleHeading: 'Otsikkotyyli', styleRewrite: 'Kirjoita uudelleen', styleReveal: 'Näytä napauttamalla', styleStack: 'Näytä molemmat',
-    showOriginal: 'Näytä alkuperäiset otsikot', plainHeading: 'Pelkistetty näkymä', swipe: 'Animoi pyyhkäisy artikkelien välillä',
+    showOriginal: 'Näytä alkuperäiset otsikot', plainHeading: 'Pelkistetty näkymä', swipe: 'Animoi pyyhkäisy artikkelien välillä', albumApp: 'Soita albumit', albumAppOff: 'Pois',
     otherHeading: 'Muut sivustot', generic: 'Tunnista uutissivustot, joita ei ole määritetty',
     disabledOn: 'Pois käytöstä', enabledOn: 'Käytössä', remove: h => `Poista ${h}`,
     notRunning: 'Web Detox ei ole käytössä tällä sivulla.',

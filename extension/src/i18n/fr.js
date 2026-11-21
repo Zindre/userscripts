@@ -12,7 +12,7 @@ STRINGS.fr = {
   later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
   myNews: 'Mes infos', mixEmpty: 'Mes infos rassemble les sites d’info que vous consultez le plus. Consultez-en quelques-uns, et ils apparaîtront ici.',
   mixLoading: (n, of) => `Lecture des pages d’accueil… ${n} sur ${of}`,
-  allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus',
+  allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus', siteMenu: 'Menu du site', allGenres: 'Tous les genres', genre: 'Genre', byScore: 'Meilleure note d’abord', dateFrom: 'Du', dateTo: 'Au', playAlbumIn: 'Écouter l’album dans %s', kasetNone: 'Introuvable', recordLabel: 'Label', released: 'Sortie',
   keys: 'Les flèches choisissent · Enter ouvre · ← → précédent et suivant en lecture · L à lire plus tard · B signet · Esc ferme',
 
   pop: {
@@ -27,7 +27,7 @@ STRINGS.fr = {
     calmHeading: 'Afficher sur ce site', neverHeading: 'Ne jamais afficher', allSites: 'tous les sites',
     someOf: (n, of) => `${n} sur ${of}`, subtopicsOf: g => `Sous-thèmes de ${g}`,
     styleHeading: 'Style des titres', styleRewrite: 'Réécrire', styleReveal: 'Afficher au toucher', styleStack: 'Afficher les deux',
-    showOriginal: 'Afficher les titres d’origine', plainHeading: 'Vue simple', swipe: 'Animer le balayage entre les articles',
+    showOriginal: 'Afficher les titres d’origine', plainHeading: 'Vue simple', swipe: 'Animer le balayage entre les articles', albumApp: 'Écouter les albums dans', albumAppOff: 'Désactivé',
     otherHeading: 'Autres sites', generic: 'Détecter les sites d’info que je n’ai pas configurés',
     disabledOn: 'Désactivé sur', enabledOn: 'Activé sur', remove: h => `Retirer ${h}`,
     notRunning: 'Web Detox ne fonctionne pas sur cette page.',

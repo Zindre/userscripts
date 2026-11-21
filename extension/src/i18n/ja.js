@@ -13,7 +13,7 @@ STRINGS.ja = {
   later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
   myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
   mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
-  allRead: 'すべて読みました。', showAllRead: '既読を表示',
+  allRead: 'すべて読みました。', showAllRead: '既読を表示', siteMenu: 'サイトのメニュー', allGenres: 'すべてのジャンル', genre: 'ジャンル', byScore: '評価の高い順', dateFrom: '開始', dateTo: '終了', playAlbumIn: '%s でアルバムを再生', kasetNone: '見つかりません', recordLabel: 'レーベル', released: 'リリース',
   keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
 
   // The toolbar popup, in the browser's language.
@@ -29,7 +29,7 @@ STRINGS.ja = {
     calmHeading: 'このサイトで表示', neverHeading: '表示しない', allSites: 'すべてのサイト',
     someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}のサブトピック`,
     styleHeading: '見出しのスタイル', styleRewrite: '書き換え', styleReveal: 'タップで表示', styleStack: '両方を表示',
-    showOriginal: '元の見出しを表示', plainHeading: 'シンプル表示', swipe: '記事間のスワイプをアニメーション',
+    showOriginal: '元の見出しを表示', plainHeading: 'シンプル表示', swipe: '記事間のスワイプをアニメーション', albumApp: 'アルバムの再生', albumAppOff: 'オフ',
     otherHeading: 'ほかのサイト', generic: '未設定のニュースサイトを自動検出',
     disabledOn: '無効のサイト', enabledOn: '有効のサイト', remove: h => `${h}を削除`,
     notRunning: 'Web Detoxはこのページでは動作していません。',

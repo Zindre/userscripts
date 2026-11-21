@@ -1,5 +1,12 @@
 // ───────────────────────────── Text: cleanup and bait scoring ─────────────────────────────
 const norm = s => (s || '').replace(/[\u00AD\u200B\u2060\uFEFF]/g, '').replace(/\s+/g, ' ').trim(); // drop soft hyphens / zero-width joiners
+// HTML entities left in text that was escaped twice (WordPress themes' aria-labels: "The Avalanches &#8211; No Bad Memories").
+const TEXT_ENTITIES = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>', nbsp: ' ', ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', laquo: '«', raquo: '»', hellip: '…' };
+const unentity = s => (s || '').replace(/&(?:#(\d{1,6})|#x([0-9a-f]{1,6})|([a-z]{2,6}));/gi, (m, d, x, n) => {
+  if (!d && !x) return TEXT_ENTITIES[n.toLowerCase()] ?? m;
+  const c = parseInt(d || x, d ? 10 : 16);
+  return c > 0 && c <= 0x10FFFF ? String.fromCodePoint(c) : m;
+});
 
 function fixCase(s) {
   const CAPS = /^[A-ZÆØÅÄÖÜ]{3,}$/, ANYCAPS = /^[A-ZÆØÅÄÖÜ]+$/;

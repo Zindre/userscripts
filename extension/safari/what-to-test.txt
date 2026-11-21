@@ -1,11 +1,9 @@
-Read later and Bookmarks: save an article from the reader (the clock and bookmark buttons), with L or B on a keyboard, or by holding your finger on it in the list. Both show at the top of every site's list, with articles from all sites. Read later empties itself as you read.
+Music reviews: a ▶ button by each album review opens the album in your music app, in the list and on the review itself: choose YouTube Music, Apple Music or Spotify under "Play albums in" in the Web Detox menu. On the iPhone it opens in the app when you have it installed. It works on music review sites in general: the Guardian, NME, musicOMH, Clash, Kerrang, The Line of Best Fit, laut.de, Plattentests, musikknyheter.no and many more. More music magazines now open in the plain list. On Pitchfork the reviews also show scores, genres and dates, and you can sort by score and go back to older pages.
 
-My news: open the Web Detox menu and tap My news. It gathers the news sites you visit most and shows their front pages together, one section per site, or all of them with the most important first.
+Pictures: larger pictures in the list (a switch in the menu), whole pictures without cut-off heads, and a tap on a picture zooms it. Picture series show as a series in the reader.
 
-Your things on all your devices: Read later, Bookmarks, what you have read and your section choices follow you through iCloud. Under Your data, at the bottom of the menu, you can delete everything Web Detox has stored.
+Calm on the rest of the web: on shops and other sites that are not news, Web Detox removes buying pressure (countdowns, "only 2 left", "23 people are looking"), sponsored rows, and pop-ups that ask for your e-mail or notifications by themselves. Each part can be switched back on in the menu. Login, cart and checkout are never touched.
 
-The list: hide what you have read (the switch above the sections). Edit the sections right in the row of buttons: tap the pencil, then tap a section to hide or show it, or drag it to move it. The section you are reading is marked. Leads keep the same size, so the list no longer jumps while it loads, and pictures no longer blink. On a wide screen, small sections stand side by side.
+Also new: the byline names the site an article is from. When you have read everything, the list says so. A site's list shows only the articles saved from that site; My news shows them all. Better with screen readers: the reader is a named dialog, and the list behind it is out of the way.
 
-Web Detox now speaks 14 languages. The list follows the site's language; the menu and the app follow your device.
-
-Also new: the app's first screen shows whether Web Detox is turned on and allowed on all websites, with a button to the right page in Settings. Safari's "get our app" banner is gone from news sites. "Read on the site" opens in a new tab, so you come straight back. Fixed: bild.de reloading over and over, and dark-mode extensions such as Noir changing the list's colours.
+Fixed: bt.no articles that showed only the headline and the lead in the reader. Safari is quicker on large front pages.

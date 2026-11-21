@@ -92,6 +92,7 @@ function show(s) {
   $('generic').checked = s.genericSites;
   $('swipe').checked = s.swipeAnimation !== false;
   $('big-pics').checked = !!s.bigPics;
+  showAlbumApp(s.albumApp);
 
   // Topics the reader never wants, for all sites: main topics with their subtopics, from the
   // script's own tree. A muted main topic covers its subtopics, so they show as on and locked.
@@ -160,13 +161,36 @@ $('default').addEventListener('click', async () => {
 });
 $('orig').addEventListener('change', async () => show(await ask({ act: 'orig' })));
 $('generic').addEventListener('change', () => actAndReload('generic'));
-$('big-pics').addEventListener('change', () => actAndReload('bigPics', $('big-pics').checked));
-$('swipe').addEventListener('change', async () => show(await ask({ act: 'swipeAnim', arg: $('swipe').checked })));
+$('big-pics').addEventListener('change', () => onMix ? setEverywhere('plainBigPics', $('big-pics').checked) : actAndReload('bigPics', $('big-pics').checked));
+// My news is the extension's own page, where the popup can't ask a content script: the settings that apply everywhere
+// (those of plain view), read and written in storage here, and the page reloaded.
+let onMix = false;
+async function showMix() {
+  onMix = true;
+  $('unavailable').hidden = true; $('settings').hidden = false;
+  for (const el of $('settings').querySelectorAll(':scope > *, #news-box > *')) if (el.id !== 'news-box') el.hidden = !el.classList.contains('everywhere');
+  const s = await api.storage.local.get(['swipeAnimation', 'plainBigPics', 'albumApp', 'kasetLinks']);
+  $('swipe').checked = s.swipeAnimation !== false; $('big-pics').checked = !!s.plainBigPics;
+  showAlbumApp(s.albumApp || (s.kasetLinks ? 'kaset' : ''));
+}
+// Which music app album reviews' ▶ button opens. Kaset is a Mac app: offered only there. The browser says which system
+// it runs on (an iPad's Safari calls itself a Mac in navigator.platform).
+function showAlbumApp(app) {
+  $('album-app').value = app || '';
+  (globalThis.browser ?? globalThis.chrome).runtime.getPlatformInfo().then(p => { if (p.os !== 'mac' && app !== 'kaset') $('kaset-opt')?.remove(); }, () => {});
+}
+const setEverywhere = async (key, value, reload = true) => { await api.storage.local.set({ [key]: value }); if (reload) api.tabs.reload(tabId).catch(() => {}); };
+$('album-app').addEventListener('change', async () => {
+  const v = $('album-app').value;
+  if (onMix) { await api.storage.local.set({ kasetLinks: false }); setEverywhere('albumApp', v); } else actAndReload('albumApp', v);
+});
+$('swipe').addEventListener('change', async () => onMix ? setEverywhere('swipeAnimation', $('swipe').checked, false) : show(await ask({ act: 'swipeAnim', arg: $('swipe').checked })));
 
 (async () => {
   $('version').textContent = 'v' + api.runtime.getManifest().version;
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
   tabId = tab?.id ?? null;
+  if (tabId !== null && await api.runtime.sendMessage({ type: 'wd-mix-here', tabId }).catch(() => false)) return showMix();
   show(tabId === null ? null : await askUntil(1500));
 })();
 

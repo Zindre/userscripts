@@ -12,7 +12,7 @@ STRINGS.nl = {
   later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
   myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
   mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
-  allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen',
+  allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen', siteMenu: 'Menu van de site', allGenres: 'Alle genres', genre: 'Genre', byScore: 'Hoogste score eerst', dateFrom: 'Van', dateTo: 'Tot', playAlbumIn: 'Album afspelen in %s', kasetNone: 'Niet gevonden', recordLabel: 'Label', released: 'Verschenen',
   keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
 
   pop: {
@@ -27,7 +27,7 @@ STRINGS.nl = {
     calmHeading: 'Tonen op deze site', neverHeading: 'Nooit tonen', allSites: 'alle sites',
     someOf: (n, of) => `${n} van ${of}`, subtopicsOf: g => `Subonderwerpen van ${g}`,
     styleHeading: 'Stijl van koppen', styleRewrite: 'Herschrijven', styleReveal: 'Tonen bij tikken', styleStack: 'Beide tonen',
-    showOriginal: 'Originele koppen tonen', plainHeading: 'Eenvoudige weergave', swipe: 'Vegen tussen artikelen animeren',
+    showOriginal: 'Originele koppen tonen', plainHeading: 'Eenvoudige weergave', swipe: 'Vegen tussen artikelen animeren', albumApp: 'Albums afspelen in', albumAppOff: 'Uit',
     otherHeading: 'Andere sites', generic: 'Nieuwssites automatisch herkennen die ik niet heb ingesteld',
     disabledOn: 'Uitgeschakeld op', enabledOn: 'Ingeschakeld op', remove: h => `${h} verwijderen`,
     notRunning: 'Web Detox is niet actief op deze pagina.',

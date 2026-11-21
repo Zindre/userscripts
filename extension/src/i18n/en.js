@@ -14,7 +14,7 @@ STRINGS.en = {
   later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
   myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
   mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
-  allRead: 'You have read everything here.', showAllRead: 'Show read articles',
+  allRead: 'You have read everything here.', showAllRead: 'Show read articles', siteMenu: 'The site’s menu', allGenres: 'All genres', genre: 'Genre', byScore: 'Highest score first', dateFrom: 'From', dateTo: 'To', playAlbumIn: 'Play the album in %s', kasetNone: 'Not found', recordLabel: 'Label', released: 'Released',
   keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
 
   // The toolbar popup, in the browser's language.
@@ -33,7 +33,7 @@ STRINGS.en = {
     webHeading: 'Show on shops and other websites', neverHeading: 'Never show me', allSites: 'all sites',
     someOf: (n, of) => `${n} of ${of}`, subtopicsOf: g => `Subtopics of ${g}`,
     styleHeading: 'Headline style', styleRewrite: 'Rewrite', styleReveal: 'Reveal on tap', styleStack: 'Show both',
-    showOriginal: 'Show original headlines', plainHeading: 'Plain view', swipe: 'Animate swiping between articles',
+    showOriginal: 'Show original headlines', plainHeading: 'Plain view', swipe: 'Animate swiping between articles', albumApp: 'Play albums in', albumAppOff: 'Off',
     otherHeading: 'Other sites', generic: "Auto-detect news sites I haven't set up",
     disabledOn: 'Disabled on', enabledOn: 'Enabled on', remove: h => `Remove ${h}`,
     notRunning: "Web Detox isn't running on this page.",

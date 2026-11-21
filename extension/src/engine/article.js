@@ -50,7 +50,7 @@ function calmArticle(withImages) {
     while (b.parentElement && b.parentElement !== document.body && !hasProse(b.parentElement) && !b.parentElement.querySelector('h1')) b = b.parentElement;
     if (hasProse(b) || b.querySelector('h1')) continue;
     b.classList.add('cb-related-hidden');
-    const key = url.replace(/[?#].*$/, ''), teaser = textOf(el);
+    const key = articleKey(url), teaser = textOf(el);
     if (!related.items.has(key) && teaser.length >= CFG.minTeaserLen && !isAd(a) && !isGame(url, teaser) && !mutedTopicOf(url, teaser)) {
       const it = { url, key, teaser, img: teaserImage(a), paid: isPaid(a) };
       related.items.set(key, it); fresh.push(it);

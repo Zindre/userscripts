@@ -13,7 +13,7 @@ STRINGS.zh = {
   later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
   myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
   mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
-  allRead: '这里的内容已全部读完。', showAllRead: '显示已读',
+  allRead: '这里的内容已全部读完。', showAllRead: '显示已读', siteMenu: '网站菜单', allGenres: '所有类型', genre: '类型', byScore: '评分最高优先', dateFrom: '从', dateTo: '到', playAlbumIn: '在 %s 中播放专辑', kasetNone: '未找到', recordLabel: '厂牌', released: '发行',
   keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
 
   // The toolbar popup, in the browser's language.
@@ -29,7 +29,7 @@ STRINGS.zh = {
     calmHeading: '在此网站上显示', neverHeading: '永不显示', allSites: '所有网站',
     someOf: (n, of) => `${n}/${of}`, subtopicsOf: g => `${g}的子话题`,
     styleHeading: '标题样式', styleRewrite: '改写', styleReveal: '轻点显示', styleStack: '同时显示',
-    showOriginal: '显示原标题', plainHeading: '简洁视图', swipe: '文章间轻扫时显示动画',
+    showOriginal: '显示原标题', plainHeading: '简洁视图', swipe: '文章间轻扫时显示动画', albumApp: '播放专辑', albumAppOff: '关闭',
     otherHeading: '其他网站', generic: '自动识别未设置的新闻网站',
     disabledOn: '已停用的网站', enabledOn: '已启用的网站', remove: h => `移除 ${h}`,
     notRunning: 'Web Detox 未在此页面上运行。',

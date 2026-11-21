@@ -1,3 +1,4 @@
+[hidden] { display: none !important; } /* over .switch and other display rules: a hidden switch stays hidden */
 :root {
   color-scheme: light dark;
   --bg: #fff; --fg: #111; --muted: #6b6f6c; --line: #dde3df; --soft: #f4f6f5;
@@ -32,6 +33,7 @@ p { margin: 0 0 6px; }
 .switch input { appearance: none; -webkit-appearance: none; flex: none; width: 34px; height: 20px; margin: 0; border-radius: 10px; background: var(--line); position: relative; cursor: pointer; transition: background .15s; }
 .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
 .switch input:checked { background: var(--accent); }
+.choice select { flex: none; max-width: 55%; font: inherit; color: inherit; background: var(--bg, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; }
 .switch input:checked::after { transform: translateX(14px); }
 .switch input:focus-visible, button:focus-visible, .modes input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 kbd { font: 11px ui-monospace, monospace; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 3px; margin-left: 4px; }
