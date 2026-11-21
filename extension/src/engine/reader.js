@@ -111,8 +111,9 @@ function readerPlayerFrame(frame, base) {
 function readerPlayer(el, base) {
   const poster = () => { const img = el.querySelector('img'); return img ? readerImage(img, base) : ''; };
   if (el.tagName === 'FIGURE' && el.getAttribute('data-video-source') === 'POTION' && /^[\w-]{8,}$/.test(el.getAttribute('data-video-id') || ''))
-    // Its data-aspect-ratio is the clip's on a phone; NRK's player shows every clip 16:9.
-    return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${el.getAttribute('data-video-id')}`, poster: poster(), title: norm(el.getAttribute('data-title')) };
+    // Its data-aspect-ratio is the clip's on a phone; NRK's player shows every clip 16:9. nrk: the clip's id, for its
+    // stream, which Safari plays itself (NRK's player in a frame shows only the picture on the iPhone).
+    return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${el.getAttribute('data-video-id')}`, nrk: el.getAttribute('data-video-id'), poster: poster(), title: norm(el.getAttribute('data-title')) };
   if (el.tagName === 'LITE-YOUTUBE' && /^[\w-]{11}$/.test(el.getAttribute('videoid') || ''))
     return { ...PLAYER_FRAME[0][1](el.getAttribute('videoid')), title: norm(el.getAttribute('playlabel') || el.getAttribute('title')) };
   for (const a of el.attributes) {

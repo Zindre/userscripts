@@ -824,7 +824,23 @@ function readerVideoBox(b) {
     if (!(rw > 0)) play.style.aspectRatio = '16/9'; shape(play);
     play.append(el('span', '▶', 'icon'));
     if (b.title) play.append(el('span', b.title, 'title'));
+    // NRK: the clip's stream, looked up now (a few lines from NRK, not the video), so a tap starts it in Safari's own
+    // player while the tap still counts as yours. Without it, or where the browser can't play the stream, NRK's player.
+    let stream = '';
+    if (b.nrk && el('video').canPlayType('application/vnd.apple.mpegurl'))
+      fetch(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
+        const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));
+        if (a) stream = a.url;
+      }).catch(() => {});
     play.addEventListener('click', () => {
+      if (stream) {
+        const v = el('video');
+        v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+        if (b.poster) v.poster = b.poster;
+        v.src = stream; if (label) v.setAttribute('aria-label', label);
+        play.replaceWith(v); v.play().catch(() => {});
+        return;
+      }
       const fr = el('iframe');
       fr.src = b.embed; fr.title = label || T.playVideo; fr.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; fr.allowFullscreen = true;
       fr.style.cssText = play.style.cssText; fr.style.backgroundImage = '';
