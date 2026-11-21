@@ -7,6 +7,7 @@ STRINGS.nb = {
   loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk',
   paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak',
   unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.',
+  playVideo: 'Spill av video',
   short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.',
   hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis',
   later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',

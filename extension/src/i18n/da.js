@@ -8,6 +8,7 @@ STRINGS.da = {
   loading: 'Henter artiklen …', onSite: h => `Læs på ${h}`, close: 'Luk',
   paidHere: 'Resten af artiklen er for abonnenter.', prev: 'Forrige artikel', next: 'Næste artikel',
   unreadable: 'Artiklen kan ikke vises her, men den kan læses på siden.',
+  playVideo: 'Afspil video',
   short: 'Det er al teksten i artiklen. Siden kan have mere, fx video eller senere opdateringer.',
   hideRead: 'Skjul læste', readHidden: n => `${n} ${n === 1 ? 'læst artikel' : 'læste artikler'} skjult`, showRead: 'Vis',
   later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',

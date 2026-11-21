@@ -59,6 +59,82 @@ function readerImage(img, base) {
   }
   return '';
 }
+// A video in the story with a file of its own (NRK's "levende stillbilde": a short silent loop, in a small, a medium and a
+// large copy): { src, poster }, the largest copy up to 1080 lines, so it plays sharp on a phone. '' when the video is only
+// a player's script, which the reader does not run. The reader shows it still, with its controls: it plays when tapped.
+function readerVideo(box, base) {
+  const files = [];
+  for (const v of box.tagName === 'VIDEO' ? [box] : box.querySelectorAll('video')) {
+    for (const s of [v, ...v.querySelectorAll('source')]) {
+      const u = s.getAttribute('src'), type = s.getAttribute('type') || '';
+      if (!u || (type && !/mp4|webm|quicktime/i.test(type))) continue;
+      try {
+        const abs = new URL(u, base);
+        if (abs.protocol !== 'https:' || /\.m3u8|\.mpd|^blob:/i.test(abs.href)) continue;
+        const lines = +(abs.pathname.match(/[_-](\d{3,4})p?\.(?:mp4|webm|mov)$/i)?.[1] || 0);
+        let poster = ''; try { poster = v.getAttribute('poster') ? new URL(v.getAttribute('poster'), base).href : ''; } catch {}
+        files.push({ src: abs.href, poster: /^https:/.test(poster) ? poster : '', lines });
+      } catch {}
+    }
+  }
+  const fit = files.filter(f => f.lines <= 1080).sort((a, b) => b.lines - a.lines)[0] || files[0];
+  return fit ? { src: fit.src, poster: fit.poster } : null;
+}
+// A video player's frame in the story (YouTube, Vimeo, NRK's own and the like), the way the site embeds it. The reader shows
+// its picture and title and loads the frame only when tapped: { embed, poster }. Anything else in a frame stays out.
+const PLAYER_FRAME = [
+  [/^https:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{11})/, id => ({ embed: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`, poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg` })],
+  [/^https:\/\/player\.vimeo\.com\/video\/(\d+)/, id => ({ embed: `https://player.vimeo.com/video/${id}?autoplay=1&dnt=1` })],
+  [/^https:\/\/(?:www\.)?dailymotion\.com\/embed\/video\/(\w+)/, id => ({ embed: `https://www.dailymotion.com/embed/video/${id}?autoplay=1`, poster: `https://www.dailymotion.com/thumbnail/video/${id}` })],
+  [/^https:\/\/static\.nrk\.no\/ludo\/[^#]*#id=([\w.-]+)/, id => ({ embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${id}` })],
+  [/^https:\/\/(?:streamable\.com\/[eo]|cdn\.jwplayer\.com\/players|players\.brightcove\.net|embed\.ted\.com\/talks|www\.svtplay\.se\/video|play\.tv2\.no\/embed)\//, (m, src) => ({ embed: src })],
+];
+const PLAYER_BOX = 'figure[data-video-source], lite-youtube, iframe, [data-videoid], [data-video-id], astro-island[props*="streamUrls"]';
+const LEAD_VIDEO = PLAYER_BOX + ', video';
+// The first player inside a box (a figure around Dinside's JW Player).
+function readerPlayerIn(box, base) {
+  for (const e of box.querySelectorAll(PLAYER_BOX)) { const v = e.tagName === 'IFRAME' ? readerPlayerFrame(e, base) : readerPlayer(e, base); if (v) return v; }
+  return null;
+}
+function readerPlayerFrame(frame, base) {
+  let src; try { src = new URL(frame.getAttribute('src') || frame.dataset.src || frame.dataset.lazySrc || '', base).href; } catch { return null; }
+  for (const [re, make] of PLAYER_FRAME) { const m = src.match(re); if (m) return make(m[1], src); }
+  return null;
+}
+// A video the page's script builds from data in the story, read from that data: { src | embed, poster, title, ratio }.
+// - NRK's clips (<figure data-video-source="POTION">): NRK's own player for the clip. Its "PS" boxes are TV programmes
+//   and channels beside the story, and stay out.
+// - Schibsted's sites (VG, Aftenposten, BT, E24 …): the video's file in the player's data ("streamUrls"), a video only,
+//   not a story read aloud ("assetType":"audio").
+// - JW Player (Dagbladet, Dinside): its stream, by the video's id, unless the site marks the video as advertising.
+// - <lite-youtube videoid> (WordPress): YouTube.
+function readerPlayer(el, base) {
+  const poster = () => { const img = el.querySelector('img'); return img ? readerImage(img, base) : ''; };
+  if (el.tagName === 'FIGURE' && el.getAttribute('data-video-source') === 'POTION' && /^[\w-]{8,}$/.test(el.getAttribute('data-video-id') || ''))
+    // Its data-aspect-ratio is the clip's on a phone; NRK's player shows every clip 16:9.
+    return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${el.getAttribute('data-video-id')}`, poster: poster(), title: norm(el.getAttribute('data-title')) };
+  if (el.tagName === 'LITE-YOUTUBE' && /^[\w-]{11}$/.test(el.getAttribute('videoid') || ''))
+    return { ...PLAYER_FRAME[0][1](el.getAttribute('videoid')), title: norm(el.getAttribute('playlabel') || el.getAttribute('title')) };
+  for (const a of el.attributes) {
+    const v = a.value;
+    if (v.length > 80 && v.includes('"streamUrls"')) {
+      // Astro writes its props as [0, value]: "mp4":[0,"https://…"].
+      const get = k => v.match(new RegExp(`"${k}":(?:\\[0,)?"([^"]+)"`))?.[1]?.replace(/\\u002F/g, '/') || '';
+      if (get('assetType') !== 'video') return null;
+      const src = get('mp4') || get('hls');
+      if (!/^https:/.test(src)) return null;
+      const still = (v.match(/"imageAsset":(?:\[0,)?\{[^{}]*?"main":(?:\[0,)?"(https:[^"]+)"/) || [])[1] || '';
+      const ar = get('aspectRatio'), r = +ar > 0 ? `${ar}/1` : '';
+      return { src, poster: still ? still + (still.includes('?') ? '' : '?t[]=1080q80') : poster(), title: get('title'), ratio: r };
+    }
+  }
+  const jw = el.getAttribute('data-videoid') || el.getAttribute('data-video-id') || '';
+  if (/^\w{8}$/.test(jw) && /cdn\.jwplayer\.com/.test(el.getAttribute('style') || el.innerHTML.slice(0, 2000))) {
+    if (/^(?:1|true)$/.test(el.getAttribute('data-is-content-marketing') || '')) return null;
+    return { src: `https://cdn.jwplayer.com/manifests/${jw}.m3u8`, poster: `https://cdn.jwplayer.com/v2/media/${jw}/poster.jpg?width=1280`, title: '' };
+  }
+  return null;
+}
 
 // The element that holds the most paragraph text: a paragraph counts fully for its parent, half for
 // its grandparent, a third above that and so on for five levels, so a body whose paragraphs sit in
@@ -126,7 +202,7 @@ function readArticle(html, url, withImages) {
   if (art) try { art.rating = pageRating(html, doc); const rv = reviewedAlbum(doc); art.album = rv?.name || ''; art.albumPair = !!(rv?.album && rv.artist); art.facts = reviewFacts(html); } catch {}
   return art;
 }
-// → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'embed', text, items, src, caption }], date, byline, paid, partial } or null
+// → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'video'|'embed', text, items, src, poster, caption }], date, byline, paid, partial } or null
 // partial: a paid article that arrived with only its start. short: an article with little text.
 function readArticleIn(doc, url, withImages) {
   let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
@@ -157,11 +233,19 @@ function readArticleIn(doc, url, withImages) {
   if (!root && !entry && !quizzes.length) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
   const blocks = [];
   const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
+  // A video once (NRK has the same clip in a small, a medium and a large copy, a site can repeat its player).
+  const addVideo = v => { if (!blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) blocks.push({ t: 'video', ...v }); };
   const walk = el => {
     for (const c of el.children) {
       const tag = c.tagName;
-      if (tag === 'IFRAME') { const src = readerEmbed(c, url); if (src) blocks.push({ t: 'embed', src }); continue; }
+      if (tag === 'IFRAME') {
+        const src = readerEmbed(c, url), pf = !src && withImages && readerPlayerFrame(c, url);
+        if (src) blocks.push({ t: 'embed', src }); else if (pf) addVideo({ ...pf, title: norm(c.getAttribute('title')) });
+        continue;
+      }
       if (c.matches(skip)) continue;
+      const pv = withImages && (readerPlayer(c, url) || (tag === 'FIGURE' ? readerPlayerIn(c, url) : null));
+      if (pv) { addVideo({ ...pv, caption: (f => f ? readerText(f) : '')(c.querySelector('figcaption')) }); continue; }
       // A link around a picture and text is a card for another story (BT's live entries end with one).
       if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
       if (tag === 'P') {
@@ -181,6 +265,11 @@ function readArticleIn(doc, url, withImages) {
           const items = lis.map(readerText).filter(Boolean);
           if (items.length) blocks.push({ t: 'list', items, ordered: tag === 'OL' });
         }
+      } else if (withImages && (tag === 'VIDEO' || (tag === 'FIGURE' && c.querySelector('video')))) {
+        const v = readerVideo(c, url), cap = (f => f ? readerText(f) : '')(tag === 'FIGURE' ? c.querySelector('figcaption') : null);
+        const img = !v?.poster && c.querySelector('img'), still = img ? readerImage(img, url) : '';
+        if (v) addVideo({ src: v.src, poster: v.poster || still, caption: cap });
+        else if (still) blocks.push({ t: 'img', src: still, caption: cap });
       } else if (tag === 'FIGURE' || tag === 'IMG' || tag === 'PICTURE') {
         const img = tag === 'IMG' ? c : c.querySelector('img');
         const src = withImages && img ? readerImage(img, url) : '';
@@ -200,6 +289,16 @@ function readArticleIn(doc, url, withImages) {
       else blocks.push({ t: 'embed', src });
     }
     blocks.unshift(...above);
+    // The story's video above its text, where a lead picture would be: the first in the article before the text, outside
+    // anything left out (Dinside, NRK's clips at the top).
+    if (withImages && root) {
+      const box = root.parentElement?.closest('article, main') || doc.querySelector('article, main');
+      for (const c of box?.querySelectorAll(LEAD_VIDEO) || []) {
+        if (c.contains(root) || !(root.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_PRECEDING) || c.closest(skip)) continue;
+        const v = c.tagName === 'IFRAME' ? readerPlayerFrame(c, url) : readerPlayer(c, url) || (c.tagName === 'VIDEO' ? readerVideo(c, url) : null);
+        if (v && !blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) { blocks.unshift({ t: 'video', ...v }); break; }
+      }
+    }
   }
   // The entry's own heading is the reader's headline already.
   if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
@@ -225,7 +324,7 @@ function readArticleIn(doc, url, withImages) {
     if (pics.length >= 3) { series = true; for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'img') blocks.splice(i, 1); blocks.push(...pics); }
   }
   // The story's own picture leads when the body has none of its own.
-  if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
+  if (withImages && !feed && !blocks.some(b => b.t === 'img' || b.t === 'video')) {
     try {
       const og = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
       if (og && !/logo/i.test(og)) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
@@ -233,7 +332,7 @@ function readArticleIn(doc, url, withImages) {
   }
   const words = blocks.reduce((n, b) => n + (b.text || '').length + (b.items || []).join(' ').length, 0);
   // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
-  if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
+  if (paid && words < 1500) return { blocks: blocks.filter(b => (b.t !== 'img' && b.t !== 'video') || words >= 200), date, byline, paid, partial: true };
   if (words >= 200) return { blocks, date, byline, paid, partial: false };
   if (series) return { blocks, date, byline, paid, partial: false };
   return article ? { blocks, date, byline, paid, partial: false, short: !blocks.some(b => b.t === 'embed') } : null;

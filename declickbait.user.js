@@ -89,6 +89,7 @@
       loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close',
       paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article',
       unreadable: "This article can't be shown here, but you can read it on the site.",
+      playVideo: 'Play video',
       short: "That's all the text this article has. The site may have more, such as video or later updates.",
       hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show',
       later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
@@ -184,6 +185,7 @@
       loading: 'Henter artiklen …', onSite: h => `Læs på ${h}`, close: 'Luk',
       paidHere: 'Resten af artiklen er for abonnenter.', prev: 'Forrige artikel', next: 'Næste artikel',
       unreadable: 'Artiklen kan ikke vises her, men den kan læses på siden.',
+      playVideo: 'Afspil video',
       short: 'Det er al teksten i artiklen. Siden kan have mere, fx video eller senere opdateringer.',
       hideRead: 'Skjul læste', readHidden: n => `${n} ${n === 1 ? 'læst artikel' : 'læste artikler'} skjult`, showRead: 'Vis',
       later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
@@ -272,6 +274,7 @@
       loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen',
       paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel',
       unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.',
+      playVideo: 'Video abspielen',
       short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.',
       hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen',
       later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
@@ -355,6 +358,7 @@
       loading: 'Cargando el artículo…', onSite: h => `Leer en ${h}`, close: 'Cerrar',
       paidHere: 'El resto de este artículo es para suscriptores.', prev: 'Artículo anterior', next: 'Artículo siguiente',
       unreadable: 'Este artículo no se puede mostrar aquí, pero puedes leerlo en la web.',
+      playVideo: 'Reproducir vídeo',
       short: 'Este artículo no tiene más texto. La web puede tener más, como vídeos o actualizaciones posteriores.',
       hideRead: 'Ocultar leídos', readHidden: n => `${n} ${n === 1 ? 'artículo leído oculto' : 'artículos leídos ocultos'}`, showRead: 'Mostrar',
       later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',
@@ -439,6 +443,7 @@
       loading: 'Ladataan artikkelia …', onSite: h => `Lue sivustolla ${h}`, close: 'Sulje',
       paidHere: 'Artikkelin loppuosa on tilaajille.', prev: 'Edellinen artikkeli', next: 'Seuraava artikkeli',
       unreadable: 'Artikkelia ei voi näyttää tässä, mutta sen voi lukea sivustolla.',
+      playVideo: 'Toista video',
       short: 'Tässä on artikkelin koko teksti. Sivustolla voi olla lisää, kuten videota tai myöhempiä päivityksiä.',
       hideRead: 'Piilota luetut', readHidden: n => `${n} ${n === 1 ? 'luettu artikkeli' : 'luettua artikkelia'} piilotettu`, showRead: 'Näytä',
       later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
@@ -527,6 +532,7 @@
       loading: 'Chargement de l’article…', onSite: h => `Lire sur ${h}`, close: 'Fermer',
       paidHere: 'La suite de cet article est réservée aux abonnés.', prev: 'Article précédent', next: 'Article suivant',
       unreadable: 'Cet article ne peut pas s’afficher ici, mais vous pouvez le lire sur le site.',
+      playVideo: 'Lire la vidéo',
       short: 'Cet article n’a pas plus de texte. Le site en a peut-être plus, comme des vidéos ou des mises à jour.',
       hideRead: 'Masquer les lus', readHidden: n => `${n} ${n < 2 ? 'article lu masqué' : 'articles lus masqués'}`, showRead: 'Afficher',
       later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
@@ -610,6 +616,7 @@
       loading: 'Caricamento dell’articolo …', onSite: h => `Leggi su ${h}`, close: 'Chiudi',
       paidHere: 'Il resto dell’articolo è per gli abbonati.', prev: 'Articolo precedente', next: 'Articolo successivo',
       unreadable: 'Questo articolo non si può mostrare qui, ma puoi leggerlo sul sito.',
+      playVideo: 'Riproduci il video',
       short: 'Questo è tutto il testo dell’articolo. Il sito potrebbe avere altro, come video o aggiornamenti successivi.',
       hideRead: 'Nascondi letti', readHidden: n => `${n} ${n === 1 ? 'articolo letto nascosto' : 'articoli letti nascosti'}`, showRead: 'Mostra',
       later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',
@@ -694,6 +701,7 @@
       loading: '記事を読み込み中…', onSite: h => `${h}で読む`, close: '閉じる',
       paidHere: 'この記事の続きは購読者向けです。', prev: '前の記事', next: '次の記事',
       unreadable: 'この記事はここでは表示できませんが、サイトで読むことができます。',
+      playVideo: '動画を再生',
       short: 'この記事のテキストはこれですべてです。サイトには動画やその後の更新など、ほかの内容があるかもしれません。',
       hideRead: '既読を非表示', readHidden: n => `既読の記事${n}件を非表示`, showRead: '表示',
       later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
@@ -782,6 +790,7 @@
       loading: 'Henter saken …', onSite: h => `Les på ${h}`, close: 'Lukk',
       paidHere: 'Resten av saken krever abonnement.', prev: 'Forrige sak', next: 'Neste sak',
       unreadable: 'Denne saken kan ikke vises her, men du kan lese den på nettstedet.',
+      playVideo: 'Spill av video',
       short: 'Saken har ikke mer tekst enn dette. Nettstedet kan ha mer, som video eller nyere oppdateringer.',
       hideRead: 'Skjul leste', readHidden: n => `${n} ${n === 1 ? 'lest sak' : 'leste saker'} skjult`, showRead: 'Vis',
       later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
@@ -869,6 +878,7 @@
       loading: 'Artikel wordt geladen…', onSite: h => `Lezen op ${h}`, close: 'Sluiten',
       paidHere: 'De rest van dit artikel is voor abonnees.', prev: 'Vorig artikel', next: 'Volgend artikel',
       unreadable: 'Dit artikel kan hier niet worden getoond, maar je kunt het op de site lezen.',
+      playVideo: 'Video afspelen',
       short: 'Meer tekst heeft dit artikel niet. De site heeft misschien meer, zoals video of latere updates.',
       hideRead: 'Gelezen verbergen', readHidden: n => `${n} gelezen ${n === 1 ? 'artikel' : 'artikelen'} verborgen`, showRead: 'Tonen',
       later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
@@ -954,6 +964,7 @@
       loading: 'Wczytywanie artykułu …', onSite: h => `Czytaj na ${h}`, close: 'Zamknij',
       paidHere: 'Dalsza część artykułu jest dla subskrybentów.', prev: 'Poprzedni artykuł', next: 'Następny artykuł',
       unreadable: 'Tego artykułu nie da się tu pokazać, ale można go przeczytać na stronie.',
+      playVideo: 'Odtwórz wideo',
       short: 'To cały tekst tego artykułu. Strona może mieć więcej, np. wideo lub późniejsze aktualizacje.',
       hideRead: 'Ukryj przeczytane',
       readHidden: n => `Ukryto ${n} ${n === 1 ? 'przeczytany artykuł' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'przeczytane artykuły' : 'przeczytanych artykułów'}`,
@@ -1039,6 +1050,7 @@
       loading: 'Carregando a notícia …', onSite: h => `Ler em ${h}`, close: 'Fechar',
       paidHere: 'O resto desta notícia é para assinantes.', prev: 'Notícia anterior', next: 'Próxima notícia',
       unreadable: 'Esta notícia não pode ser mostrada aqui, mas dá para ler no site.',
+      playVideo: 'Reproduzir vídeo',
       short: 'Este é todo o texto desta notícia. O site pode ter mais, como vídeo ou atualizações posteriores.',
       hideRead: 'Ocultar lidas', readHidden: n => `${n} ${n === 1 ? 'notícia lida oculta' : 'notícias lidas ocultas'}`, showRead: 'Mostrar',
       later: 'Ler depois', marks: 'Favoritos', mark: 'Favorito', unLater: 'Remover de Ler depois', unMark: 'Remover favorito',
@@ -1122,6 +1134,7 @@
       loading: 'Läser in artikeln …', onSite: h => `Läs på ${h}`, close: 'Stäng',
       paidHere: 'Resten av artikeln är för prenumeranter.', prev: 'Föregående artikel', next: 'Nästa artikel',
       unreadable: 'Artikeln kan inte visas här, men du kan läsa den på sajten.',
+      playVideo: 'Spela upp video',
       short: 'Det är all text som artikeln har. Sajten kan ha mer, till exempel video eller senare uppdateringar.',
       hideRead: 'Dölj lästa', readHidden: n => `${n} ${n === 1 ? 'läst artikel dold' : 'lästa artiklar dolda'}`, showRead: 'Visa',
       later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
@@ -1206,6 +1219,7 @@
       loading: '正在载入文章…', onSite: h => `在 ${h} 上阅读`, close: '关闭',
       paidHere: '本文其余部分仅供订阅者阅读。', prev: '上一篇文章', next: '下一篇文章',
       unreadable: '此文章无法在这里显示，但可以在网站上阅读。',
+      playVideo: '播放视频',
       short: '这篇文章的文字只有这些。网站上可能还有更多内容，例如视频或后续更新。',
       hideRead: '隐藏已读', readHidden: n => `已隐藏 ${n} 篇已读文章`, showRead: '显示',
       later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
@@ -2242,6 +2256,82 @@
       }
       return '';
     }
+    // A video in the story with a file of its own (NRK's "levende stillbilde": a short silent loop, in a small, a medium and a
+    // large copy): { src, poster }, the largest copy up to 1080 lines, so it plays sharp on a phone. '' when the video is only
+    // a player's script, which the reader does not run. The reader shows it still, with its controls: it plays when tapped.
+    function readerVideo(box, base) {
+      const files = [];
+      for (const v of box.tagName === 'VIDEO' ? [box] : box.querySelectorAll('video')) {
+        for (const s of [v, ...v.querySelectorAll('source')]) {
+          const u = s.getAttribute('src'), type = s.getAttribute('type') || '';
+          if (!u || (type && !/mp4|webm|quicktime/i.test(type))) continue;
+          try {
+            const abs = new URL(u, base);
+            if (abs.protocol !== 'https:' || /\.m3u8|\.mpd|^blob:/i.test(abs.href)) continue;
+            const lines = +(abs.pathname.match(/[_-](\d{3,4})p?\.(?:mp4|webm|mov)$/i)?.[1] || 0);
+            let poster = ''; try { poster = v.getAttribute('poster') ? new URL(v.getAttribute('poster'), base).href : ''; } catch {}
+            files.push({ src: abs.href, poster: /^https:/.test(poster) ? poster : '', lines });
+          } catch {}
+        }
+      }
+      const fit = files.filter(f => f.lines <= 1080).sort((a, b) => b.lines - a.lines)[0] || files[0];
+      return fit ? { src: fit.src, poster: fit.poster } : null;
+    }
+    // A video player's frame in the story (YouTube, Vimeo, NRK's own and the like), the way the site embeds it. The reader shows
+    // its picture and title and loads the frame only when tapped: { embed, poster }. Anything else in a frame stays out.
+    const PLAYER_FRAME = [
+      [/^https:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/([\w-]{11})/, id => ({ embed: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`, poster: `https://i.ytimg.com/vi/${id}/hqdefault.jpg` })],
+      [/^https:\/\/player\.vimeo\.com\/video\/(\d+)/, id => ({ embed: `https://player.vimeo.com/video/${id}?autoplay=1&dnt=1` })],
+      [/^https:\/\/(?:www\.)?dailymotion\.com\/embed\/video\/(\w+)/, id => ({ embed: `https://www.dailymotion.com/embed/video/${id}?autoplay=1`, poster: `https://www.dailymotion.com/thumbnail/video/${id}` })],
+      [/^https:\/\/static\.nrk\.no\/ludo\/[^#]*#id=([\w.-]+)/, id => ({ embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${id}` })],
+      [/^https:\/\/(?:streamable\.com\/[eo]|cdn\.jwplayer\.com\/players|players\.brightcove\.net|embed\.ted\.com\/talks|www\.svtplay\.se\/video|play\.tv2\.no\/embed)\//, (m, src) => ({ embed: src })],
+    ];
+    const PLAYER_BOX = 'figure[data-video-source], lite-youtube, iframe, [data-videoid], [data-video-id], astro-island[props*="streamUrls"]';
+    const LEAD_VIDEO = PLAYER_BOX + ', video';
+    // The first player inside a box (a figure around Dinside's JW Player).
+    function readerPlayerIn(box, base) {
+      for (const e of box.querySelectorAll(PLAYER_BOX)) { const v = e.tagName === 'IFRAME' ? readerPlayerFrame(e, base) : readerPlayer(e, base); if (v) return v; }
+      return null;
+    }
+    function readerPlayerFrame(frame, base) {
+      let src; try { src = new URL(frame.getAttribute('src') || frame.dataset.src || frame.dataset.lazySrc || '', base).href; } catch { return null; }
+      for (const [re, make] of PLAYER_FRAME) { const m = src.match(re); if (m) return make(m[1], src); }
+      return null;
+    }
+    // A video the page's script builds from data in the story, read from that data: { src | embed, poster, title, ratio }.
+    // - NRK's clips (<figure data-video-source="POTION">): NRK's own player for the clip. Its "PS" boxes are TV programmes
+    //   and channels beside the story, and stay out.
+    // - Schibsted's sites (VG, Aftenposten, BT, E24 …): the video's file in the player's data ("streamUrls"), a video only,
+    //   not a story read aloud ("assetType":"audio").
+    // - JW Player (Dagbladet, Dinside): its stream, by the video's id, unless the site marks the video as advertising.
+    // - <lite-youtube videoid> (WordPress): YouTube.
+    function readerPlayer(el, base) {
+      const poster = () => { const img = el.querySelector('img'); return img ? readerImage(img, base) : ''; };
+      if (el.tagName === 'FIGURE' && el.getAttribute('data-video-source') === 'POTION' && /^[\w-]{8,}$/.test(el.getAttribute('data-video-id') || ''))
+        // Its data-aspect-ratio is the clip's on a phone; NRK's player shows every clip 16:9.
+        return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${el.getAttribute('data-video-id')}`, poster: poster(), title: norm(el.getAttribute('data-title')) };
+      if (el.tagName === 'LITE-YOUTUBE' && /^[\w-]{11}$/.test(el.getAttribute('videoid') || ''))
+        return { ...PLAYER_FRAME[0][1](el.getAttribute('videoid')), title: norm(el.getAttribute('playlabel') || el.getAttribute('title')) };
+      for (const a of el.attributes) {
+        const v = a.value;
+        if (v.length > 80 && v.includes('"streamUrls"')) {
+          // Astro writes its props as [0, value]: "mp4":[0,"https://…"].
+          const get = k => v.match(new RegExp(`"${k}":(?:\\[0,)?"([^"]+)"`))?.[1]?.replace(/\\u002F/g, '/') || '';
+          if (get('assetType') !== 'video') return null;
+          const src = get('mp4') || get('hls');
+          if (!/^https:/.test(src)) return null;
+          const still = (v.match(/"imageAsset":(?:\[0,)?\{[^{}]*?"main":(?:\[0,)?"(https:[^"]+)"/) || [])[1] || '';
+          const ar = get('aspectRatio'), r = +ar > 0 ? `${ar}/1` : '';
+          return { src, poster: still ? still + (still.includes('?') ? '' : '?t[]=1080q80') : poster(), title: get('title'), ratio: r };
+        }
+      }
+      const jw = el.getAttribute('data-videoid') || el.getAttribute('data-video-id') || '';
+      if (/^\w{8}$/.test(jw) && /cdn\.jwplayer\.com/.test(el.getAttribute('style') || el.innerHTML.slice(0, 2000))) {
+        if (/^(?:1|true)$/.test(el.getAttribute('data-is-content-marketing') || '')) return null;
+        return { src: `https://cdn.jwplayer.com/manifests/${jw}.m3u8`, poster: `https://cdn.jwplayer.com/v2/media/${jw}/poster.jpg?width=1280`, title: '' };
+      }
+      return null;
+    }
 
     // The element that holds the most paragraph text: a paragraph counts fully for its parent, half for
     // its grandparent, a third above that and so on for five levels, so a body whose paragraphs sit in
@@ -2309,7 +2399,7 @@
       if (art) try { art.rating = pageRating(html, doc); const rv = reviewedAlbum(doc); art.album = rv?.name || ''; art.albumPair = !!(rv?.album && rv.artist); art.facts = reviewFacts(html); } catch {}
       return art;
     }
-    // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'embed', text, items, src, caption }], date, byline, paid, partial } or null
+    // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'video'|'embed', text, items, src, poster, caption }], date, byline, paid, partial } or null
     // partial: a paid article that arrived with only its start. short: an article with little text.
     function readArticleIn(doc, url, withImages) {
       let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
@@ -2340,11 +2430,19 @@
       if (!root && !entry && !quizzes.length) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
       const blocks = [];
       const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
+      // A video once (NRK has the same clip in a small, a medium and a large copy, a site can repeat its player).
+      const addVideo = v => { if (!blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) blocks.push({ t: 'video', ...v }); };
       const walk = el => {
         for (const c of el.children) {
           const tag = c.tagName;
-          if (tag === 'IFRAME') { const src = readerEmbed(c, url); if (src) blocks.push({ t: 'embed', src }); continue; }
+          if (tag === 'IFRAME') {
+            const src = readerEmbed(c, url), pf = !src && withImages && readerPlayerFrame(c, url);
+            if (src) blocks.push({ t: 'embed', src }); else if (pf) addVideo({ ...pf, title: norm(c.getAttribute('title')) });
+            continue;
+          }
           if (c.matches(skip)) continue;
+          const pv = withImages && (readerPlayer(c, url) || (tag === 'FIGURE' ? readerPlayerIn(c, url) : null));
+          if (pv) { addVideo({ ...pv, caption: (f => f ? readerText(f) : '')(c.querySelector('figcaption')) }); continue; }
           // A link around a picture and text is a card for another story (BT's live entries end with one).
           if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
           if (tag === 'P') {
@@ -2364,6 +2462,11 @@
               const items = lis.map(readerText).filter(Boolean);
               if (items.length) blocks.push({ t: 'list', items, ordered: tag === 'OL' });
             }
+          } else if (withImages && (tag === 'VIDEO' || (tag === 'FIGURE' && c.querySelector('video')))) {
+            const v = readerVideo(c, url), cap = (f => f ? readerText(f) : '')(tag === 'FIGURE' ? c.querySelector('figcaption') : null);
+            const img = !v?.poster && c.querySelector('img'), still = img ? readerImage(img, url) : '';
+            if (v) addVideo({ src: v.src, poster: v.poster || still, caption: cap });
+            else if (still) blocks.push({ t: 'img', src: still, caption: cap });
           } else if (tag === 'FIGURE' || tag === 'IMG' || tag === 'PICTURE') {
             const img = tag === 'IMG' ? c : c.querySelector('img');
             const src = withImages && img ? readerImage(img, url) : '';
@@ -2383,6 +2486,16 @@
           else blocks.push({ t: 'embed', src });
         }
         blocks.unshift(...above);
+        // The story's video above its text, where a lead picture would be: the first in the article before the text, outside
+        // anything left out (Dinside, NRK's clips at the top).
+        if (withImages && root) {
+          const box = root.parentElement?.closest('article, main') || doc.querySelector('article, main');
+          for (const c of box?.querySelectorAll(LEAD_VIDEO) || []) {
+            if (c.contains(root) || !(root.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_PRECEDING) || c.closest(skip)) continue;
+            const v = c.tagName === 'IFRAME' ? readerPlayerFrame(c, url) : readerPlayer(c, url) || (c.tagName === 'VIDEO' ? readerVideo(c, url) : null);
+            if (v && !blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) { blocks.unshift({ t: 'video', ...v }); break; }
+          }
+        }
       }
       // The entry's own heading is the reader's headline already.
       if (entry) for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'h' && blocks[i].text === title) blocks.splice(i, 1);
@@ -2408,7 +2521,7 @@
         if (pics.length >= 3) { series = true; for (let i = blocks.length - 1; i >= 0; i--) if (blocks[i].t === 'img') blocks.splice(i, 1); blocks.push(...pics); }
       }
       // The story's own picture leads when the body has none of its own.
-      if (withImages && !feed && !blocks.some(b => b.t === 'img')) {
+      if (withImages && !feed && !blocks.some(b => b.t === 'img' || b.t === 'video')) {
         try {
           const og = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
           if (og && !/logo/i.test(og)) blocks.unshift({ t: 'img', src: new URL(og, url).href, caption: '' });
@@ -2416,7 +2529,7 @@
       }
       const words = blocks.reduce((n, b) => n + (b.text || '').length + (b.items || []).join(' ').length, 0);
       // A full article runs to thousands of characters; a paid one far shorter is what the site let through.
-      if (paid && words < 1500) return { blocks: blocks.filter(b => b.t !== 'img' || words >= 200), date, byline, paid, partial: true };
+      if (paid && words < 1500) return { blocks: blocks.filter(b => (b.t !== 'img' && b.t !== 'video') || words >= 200), date, byline, paid, partial: true };
       if (words >= 200) return { blocks, date, byline, paid, partial: false };
       if (series) return { blocks, date, byline, paid, partial: false };
       return article ? { blocks, date, byline, paid, partial: false, short: !blocks.some(b => b.t === 'embed') } : null;
@@ -3548,7 +3661,18 @@
       .reader li{padding:0 0 .3em;border:0;box-shadow:none}
       .reader figure{margin:0 0 1em}
       .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
+      .reader video{display:block;width:100%;height:auto;border-radius:6px;background:#000}
       .reader iframe{display:block;width:100%;height:600px;margin:0 0 1em;border:0;border-radius:6px;background:#fff}
+      .reader figure.video>video,.reader figure.video>iframe,.reader figure.video>.play{margin:0 auto}
+      .reader figure.video>iframe{height:auto;background:#000}
+      .reader figure.video>video{max-height:78vh}
+      .reader .play{position:relative;display:flex;align-items:center;justify-content:center;width:100%;padding:0;border:0;border-radius:6px;
+        background:#222 center/cover no-repeat;color:#fff;overflow:hidden}
+      .reader .play .icon{display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;
+        background:rgba(0,0,0,.6);font-size:24px;padding-left:5px;box-sizing:border-box}
+      .reader .play:hover .icon,.reader .play:focus-visible .icon{background:rgba(0,0,0,.8)}
+      .reader .play .title{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;text-align:left;font-size:15px;font-weight:600;
+        line-height:1.3;background:linear-gradient(transparent,rgba(0,0,0,.75))}
       .reader .term{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
       .reader .term[aria-expanded="true"]{text-decoration-style:solid}
       .reader .explain{display:block;margin:8px 0 0;padding:8px 12px;font-size:15px;line-height:1.4;color:var(--muted);border-left:3px solid var(--line);background:color-mix(in srgb,var(--line) 35%,transparent);border-radius:0 6px 6px 0}
@@ -3688,6 +3812,48 @@
       readerFrames.add(f);
       return f;
     }
+    // A video in the reader, which never starts by itself.
+    // - A file: the browser's own player, still until play is pressed; nothing but its picture is fetched before that. A stream
+    //   the browser cannot play (HLS outside Safari) shows its picture only.
+    // - A player's frame (YouTube, NRK …): its picture and title with a play button; nothing of the player loads until pressed,
+    //   and then it plays in its place.
+    // Upright videos keep their shape, no taller than most of the screen.
+    function readerVideoBox(b) {
+      const el = readerEl, f = el('figure', '', 'video'), label = b.caption || b.title || '';
+      const [rw, rh] = (b.ratio || '').split('/').map(Number), upright = rw > 0 && rh > rw;
+      const shape = x => { if (!(rw > 0 && rh > 0)) return; x.style.aspectRatio = `${rw}/${rh}`; if (upright) x.style.width = `min(100%, calc(78vh * ${rw / rh}))`; };
+      const still = () => {
+        if (!b.poster) return f.remove();
+        const im = el('img'); im.src = b.poster; im.alt = label; im.loading = 'lazy'; im.addEventListener('error', () => f.remove()); f.prepend(im);
+      };
+      if (b.src) {
+        const v = el('video');
+        if (/\.m3u8(?:[?#]|$)/i.test(b.src) && !v.canPlayType('application/vnd.apple.mpegurl')) still();
+        else {
+          v.controls = true; v.preload = 'none'; v.playsInline = true; v.setAttribute('playsinline', '');
+          if (b.poster) v.poster = b.poster;
+          v.src = b.src; shape(v); if (label) v.setAttribute('aria-label', label);
+          v.addEventListener('error', () => { v.remove(); still(); }, { once: true });
+          f.append(v);
+        }
+      } else {
+        const play = el('button', '', 'play');
+        play.type = 'button'; play.setAttribute('aria-label', label ? `${T.playVideo}: ${label}` : T.playVideo);
+        if (b.poster) play.style.backgroundImage = `url("${b.poster.replace(/["\\]/g, encodeURIComponent)}")`;
+        if (!(rw > 0)) play.style.aspectRatio = '16/9'; shape(play);
+        play.append(el('span', '▶', 'icon'));
+        if (b.title) play.append(el('span', b.title, 'title'));
+        play.addEventListener('click', () => {
+          const fr = el('iframe');
+          fr.src = b.embed; fr.title = label || T.playVideo; fr.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; fr.allowFullscreen = true;
+          fr.style.cssText = play.style.cssText; fr.style.backgroundImage = '';
+          play.replaceWith(fr); fr.focus();
+        });
+        f.append(play);
+      }
+      if (b.caption) f.append(el('figcaption', b.caption));
+      return f;
+    }
     const readerEl = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
     // A paragraph with explained words (VG's "mistenkt", an <abbr>): the word, the first time it comes, is
     // marked, and a tap shows what it means under the paragraph, so the sentence isn't split.
@@ -3743,6 +3909,7 @@
           im.addEventListener('click', () => zoomImage(im));
           f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
         }
+        else if (b.t === 'video') out.push(readerVideoBox(b));
         else if (b.t === 'embed') out.push(readerFrame(b.src));
       }
       if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it

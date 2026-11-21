@@ -7,6 +7,7 @@ STRINGS.es = {
   loading: 'Cargando el artículo…', onSite: h => `Leer en ${h}`, close: 'Cerrar',
   paidHere: 'El resto de este artículo es para suscriptores.', prev: 'Artículo anterior', next: 'Artículo siguiente',
   unreadable: 'Este artículo no se puede mostrar aquí, pero puedes leerlo en la web.',
+  playVideo: 'Reproducir vídeo',
   short: 'Este artículo no tiene más texto. La web puede tener más, como vídeos o actualizaciones posteriores.',
   hideRead: 'Ocultar leídos', readHidden: n => `${n} ${n === 1 ? 'artículo leído oculto' : 'artículos leídos ocultos'}`, showRead: 'Mostrar',
   later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',

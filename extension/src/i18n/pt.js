@@ -7,6 +7,7 @@ STRINGS.pt = {
   loading: 'Carregando a notícia …', onSite: h => `Ler em ${h}`, close: 'Fechar',
   paidHere: 'O resto desta notícia é para assinantes.', prev: 'Notícia anterior', next: 'Próxima notícia',
   unreadable: 'Esta notícia não pode ser mostrada aqui, mas dá para ler no site.',
+  playVideo: 'Reproduzir vídeo',
   short: 'Este é todo o texto desta notícia. O site pode ter mais, como vídeo ou atualizações posteriores.',
   hideRead: 'Ocultar lidas', readHidden: n => `${n} ${n === 1 ? 'notícia lida oculta' : 'notícias lidas ocultas'}`, showRead: 'Mostrar',
   later: 'Ler depois', marks: 'Favoritos', mark: 'Favorito', unLater: 'Remover de Ler depois', unMark: 'Remover favorito',

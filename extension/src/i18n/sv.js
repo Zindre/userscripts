@@ -7,6 +7,7 @@ STRINGS.sv = {
   loading: 'Läser in artikeln …', onSite: h => `Läs på ${h}`, close: 'Stäng',
   paidHere: 'Resten av artikeln är för prenumeranter.', prev: 'Föregående artikel', next: 'Nästa artikel',
   unreadable: 'Artikeln kan inte visas här, men du kan läsa den på sajten.',
+  playVideo: 'Spela upp video',
   short: 'Det är all text som artikeln har. Sajten kan ha mer, till exempel video eller senare uppdateringar.',
   hideRead: 'Dölj lästa', readHidden: n => `${n} ${n === 1 ? 'läst artikel dold' : 'lästa artiklar dolda'}`, showRead: 'Visa',
   later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',

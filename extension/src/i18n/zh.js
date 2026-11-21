@@ -8,6 +8,7 @@ STRINGS.zh = {
   loading: '正在载入文章…', onSite: h => `在 ${h} 上阅读`, close: '关闭',
   paidHere: '本文其余部分仅供订阅者阅读。', prev: '上一篇文章', next: '下一篇文章',
   unreadable: '此文章无法在这里显示，但可以在网站上阅读。',
+  playVideo: '播放视频',
   short: '这篇文章的文字只有这些。网站上可能还有更多内容，例如视频或后续更新。',
   hideRead: '隐藏已读', readHidden: n => `已隐藏 ${n} 篇已读文章`, showRead: '显示',
   later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',

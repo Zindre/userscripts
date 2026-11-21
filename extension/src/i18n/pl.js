@@ -9,6 +9,7 @@ STRINGS.pl = {
   loading: 'Wczytywanie artykułu …', onSite: h => `Czytaj na ${h}`, close: 'Zamknij',
   paidHere: 'Dalsza część artykułu jest dla subskrybentów.', prev: 'Poprzedni artykuł', next: 'Następny artykuł',
   unreadable: 'Tego artykułu nie da się tu pokazać, ale można go przeczytać na stronie.',
+  playVideo: 'Odtwórz wideo',
   short: 'To cały tekst tego artykułu. Strona może mieć więcej, np. wideo lub późniejsze aktualizacje.',
   hideRead: 'Ukryj przeczytane',
   readHidden: n => `Ukryto ${n} ${n === 1 ? 'przeczytany artykuł' : n % 10 > 1 && n % 10 < 5 && (n % 100 < 12 || n % 100 > 14) ? 'przeczytane artykuły' : 'przeczytanych artykułów'}`,

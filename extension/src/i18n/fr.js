@@ -7,6 +7,7 @@ STRINGS.fr = {
   loading: 'Chargement de l’article…', onSite: h => `Lire sur ${h}`, close: 'Fermer',
   paidHere: 'La suite de cet article est réservée aux abonnés.', prev: 'Article précédent', next: 'Article suivant',
   unreadable: 'Cet article ne peut pas s’afficher ici, mais vous pouvez le lire sur le site.',
+  playVideo: 'Lire la vidéo',
   short: 'Cet article n’a pas plus de texte. Le site en a peut-être plus, comme des vidéos ou des mises à jour.',
   hideRead: 'Masquer les lus', readHidden: n => `${n} ${n < 2 ? 'article lu masqué' : 'articles lus masqués'}`, showRead: 'Afficher',
   later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',

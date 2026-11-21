@@ -9,6 +9,7 @@ STRINGS.en = {
   loading: 'Loading the article …', onSite: h => `Read on ${h}`, close: 'Close',
   paidHere: 'The rest of this article is for subscribers.', prev: 'Previous article', next: 'Next article',
   unreadable: "This article can't be shown here, but you can read it on the site.",
+  playVideo: 'Play video',
   short: "That's all the text this article has. The site may have more, such as video or later updates.",
   hideRead: 'Hide read', readHidden: n => `${n} read ${n === 1 ? 'article' : 'articles'} hidden`, showRead: 'Show',
   later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',

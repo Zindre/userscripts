@@ -8,6 +8,7 @@ STRINGS.ja = {
   loading: '記事を読み込み中…', onSite: h => `${h}で読む`, close: '閉じる',
   paidHere: 'この記事の続きは購読者向けです。', prev: '前の記事', next: '次の記事',
   unreadable: 'この記事はここでは表示できませんが、サイトで読むことができます。',
+  playVideo: '動画を再生',
   short: 'この記事のテキストはこれですべてです。サイトには動画やその後の更新など、ほかの内容があるかもしれません。',
   hideRead: '既読を非表示', readHidden: n => `既読の記事${n}件を非表示`, showRead: '表示',
   later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',

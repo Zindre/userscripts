@@ -8,6 +8,7 @@ STRINGS.fi = {
   loading: 'Ladataan artikkelia …', onSite: h => `Lue sivustolla ${h}`, close: 'Sulje',
   paidHere: 'Artikkelin loppuosa on tilaajille.', prev: 'Edellinen artikkeli', next: 'Seuraava artikkeli',
   unreadable: 'Artikkelia ei voi näyttää tässä, mutta sen voi lukea sivustolla.',
+  playVideo: 'Toista video',
   short: 'Tässä on artikkelin koko teksti. Sivustolla voi olla lisää, kuten videota tai myöhempiä päivityksiä.',
   hideRead: 'Piilota luetut', readHidden: n => `${n} ${n === 1 ? 'luettu artikkeli' : 'luettua artikkelia'} piilotettu`, showRead: 'Näytä',
   later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',

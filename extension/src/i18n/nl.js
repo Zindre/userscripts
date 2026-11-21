@@ -7,6 +7,7 @@ STRINGS.nl = {
   loading: 'Artikel wordt geladen…', onSite: h => `Lezen op ${h}`, close: 'Sluiten',
   paidHere: 'De rest van dit artikel is voor abonnees.', prev: 'Vorig artikel', next: 'Volgend artikel',
   unreadable: 'Dit artikel kan hier niet worden getoond, maar je kunt het op de site lezen.',
+  playVideo: 'Video afspelen',
   short: 'Meer tekst heeft dit artikel niet. De site heeft misschien meer, zoals video of latere updates.',
   hideRead: 'Gelezen verbergen', readHidden: n => `${n} gelezen ${n === 1 ? 'artikel' : 'artikelen'} verborgen`, showRead: 'Tonen',
   later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',

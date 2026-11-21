@@ -7,6 +7,7 @@ STRINGS.de = {
   loading: 'Artikel wird geladen …', onSite: h => `Auf ${h} lesen`, close: 'Schließen',
   paidHere: 'Der Rest des Artikels ist nur mit Abo lesbar.', prev: 'Vorheriger Artikel', next: 'Nächster Artikel',
   unreadable: 'Dieser Artikel lässt sich hier nicht anzeigen, auf der Website aber lesen.',
+  playVideo: 'Video abspielen',
   short: 'Mehr Text hat dieser Artikel nicht. Die Website hat vielleicht mehr, etwa Videos oder neuere Updates.',
   hideRead: 'Gelesene ausblenden', readHidden: n => `${n} ${n === 1 ? 'gelesener Artikel' : 'gelesene Artikel'} ausgeblendet`, showRead: 'Anzeigen',
   later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',

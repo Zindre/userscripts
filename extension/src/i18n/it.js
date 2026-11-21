@@ -7,6 +7,7 @@ STRINGS.it = {
   loading: 'Caricamento dell’articolo …', onSite: h => `Leggi su ${h}`, close: 'Chiudi',
   paidHere: 'Il resto dell’articolo è per gli abbonati.', prev: 'Articolo precedente', next: 'Articolo successivo',
   unreadable: 'Questo articolo non si può mostrare qui, ma puoi leggerlo sul sito.',
+  playVideo: 'Riproduci il video',
   short: 'Questo è tutto il testo dell’articolo. Il sito potrebbe avere altro, come video o aggiornamenti successivi.',
   hideRead: 'Nascondi letti', readHidden: n => `${n} ${n === 1 ? 'articolo letto nascosto' : 'articoli letti nascosti'}`, showRead: 'Mostra',
   later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',

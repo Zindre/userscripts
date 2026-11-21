@@ -642,7 +642,18 @@ const PLAIN_CSS = `
   .reader li{padding:0 0 .3em;border:0;box-shadow:none}
   .reader figure{margin:0 0 1em}
   .reader img{display:block;max-width:100%;height:auto;border-radius:6px;background:var(--line)}
+  .reader video{display:block;width:100%;height:auto;border-radius:6px;background:#000}
   .reader iframe{display:block;width:100%;height:600px;margin:0 0 1em;border:0;border-radius:6px;background:#fff}
+  .reader figure.video>video,.reader figure.video>iframe,.reader figure.video>.play{margin:0 auto}
+  .reader figure.video>iframe{height:auto;background:#000}
+  .reader figure.video>video{max-height:78vh}
+  .reader .play{position:relative;display:flex;align-items:center;justify-content:center;width:100%;padding:0;border:0;border-radius:6px;
+    background:#222 center/cover no-repeat;color:#fff;overflow:hidden}
+  .reader .play .icon{display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;
+    background:rgba(0,0,0,.6);font-size:24px;padding-left:5px;box-sizing:border-box}
+  .reader .play:hover .icon,.reader .play:focus-visible .icon{background:rgba(0,0,0,.8)}
+  .reader .play .title{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;text-align:left;font-size:15px;font-weight:600;
+    line-height:1.3;background:linear-gradient(transparent,rgba(0,0,0,.75))}
   .reader .term{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
   .reader .term[aria-expanded="true"]{text-decoration-style:solid}
   .reader .explain{display:block;margin:8px 0 0;padding:8px 12px;font-size:15px;line-height:1.4;color:var(--muted);border-left:3px solid var(--line);background:color-mix(in srgb,var(--line) 35%,transparent);border-radius:0 6px 6px 0}
@@ -782,6 +793,48 @@ function readerFrame(src) {
   readerFrames.add(f);
   return f;
 }
+// A video in the reader, which never starts by itself.
+// - A file: the browser's own player, still until play is pressed; nothing but its picture is fetched before that. A stream
+//   the browser cannot play (HLS outside Safari) shows its picture only.
+// - A player's frame (YouTube, NRK …): its picture and title with a play button; nothing of the player loads until pressed,
+//   and then it plays in its place.
+// Upright videos keep their shape, no taller than most of the screen.
+function readerVideoBox(b) {
+  const el = readerEl, f = el('figure', '', 'video'), label = b.caption || b.title || '';
+  const [rw, rh] = (b.ratio || '').split('/').map(Number), upright = rw > 0 && rh > rw;
+  const shape = x => { if (!(rw > 0 && rh > 0)) return; x.style.aspectRatio = `${rw}/${rh}`; if (upright) x.style.width = `min(100%, calc(78vh * ${rw / rh}))`; };
+  const still = () => {
+    if (!b.poster) return f.remove();
+    const im = el('img'); im.src = b.poster; im.alt = label; im.loading = 'lazy'; im.addEventListener('error', () => f.remove()); f.prepend(im);
+  };
+  if (b.src) {
+    const v = el('video');
+    if (/\.m3u8(?:[?#]|$)/i.test(b.src) && !v.canPlayType('application/vnd.apple.mpegurl')) still();
+    else {
+      v.controls = true; v.preload = 'none'; v.playsInline = true; v.setAttribute('playsinline', '');
+      if (b.poster) v.poster = b.poster;
+      v.src = b.src; shape(v); if (label) v.setAttribute('aria-label', label);
+      v.addEventListener('error', () => { v.remove(); still(); }, { once: true });
+      f.append(v);
+    }
+  } else {
+    const play = el('button', '', 'play');
+    play.type = 'button'; play.setAttribute('aria-label', label ? `${T.playVideo}: ${label}` : T.playVideo);
+    if (b.poster) play.style.backgroundImage = `url("${b.poster.replace(/["\\]/g, encodeURIComponent)}")`;
+    if (!(rw > 0)) play.style.aspectRatio = '16/9'; shape(play);
+    play.append(el('span', '▶', 'icon'));
+    if (b.title) play.append(el('span', b.title, 'title'));
+    play.addEventListener('click', () => {
+      const fr = el('iframe');
+      fr.src = b.embed; fr.title = label || T.playVideo; fr.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; fr.allowFullscreen = true;
+      fr.style.cssText = play.style.cssText; fr.style.backgroundImage = '';
+      play.replaceWith(fr); fr.focus();
+    });
+    f.append(play);
+  }
+  if (b.caption) f.append(el('figcaption', b.caption));
+  return f;
+}
 const readerEl = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
 // A paragraph with explained words (VG's "mistenkt", an <abbr>): the word, the first time it comes, is
 // marked, and a tap shows what it means under the paragraph, so the sentence isn't split.
@@ -837,6 +890,7 @@ function readerContent(art, title, lede, url) {
       im.addEventListener('click', () => zoomImage(im));
       f.append(im); if (b.caption) f.append(el('figcaption', b.caption)); out.push(f);
     }
+    else if (b.t === 'video') out.push(readerVideoBox(b));
     else if (b.t === 'embed') out.push(readerFrame(b.src));
   }
   if (!art) out.push(el('p', T.unreadable, 'note')); // a video, live page or app: the site shows it
