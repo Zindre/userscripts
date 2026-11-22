@@ -2300,8 +2300,10 @@
       [/^https:\/\/static\.nrk\.no\/ludo\/[^#]*#id=([\w.-]+)/, id => ({ embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${id}` })],
       [/^https:\/\/(?:streamable\.com\/[eo]|cdn\.jwplayer\.com\/players|players\.brightcove\.net|embed\.ted\.com\/talks|www\.svtplay\.se\/video|play\.tv2\.no\/embed)\//, (m, src) => ({ embed: src })],
     ];
-    const PLAYER_BOX = 'figure[data-video-source], astro-island[component-url*="NrknoPlayer"], nrkno-player[src^="nrk:"], lite-youtube, iframe, [data-videoid], [data-video-id], astro-island[props*="streamUrls"]';
+    const PLAYER_BOX = 'figure[data-video-source], astro-island[component-url*="NrknoPlayer"], astro-island[component-url*="/Video."], nrkno-player[src^="nrk:"], lite-youtube, iframe, [data-videoid], [data-video-id], astro-island[props*="streamUrls"]';
     const LEAD_VIDEO = PLAYER_BOX + ', video';
+    // What tells two videos apart: the file, the player's frame, or the video's id in Schibsted's video service.
+    const readerVideoKey = v => v.src || v.embed || (v.svp ? `svp:${v.svp.provider}/${v.svp.id}` : '');
     // The first player inside a box (a figure around Dinside's JW Player).
     function readerPlayerIn(box, base) {
       for (const e of box.querySelectorAll(PLAYER_BOX)) { const v = e.tagName === 'IFRAME' ? readerPlayerFrame(e, base) : readerPlayer(e, base); if (v) return v; }
@@ -2354,6 +2356,17 @@
           const ar = get('aspectRatio'), r = +ar > 0 ? `${ar}/1` : '';
           return { src, poster: still ? still + (still.includes('?') ? '' : '?t[]=1080q80') : poster(), title: get('title'), ratio: r };
         }
+      }
+      // Schibsted's newer pages (VG) give only the video's id, its picture and its shape: the file comes from their video
+      // service by the id, when the reader shows it. The provider is in the picture's address (…/users/vgtv/images/…).
+      if (el.tagName === 'ASTRO-ISLAND' && /\/Video\.[\w-]+\.js/.test(el.getAttribute('component-url') || '')) {
+        let p = {}; try { p = JSON.parse(el.getAttribute('props') || '{}'); } catch {}
+        const val = x => Array.isArray(x) ? x[1] : undefined, id = String(val(p.id) ?? '');
+        const img = val(p.imageAsset) || {}, meta = val(p.metadata) || {}, main = val(img.main);
+        const provider = typeof main === 'string' && main.match(/^https:\/\/images\.stream\.schibsted\.media\/users\/([\w-]+)\/images\//)?.[1];
+        if (val(p.assetType) !== 'video' || !/^\d+$/.test(id) || !provider) return null;
+        const ar = +val(meta.aspectRatio), title = val(meta.seoTitle);
+        return { svp: { provider, id }, poster: main + '?t[]=1080q80', title: typeof title === 'string' ? norm(title) : '', ratio: ar > 0 ? `${ar}/1` : '' };
       }
       const jw = el.getAttribute('data-videoid') || el.getAttribute('data-video-id') || '';
       if (/^\w{8}$/.test(jw) && /cdn\.jwplayer\.com/.test(el.getAttribute('style') || el.innerHTML.slice(0, 2000))) {
@@ -2461,7 +2474,7 @@
       const blocks = [];
       const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
       // A video once (NRK has the same clip in a small, a medium and a large copy, a site can repeat its player).
-      const addVideo = v => { if (!blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) blocks.push({ t: 'video', ...v }); };
+      const addVideo = v => { if (!blocks.some(b => b.t === 'video' && readerVideoKey(b) === readerVideoKey(v))) blocks.push({ t: 'video', ...v }); };
       const walk = el => {
         for (const c of el.children) {
           const tag = c.tagName;
@@ -2500,7 +2513,16 @@
           } else if (tag === 'FIGURE' || tag === 'IMG' || tag === 'PICTURE') {
             const img = tag === 'IMG' ? c : c.querySelector('img');
             const src = withImages && img ? readerImage(img, url) : '';
-            if (src) blocks.push({ t: 'img', src, caption: (f => f ? readerText(f) : '')(c.querySelector('figcaption')) });
+            const cap = tag === 'FIGURE' ? c.querySelector('figcaption') : null;
+            if (src) blocks.push({ t: 'img', src, caption: cap ? readerText(cap) : '' });
+            // A person in the story with a thumbnail of a picture and a few words about them (VG: "Thomas Trones / Caught the
+            // elk on camera"): the words, as a line of the story. "Name: what they say."
+            else if (cap && img && +img.getAttribute('width') > 0 && +img.getAttribute('width') < 200) {
+              const name = cap.firstElementChild?.matches('strong, b, h2, h3, h4, span') ? readerText(cap.firstElementChild) : '';
+              const all = readerText(cap), rest = name && all.startsWith(name) ? norm(all.slice(name.length)) : '';
+              const t = name && rest ? `${name}: ${rest}` : all;
+              if (t.length >= 20) blocks.push({ t: 'p', text: t });
+            }
           } else walk(c);
         }
       };
@@ -2524,7 +2546,7 @@
           for (const c of box?.querySelectorAll(LEAD_VIDEO) || []) {
             if (c.contains(root) || !(root.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_PRECEDING) || c.closest(skip)) continue;
             const v = c.tagName === 'IFRAME' ? readerPlayerFrame(c, url) : readerPlayer(c, url) || (c.tagName === 'VIDEO' ? readerVideo(c, url) : null);
-            if (v && !blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) { blocks.unshift({ t: 'video', ...v }); lead = true; break; }
+            if (v && !blocks.some(b => b.t === 'video' && readerVideoKey(b) === readerVideoKey(v))) { blocks.unshift({ t: 'video', ...v }); lead = true; break; }
           }
           // Else its picture there, in a figure of the article's own (NRK's new pages put it in the header, apart from the text).
           const art = root.parentElement?.closest('article');
@@ -3896,20 +3918,26 @@
             if (!im || b.poster) return;
             b.poster = im.url; play.style.backgroundImage = `url("${im.url.replace(/["\\]/g, encodeURIComponent)}")`;
           }).catch(() => {});
-        if (b.nrk && el('video').canPlayType('application/vnd.apple.mpegurl'))
-          fetch(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
-            const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));
-            if (a) stream = a.url;
-          }).catch(() => {});
+        const hls = !!el('video').canPlayType('application/vnd.apple.mpegurl'), json = u => fetch(u).then(r => r.ok ? r.json() : null);
+        // Schibsted (VG): the video's file, from their video service by its id.
+        const found = b.svp ? json(`https://svp.vg.no/svp/api/v1/${encodeURIComponent(b.svp.provider)}/assets/${encodeURIComponent(b.svp.id)}?appName=webdetox`).then(j => {
+          const u = j?.assetType === 'video' && j.status === 'active' && (j.streamUrls?.mp4 || (hls && j.streamUrls?.hls));
+          return /^https:\/\//.test(u || '') ? u : '';
+        }) : b.nrk && hls ? json(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(j => {
+          const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));
+          return a ? a.url : '';
+        }) : null;
+        found?.then(u => { stream = u; }).catch(() => {});
+        const start = u => {
+          const v = el('video');
+          v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+          if (b.poster) v.poster = b.poster;
+          v.src = u; shape(v); if (label) v.setAttribute('aria-label', label);
+          play.replaceWith(v); v.play().catch(() => {});
+        };
         play.addEventListener('click', () => {
-          if (stream) {
-            const v = el('video');
-            v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
-            if (b.poster) v.poster = b.poster;
-            v.src = stream; if (label) v.setAttribute('aria-label', label);
-            play.replaceWith(v); v.play().catch(() => {});
-            return;
-          }
+          if (stream) return start(stream);
+          if (!b.embed) { found?.then(u => { if (u && play.isConnected) start(u); }).catch(() => {}); return; }
           const fr = el('iframe');
           fr.src = b.embed; fr.title = label || T.playVideo; fr.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; fr.allowFullscreen = true;
           fr.style.cssText = play.style.cssText; fr.style.backgroundImage = '';

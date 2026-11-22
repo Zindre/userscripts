@@ -834,20 +834,26 @@ function readerVideoBox(b) {
         if (!im || b.poster) return;
         b.poster = im.url; play.style.backgroundImage = `url("${im.url.replace(/["\\]/g, encodeURIComponent)}")`;
       }).catch(() => {});
-    if (b.nrk && el('video').canPlayType('application/vnd.apple.mpegurl'))
-      fetch(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
-        const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));
-        if (a) stream = a.url;
-      }).catch(() => {});
+    const hls = !!el('video').canPlayType('application/vnd.apple.mpegurl'), json = u => fetch(u).then(r => r.ok ? r.json() : null);
+    // Schibsted (VG): the video's file, from their video service by its id.
+    const found = b.svp ? json(`https://svp.vg.no/svp/api/v1/${encodeURIComponent(b.svp.provider)}/assets/${encodeURIComponent(b.svp.id)}?appName=webdetox`).then(j => {
+      const u = j?.assetType === 'video' && j.status === 'active' && (j.streamUrls?.mp4 || (hls && j.streamUrls?.hls));
+      return /^https:\/\//.test(u || '') ? u : '';
+    }) : b.nrk && hls ? json(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(j => {
+      const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));
+      return a ? a.url : '';
+    }) : null;
+    found?.then(u => { stream = u; }).catch(() => {});
+    const start = u => {
+      const v = el('video');
+      v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+      if (b.poster) v.poster = b.poster;
+      v.src = u; shape(v); if (label) v.setAttribute('aria-label', label);
+      play.replaceWith(v); v.play().catch(() => {});
+    };
     play.addEventListener('click', () => {
-      if (stream) {
-        const v = el('video');
-        v.controls = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
-        if (b.poster) v.poster = b.poster;
-        v.src = stream; if (label) v.setAttribute('aria-label', label);
-        play.replaceWith(v); v.play().catch(() => {});
-        return;
-      }
+      if (stream) return start(stream);
+      if (!b.embed) { found?.then(u => { if (u && play.isConnected) start(u); }).catch(() => {}); return; }
       const fr = el('iframe');
       fr.src = b.embed; fr.title = label || T.playVideo; fr.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; fr.allowFullscreen = true;
       fr.style.cssText = play.style.cssText; fr.style.backgroundImage = '';
