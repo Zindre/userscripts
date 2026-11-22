@@ -706,6 +706,7 @@ const PLAIN_CSS = `
        with its first article. */
     .cols li{break-inside:avoid;-webkit-column-break-inside:avoid}
     .cols h2{break-after:avoid;-webkit-column-break-after:avoid}
+    .cols > section{break-inside:avoid;-webkit-column-break-inside:avoid} /* a heading never ends a column alone (WebKit ignores break-after on it); small sections fit whole */
     .cols > section:first-child{padding-top:0;margin-top:20px}
   }
   /* Larger pictures (a choice in the popup): the picture over the card, as wide as the card. */

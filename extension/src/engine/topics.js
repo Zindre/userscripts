@@ -98,11 +98,13 @@ function setMuted(ids) {
 function mutedTopicOf(url, teaser, meta) {
   if (!mutedNodes.length) return '';
   let segs = [];
-  try { segs = new URL(url).pathname.toLowerCase().split('/').filter(Boolean).slice(0, -1); } catch {}
+  // The link's sections, and those of the address the article turned out to live at (meta.home).
+  for (const p of [url, ...(meta?.home || '').split(' ')]) { try { if (p) segs.push(...new URL(p, url).pathname.toLowerCase().split('/').filter(Boolean).slice(0, -1)); } catch {} }
   const labels = [meta?.sec, ...(meta?.tags || [])].filter(Boolean).join(' | ');
   const words = [teaser, meta?.title].filter(Boolean).join(' | ');
   for (const [id, t] of mutedNodes) {
-    if ((t.path && segs.some(sg => t.path.test(sg))) || (t.labels && labels && t.labels.test(labels)) || (t.title && t.title.test(words))) return id;
+    // A league or show the publisher tagged the article with counts like one in its title ("sk brann, eliteserien").
+    if ((t.path && segs.some(sg => t.path.test(sg))) || (t.labels && labels && t.labels.test(labels)) || (t.title && (t.title.test(words) || (labels && t.title.test(labels))))) return id;
   }
   return '';
 }

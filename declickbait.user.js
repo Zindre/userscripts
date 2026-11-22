@@ -2146,7 +2146,8 @@
       let fallback = '';
       for (const el of doc.querySelectorAll('article p, main p, [class*="lead"], [class*="ingress"], [class*="standfirst"]')) { const t = norm(el.textContent); if (prose(t)) { fallback = t; break; } }
       const desc = ldDesc || meta('meta[property="og:description"]') || meta('meta[name="description"]') || fallback;
-      const self = meta('meta[property="og:url"]') || norm(q('link[rel="canonical"]')?.getAttribute('href'));
+      const canonical = norm(q('link[rel="canonical"]')?.getAttribute('href'));
+      const self = meta('meta[property="og:url"]') || canonical;
       let image = meta('meta[property="og:image"]') || meta('meta[name="twitter:image"]') || ldImage;
       try { image = image ? new URL(image, url).href : ''; } catch { image = ''; }
       // The publisher's own labels, used by the topic filter: section and keywords.
@@ -2154,7 +2155,7 @@
       const tags = [...doc.querySelectorAll('meta[property="article:tag"]')].map(m => norm(m.getAttribute('content')))
         .concat((meta('meta[name="keywords"]') || ldKeywords).split(',').map(norm)).filter(Boolean).slice(0, 20);
       // og:title often carries a section or site suffix (Bild: "… | News").
-      return { title: norm(title).replace(/\s+\|\s+[^|]{2,25}$/, ''), desc: norm(desc), self, image, sec, tags };
+      return { title: norm(title).replace(/\s+\|\s+[^|]{2,25}$/, ''), desc: norm(desc), self, canonical, image, sec, tags };
     }
 
     // Site-wide boilerplate ("Fædrelandsvennen - Få siste nytt fra …") shows up as the title or
@@ -2213,7 +2214,11 @@
         if (!site && finalUrl) { try { if (!genericArticlePath(new URL(finalUrl).pathname)) return null; } catch {} } // redirected to login/landing
         const m = extractMeta(r.responseText, url);
         if (m.self && domainOf(m.self) && domainOf(m.self) !== domainOf(url)) return null;
-        cache[key] = { title: m.title, desc: m.desc, image: m.image, sec: m.sec, tags: m.tags, t: Date.now() }; cacheDirty = true; saveCache();
+        // Where the article really lives, when the link was only a way in to it (BT's live feed: /nyheter/direkte/i/… moves
+        // on to /sport/ballspark/i/…): the topic filter reads that address's sections too.
+        const own = new URL(url, location.href).pathname, at = s => { try { return new URL(s, url).pathname; } catch { return ''; } };
+        const home = [...new Set([finalUrl, m.canonical].map(at))].filter(p => p && p !== own).join(' ');
+        cache[key] = { title: m.title, desc: m.desc, image: m.image, sec: m.sec, tags: m.tags, home, t: Date.now() }; cacheDirty = true; saveCache();
         articleFetched(url, r.responseText, finalUrl); // plain view keeps it, so the article opens at once
         return cache[key];
       } catch (e) {
@@ -3113,11 +3118,13 @@
     function mutedTopicOf(url, teaser, meta) {
       if (!mutedNodes.length) return '';
       let segs = [];
-      try { segs = new URL(url).pathname.toLowerCase().split('/').filter(Boolean).slice(0, -1); } catch {}
+      // The link's sections, and those of the address the article turned out to live at (meta.home).
+      for (const p of [url, ...(meta?.home || '').split(' ')]) { try { if (p) segs.push(...new URL(p, url).pathname.toLowerCase().split('/').filter(Boolean).slice(0, -1)); } catch {} }
       const labels = [meta?.sec, ...(meta?.tags || [])].filter(Boolean).join(' | ');
       const words = [teaser, meta?.title].filter(Boolean).join(' | ');
       for (const [id, t] of mutedNodes) {
-        if ((t.path && segs.some(sg => t.path.test(sg))) || (t.labels && labels && t.labels.test(labels)) || (t.title && t.title.test(words))) return id;
+        // A league or show the publisher tagged the article with counts like one in its title ("sk brann, eliteserien").
+        if ((t.path && segs.some(sg => t.path.test(sg))) || (t.labels && labels && t.labels.test(labels)) || (t.title && (t.title.test(words) || (labels && t.title.test(labels))))) return id;
       }
       return '';
     }
@@ -3866,6 +3873,7 @@
            with its first article. */
         .cols li{break-inside:avoid;-webkit-column-break-inside:avoid}
         .cols h2{break-after:avoid;-webkit-column-break-after:avoid}
+        .cols > section{break-inside:avoid;-webkit-column-break-inside:avoid} /* a heading never ends a column alone (WebKit ignores break-after on it); small sections fit whole */
         .cols > section:first-child{padding-top:0;margin-top:20px}
       }
       /* Larger pictures (a choice in the popup): the picture over the card, as wide as the card. */
