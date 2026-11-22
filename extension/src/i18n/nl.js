@@ -13,7 +13,7 @@ STRINGS.nl = {
   later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
   myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
   mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
-  allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen', siteMenu: 'Menu van de site', allGenres: 'Alle genres', genre: 'Genre', byScore: 'Hoogste score eerst', dateFrom: 'Van', dateTo: 'Tot', playAlbumIn: 'Album afspelen in %s', kasetNone: 'Niet gevonden', recordLabel: 'Label', released: 'Verschenen',
+  games: 'Spellen', allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen', siteMenu: 'Menu van de site', allGenres: 'Alle genres', genre: 'Genre', byScore: 'Hoogste score eerst', dateFrom: 'Van', dateTo: 'Tot', playAlbumIn: 'Album afspelen in %s', kasetNone: 'Niet gevonden', recordLabel: 'Label', released: 'Verschenen',
   keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
 
   pop: {
@@ -47,7 +47,9 @@ STRINGS.nl = {
     privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
     erase: 'Alles wissen wat Web Detox heeft opgeslagen',
     eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
-    bigPics: 'Grotere foto’s in de lijst',
+    reportOpen: "Meld een probleem met deze site", reportHint: "Eén tik stuurt het adres van de pagina en wat er mis is, niets over jou.", reportNote: "Nog iets te zeggen? (optioneel)", reportMissing: "Er ontbreken artikelen in de lijst", reportReader: "Een artikel wordt verkeerd getoond of is onvolledig", reportMedia: "Afbeeldingen of video ontbreken", reportBroken: "De pagina ziet er raar uit of werkt niet", reportOther: "Iets anders", reportFailed: "Versturen lukte nu niet. Probeer het later opnieuw.", privacyReport: "De enige uitzondering is als je een probleem met een site meldt: dan worden het adres van de pagina, wat er mis was, wat je schreef en de versie van Web Detox verstuurd. Niets over wie je bent.", reportThanks: h => `Bedankt! Verstuurd voor ${h}.`,
+    setupOpen: "Stel Web Detox in met een paar vragen", setupLevel: "Hoe wil je de voorpagina’s van nieuwssites zien?", setupLevelHint: "Voor elke nieuwssite waar je niets anders hebt gekozen.", setupBigPics: "Grotere afbeeldingen in de lijst?", setupGames: "De spellen van de site, zoals kruiswoordpuzzels en sudoku, onderaan de lijst?", setupSwipe: "Moet het artikel je vinger volgen als je naar het volgende veegt?", setupAlbum: "Waar wil je albums uit recensies afspelen?", setupAlbumHint: "Zet een ▶-knop bij elke albumrecensie.", setupGeneric: "Moet Web Detox ook nieuwssites opruimen die het nog niet kent?", yes: "Ja", no: "Nee", setupBack: "‹ Terug", setupSkip: "Overslaan", setupDone: "Klaar. Je kunt dit allemaal later hier in het menu veranderen.", setupClose: "Sluiten",
+    gamesRow: 'De spellen van de site onderaan de lijst', bigPics: 'Grotere foto’s in de lijst',
     gift: 'Steun Web Detox',
     eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
   },

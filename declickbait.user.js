@@ -95,7 +95,7 @@
       later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
       myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
       mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
-      allRead: 'You have read everything here.', showAllRead: 'Show read articles', siteMenu: 'The site’s menu', allGenres: 'All genres', genre: 'Genre', byScore: 'Highest score first', dateFrom: 'From', dateTo: 'To', playAlbumIn: 'Play the album in %s', kasetNone: 'Not found', recordLabel: 'Label', released: 'Released',
+      games: 'Games', allRead: 'You have read everything here.', showAllRead: 'Show read articles', siteMenu: 'The site’s menu', allGenres: 'All genres', genre: 'Genre', byScore: 'Highest score first', dateFrom: 'From', dateTo: 'To', playAlbumIn: 'Play the album in %s', kasetNone: 'Not found', recordLabel: 'Label', released: 'Released',
       keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
 
       // The toolbar popup, in the browser's language.
@@ -135,7 +135,9 @@
         privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
         erase: 'Delete everything Web Detox has stored',
         eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
-        bigPics: 'Larger pictures in the list',
+        reportOpen: "Report a problem with this site", reportHint: "One tap sends the page’s address and what is wrong, nothing about you.", reportNote: "Anything to add? (optional)", reportMissing: "Articles are missing from the list", reportReader: "An article shows wrongly or lacks content", reportMedia: "Pictures or video are missing", reportBroken: "The page looks odd or doesn’t work", reportOther: "Something else", reportFailed: "Couldn’t send just now. Try again later.", privacyReport: "The one exception is when you report a problem with a site: then the page’s address, what was wrong, anything you wrote, and the version of Web Detox are sent. Nothing about who you are.", reportThanks: h => `Thanks! Sent for ${h}.`,
+        setupOpen: "Set up Web Detox with a few questions", setupLevel: "How do you want to see news front pages?", setupLevelHint: "For every news site where you haven’t chosen something else.", setupBigPics: "Larger pictures in the list?", setupGames: "The site’s games, like crosswords and sudoku, at the end of the list?", setupSwipe: "Should the article follow your finger when you swipe to the next one?", setupAlbum: "Where do you want to play albums from reviews?", setupAlbumHint: "Adds a ▶ button by each album review.", setupGeneric: "Should Web Detox also tidy news sites it doesn’t know yet?", yes: "Yes", no: "No", setupBack: "‹ Back", setupSkip: "Skip", setupDone: "Done. You can change all of this later here in the menu.", setupClose: "Close",
+        gamesRow: 'The site’s games at the end of the list', bigPics: 'Larger pictures in the list',
         gift: 'Support Web Detox',
         eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
       },
@@ -191,7 +193,7 @@
       later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
       myNews: 'Mine nyheder', mixEmpty: 'Mine nyheder samler de nyhedssider, du besøger mest. Besøg et par stykker, så dukker de op her.',
       mixLoading: (n, of) => `Læser forsiderne … ${n} af ${of}`,
-      allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler', siteMenu: 'Webstedets menu', allGenres: 'Alle genrer', genre: 'Genre', byScore: 'Højeste karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Afspil albummet i %s', kasetNone: 'Ikke fundet', recordLabel: 'Pladeselskab', released: 'Udgivet',
+      games: 'Spil', allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler', siteMenu: 'Webstedets menu', allGenres: 'Alle genrer', genre: 'Genre', byScore: 'Højeste karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Afspil albummet i %s', kasetNone: 'Ikke fundet', recordLabel: 'Pladeselskab', released: 'Udgivet',
       keys: 'Piletaster vælger · Enter åbner · ← → forrige og næste under læsning · L læs senere · B bogmærke · Esc lukker',
 
       // The toolbar popup, in the browser's language.
@@ -227,7 +229,9 @@
         privacyText: 'Dine indstillinger, gemte artikler og det, du har læst, bliver i denne browser og følger med til dine andre enheder via din browserkonto eller iCloud. Intet sendes til os.',
         erase: 'Slet alt, hvad Web Detox har gemt',
         eraseAsk: 'Dette sletter dine indstillinger, Læs senere, Bogmærker og læsehistorik her og på dine andre enheder, næste gang de synkroniserer. Det kan ikke fortrydes.',
-        bigPics: 'Større billeder i listen',
+        reportOpen: "Meld et problem med dette websted", reportHint: "Ét tryk sender sidens adresse og hvad der er galt, intet om dig.", reportNote: "Noget at tilføje? (valgfrit)", reportMissing: "Artikler mangler i listen", reportReader: "En artikel vises forkert eller mangler indhold", reportMedia: "Billeder eller video mangler", reportBroken: "Siden ser mærkelig ud eller virker ikke", reportOther: "Noget andet", reportFailed: "Kunne ikke sende lige nu. Prøv igen senere.", privacyReport: "Undtagelsen er, når du melder et problem med et websted: så sendes sidens adresse, hvad der var galt, det du skrev, og versionen af Web Detox. Intet om, hvem du er.", reportThanks: h => `Tak! Sendt for ${h}.`,
+        setupOpen: "Tilpas Web Detox med nogle få spørgsmål", setupLevel: "Hvordan vil du se nyhedssiders forsider?", setupLevelHint: "Gælder alle nyhedssider, hvor du ikke har valgt noget andet.", setupBigPics: "Større billeder i listen?", setupGames: "Webstedets spil, som krydsord og sudoku, nederst i listen?", setupSwipe: "Skal artiklen følge fingeren, når du swiper til den næste?", setupAlbum: "Hvor vil du afspille album fra anmeldelser?", setupAlbumHint: "Giver en ▶-knap ved hver albumanmeldelse.", setupGeneric: "Skal Web Detox også rydde op på nyhedssider, den ikke kender endnu?", yes: "Ja", no: "Nej", setupBack: "‹ Tilbage", setupSkip: "Spring over", setupDone: "Færdig. Du kan ændre alt dette senere her i menuen.", setupClose: "Luk",
+        gamesRow: 'Webstedets spil nederst i listen', bigPics: 'Større billeder i listen',
         gift: 'Støt Web Detox',
         eraseYes: 'Slet alt', eraseNo: 'Annuller', erased: 'Alt er slettet.',
       },
@@ -280,7 +284,7 @@
       later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
       myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
       mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
-      allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen', siteMenu: 'Menü der Website', allGenres: 'Alle Genres', genre: 'Genre', byScore: 'Beste Wertung zuerst', dateFrom: 'Von', dateTo: 'Bis', playAlbumIn: 'Album in %s abspielen', kasetNone: 'Nicht gefunden', recordLabel: 'Label', released: 'Erschienen',
+      games: 'Spiele', allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen', siteMenu: 'Menü der Website', allGenres: 'Alle Genres', genre: 'Genre', byScore: 'Beste Wertung zuerst', dateFrom: 'Von', dateTo: 'Bis', playAlbumIn: 'Album in %s abspielen', kasetNone: 'Nicht gefunden', recordLabel: 'Label', released: 'Erschienen',
       keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
 
       pop: {
@@ -314,7 +318,9 @@
         privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
         erase: 'Alles löschen, was Web Detox gespeichert hat',
         eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
-        bigPics: 'Größere Bilder in der Liste',
+        reportOpen: "Ein Problem mit dieser Website melden", reportHint: "Ein Tippen sendet die Adresse der Seite und was nicht stimmt, nichts über dich.", reportNote: "Noch etwas? (optional)", reportMissing: "In der Liste fehlen Artikel", reportReader: "Ein Artikel wird falsch angezeigt oder ist unvollständig", reportMedia: "Bilder oder Videos fehlen", reportBroken: "Die Seite sieht seltsam aus oder funktioniert nicht", reportOther: "Etwas anderes", reportFailed: "Konnte gerade nicht senden. Versuch es später noch einmal.", privacyReport: "Die einzige Ausnahme: Wenn du ein Problem mit einer Website meldest, werden die Adresse der Seite, was nicht stimmte, was du geschrieben hast, und die Version von Web Detox gesendet. Nichts darüber, wer du bist.", reportThanks: h => `Danke! Für ${h} gesendet.`,
+        setupOpen: "Web Detox mit ein paar Fragen einrichten", setupLevel: "Wie möchtest du die Startseiten von Nachrichtenseiten sehen?", setupLevelHint: "Gilt für jede Nachrichtenseite, auf der du nichts anderes gewählt hast.", setupBigPics: "Größere Bilder in der Liste?", setupGames: "Die Spiele der Website, etwa Kreuzworträtsel und Sudoku, am Ende der Liste?", setupSwipe: "Soll der Artikel deinem Finger folgen, wenn du zum nächsten wischst?", setupAlbum: "Wo möchtest du Alben aus Rezensionen abspielen?", setupAlbumHint: "Fügt bei jeder Albumrezension eine ▶-Taste hinzu.", setupGeneric: "Soll Web Detox auch Nachrichtenseiten aufräumen, die es noch nicht kennt?", yes: "Ja", no: "Nein", setupBack: "‹ Zurück", setupSkip: "Überspringen", setupDone: "Fertig. Du kannst all das später hier im Menü ändern.", setupClose: "Schließen",
+        gamesRow: 'Die Spiele der Website am Ende der Liste', bigPics: 'Größere Bilder in der Liste',
         gift: 'Web Detox unterstützen',
         eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
       },
@@ -364,7 +370,7 @@
       later: 'Leer más tarde', marks: 'Marcadores', mark: 'Añadir marcador', unLater: 'Quitar de «Leer más tarde»', unMark: 'Quitar marcador',
       myNews: 'Mis noticias', mixEmpty: 'Mis noticias reúne los sitios de noticias que más visitas. Visita algunos y aparecerán aquí.',
       mixLoading: (n, of) => `Leyendo las portadas… ${n} de ${of}`,
-      allRead: 'Has leído todo aquí.', showAllRead: 'Mostrar leídos', siteMenu: 'Menú del sitio', allGenres: 'Todos los géneros', genre: 'Género', byScore: 'Mejor nota primero', dateFrom: 'Desde', dateTo: 'Hasta', playAlbumIn: 'Reproducir el álbum en %s', kasetNone: 'No encontrado', recordLabel: 'Sello', released: 'Publicado',
+      games: 'Juegos', allRead: 'Has leído todo aquí.', showAllRead: 'Mostrar leídos', siteMenu: 'Menú del sitio', allGenres: 'Todos los géneros', genre: 'Género', byScore: 'Mejor nota primero', dateFrom: 'Desde', dateTo: 'Hasta', playAlbumIn: 'Reproducir el álbum en %s', kasetNone: 'No encontrado', recordLabel: 'Sello', released: 'Publicado',
       keys: 'Flechas para elegir · Enter abre · ← → anterior y siguiente al leer · L leer más tarde · B marcador · Esc cierra',
 
       pop: {
@@ -398,7 +404,9 @@
         privacyText: 'Tus ajustes, los artículos guardados y lo que has leído se quedan en este navegador y llegan a tus otros dispositivos a través de tu cuenta del navegador o de iCloud. No se nos envía nada.',
         erase: 'Borrar todo lo que Web Detox ha guardado',
         eraseAsk: 'Esto borra tus ajustes, «Leer más tarde», «Marcadores» y el historial de lectura aquí y en tus otros dispositivos la próxima vez que se sincronicen. No se puede deshacer.',
-        bigPics: 'Imágenes más grandes en la lista',
+        reportOpen: "Informar de un problema con este sitio", reportHint: "Un toque envía la dirección de la página y lo que falla, nada sobre ti.", reportNote: "¿Algo más? (opcional)", reportMissing: "Faltan artículos en la lista", reportReader: "Un artículo se ve mal o le falta contenido", reportMedia: "Faltan imágenes o vídeos", reportBroken: "La página se ve rara o no funciona", reportOther: "Otra cosa", reportFailed: "No se pudo enviar ahora. Inténtalo más tarde.", privacyReport: "La única excepción es cuando informas de un problema con un sitio: entonces se envían la dirección de la página, lo que fallaba, lo que escribiste y la versión de Web Detox. Nada sobre quién eres.", reportThanks: h => `¡Gracias! Enviado para ${h}.`,
+        setupOpen: "Configura Web Detox con unas preguntas", setupLevel: "¿Cómo quieres ver las portadas de los sitios de noticias?", setupLevelHint: "Para todos los sitios de noticias donde no hayas elegido otra cosa.", setupBigPics: "¿Imágenes más grandes en la lista?", setupGames: "¿Los juegos del sitio, como crucigramas y sudokus, al final de la lista?", setupSwipe: "¿Debe el artículo seguir tu dedo cuando deslizas al siguiente?", setupAlbum: "¿Dónde quieres escuchar los álbumes de las reseñas?", setupAlbumHint: "Añade un botón ▶ junto a cada reseña de álbum.", setupGeneric: "¿Debe Web Detox ordenar también los sitios de noticias que aún no conoce?", yes: "Sí", no: "No", setupBack: "‹ Atrás", setupSkip: "Omitir", setupDone: "Listo. Puedes cambiar todo esto más tarde aquí, en el menú.", setupClose: "Cerrar",
+        gamesRow: 'Los juegos del sitio al final de la lista', bigPics: 'Imágenes más grandes en la lista',
         gift: 'Apoyar Web Detox',
         eraseYes: 'Borrar todo', eraseNo: 'Cancelar', erased: 'Se ha borrado todo.',
       },
@@ -449,7 +457,7 @@
       later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
       myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
       mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
-      allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut', siteMenu: 'Sivuston valikko', allGenres: 'Kaikki tyylilajit', genre: 'Tyylilaji', byScore: 'Paras arvosana ensin', dateFrom: 'Alkaen', dateTo: 'Asti', playAlbumIn: 'Soita albumi: %s', kasetNone: 'Ei löytynyt', recordLabel: 'Levy-yhtiö', released: 'Julkaistu',
+      games: 'Pelit', allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut', siteMenu: 'Sivuston valikko', allGenres: 'Kaikki tyylilajit', genre: 'Tyylilaji', byScore: 'Paras arvosana ensin', dateFrom: 'Alkaen', dateTo: 'Asti', playAlbumIn: 'Soita albumi: %s', kasetNone: 'Ei löytynyt', recordLabel: 'Levy-yhtiö', released: 'Julkaistu',
       keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
 
       // The toolbar popup, in the browser's language.
@@ -485,7 +493,9 @@
         privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
         erase: 'Poista kaikki, mitä Web Detox on tallentanut',
         eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
-        bigPics: 'Suuremmat kuvat listassa',
+        reportOpen: "Ilmoita ongelmasta tällä sivustolla", reportHint: "Yksi napautus lähettää sivun osoitteen ja vian, ei mitään sinusta.", reportNote: "Muuta lisättävää? (valinnainen)", reportMissing: "Listasta puuttuu artikkeleita", reportReader: "Artikkeli näkyy väärin tai siitä puuttuu sisältöä", reportMedia: "Kuvia tai videoita puuttuu", reportBroken: "Sivu näyttää oudolta tai ei toimi", reportOther: "Jotain muuta", reportFailed: "Lähetys ei onnistunut nyt. Yritä myöhemmin uudelleen.", privacyReport: "Ainoa poikkeus on, kun ilmoitat sivuston ongelmasta: silloin lähetetään sivun osoite, vika, kirjoittamasi teksti ja Web Detoxin versio. Ei mitään siitä, kuka olet.", reportThanks: h => `Kiitos! Lähetetty: ${h}.`,
+        setupOpen: "Määritä Web Detox muutamalla kysymyksellä", setupLevel: "Miten haluat nähdä uutissivustojen etusivut?", setupLevelHint: "Koskee kaikkia uutissivustoja, joilla et ole valinnut muuta.", setupBigPics: "Isommat kuvat listassa?", setupGames: "Sivuston pelit, kuten ristikot ja sudoku, listan lopussa?", setupSwipe: "Seuraako artikkeli sormea, kun pyyhkäiset seuraavaan?", setupAlbum: "Missä haluat kuunnella arvosteluiden albumeja?", setupAlbumHint: "Lisää ▶-painikkeen jokaiseen albumiarvosteluun.", setupGeneric: "Siistiikö Web Detox myös uutissivustot, joita se ei vielä tunne?", yes: "Kyllä", no: "Ei", setupBack: "‹ Takaisin", setupSkip: "Ohita", setupDone: "Valmis. Voit muuttaa näitä myöhemmin täällä valikossa.", setupClose: "Sulje",
+        gamesRow: 'Sivuston pelit listan lopussa', bigPics: 'Suuremmat kuvat listassa',
         gift: 'Tue Web Detoxia',
         eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
       },
@@ -538,7 +548,7 @@
       later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
       myNews: 'Mes infos', mixEmpty: 'Mes infos rassemble les sites d’info que vous consultez le plus. Consultez-en quelques-uns, et ils apparaîtront ici.',
       mixLoading: (n, of) => `Lecture des pages d’accueil… ${n} sur ${of}`,
-      allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus', siteMenu: 'Menu du site', allGenres: 'Tous les genres', genre: 'Genre', byScore: 'Meilleure note d’abord', dateFrom: 'Du', dateTo: 'Au', playAlbumIn: 'Écouter l’album dans %s', kasetNone: 'Introuvable', recordLabel: 'Label', released: 'Sortie',
+      games: 'Jeux', allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus', siteMenu: 'Menu du site', allGenres: 'Tous les genres', genre: 'Genre', byScore: 'Meilleure note d’abord', dateFrom: 'Du', dateTo: 'Au', playAlbumIn: 'Écouter l’album dans %s', kasetNone: 'Introuvable', recordLabel: 'Label', released: 'Sortie',
       keys: 'Les flèches choisissent · Enter ouvre · ← → précédent et suivant en lecture · L à lire plus tard · B signet · Esc ferme',
 
       pop: {
@@ -572,7 +582,9 @@
         privacyText: 'Vos réglages, vos articles enregistrés et ce que vous avez lu restent dans ce navigateur et passent sur vos autres appareils via votre compte de navigateur ou iCloud. Rien ne nous est envoyé.',
         erase: 'Effacer tout ce que Web Detox a enregistré',
         eraseAsk: 'Cela efface vos réglages, « À lire plus tard », « Signets » et l’historique de lecture ici, ainsi que sur vos autres appareils lors de leur prochaine synchronisation. Cette action est irréversible.',
-        bigPics: 'Images plus grandes dans la liste',
+        reportOpen: "Signaler un problème avec ce site", reportHint: "Un toucher envoie l’adresse de la page et ce qui ne va pas, rien sur vous.", reportNote: "Autre chose à dire ? (facultatif)", reportMissing: "Des articles manquent dans la liste", reportReader: "Un article s’affiche mal ou est incomplet", reportMedia: "Des images ou vidéos manquent", reportBroken: "La page a l’air bizarre ou ne marche pas", reportOther: "Autre chose", reportFailed: "Envoi impossible pour le moment. Réessayez plus tard.", privacyReport: "La seule exception : quand vous signalez un problème avec un site, l’adresse de la page, ce qui n’allait pas, ce que vous avez écrit et la version de Web Detox sont envoyés. Rien sur qui vous êtes.", reportThanks: h => `Merci ! Envoyé pour ${h}.`,
+        setupOpen: "Configurer Web Detox en quelques questions", setupLevel: "Comment voulez-vous voir les unes des sites d’info ?", setupLevelHint: "Pour tous les sites d’info où vous n’avez rien choisi d’autre.", setupBigPics: "Des images plus grandes dans la liste ?", setupGames: "Les jeux du site, comme les mots croisés et le sudoku, en bas de la liste ?", setupSwipe: "L’article doit-il suivre votre doigt quand vous passez au suivant ?", setupAlbum: "Où voulez-vous écouter les albums des critiques ?", setupAlbumHint: "Ajoute un bouton ▶ à chaque critique d’album.", setupGeneric: "Web Detox doit-il aussi ranger les sites d’info qu’il ne connaît pas encore ?", yes: "Oui", no: "Non", setupBack: "‹ Retour", setupSkip: "Passer", setupDone: "Terminé. Vous pourrez tout changer plus tard ici, dans le menu.", setupClose: "Fermer",
+        gamesRow: 'Les jeux du site en bas de la liste', bigPics: 'Images plus grandes dans la liste',
         gift: 'Soutenir Web Detox',
         eraseYes: 'Tout effacer', eraseNo: 'Annuler', erased: 'Tout est effacé.',
       },
@@ -622,7 +634,7 @@
       later: 'Leggi dopo', marks: 'Segnalibri', mark: 'Segnalibro', unLater: 'Togli da Leggi dopo', unMark: 'Togli segnalibro',
       myNews: 'Le mie notizie', mixEmpty: 'Le mie notizie raccoglie i siti di notizie che visiti di più. Visitane qualcuno e compariranno qui.',
       mixLoading: (n, of) => `Lettura delle prime pagine … ${n} di ${of}`,
-      allRead: 'Hai letto tutto qui.', showAllRead: 'Mostra letti', siteMenu: 'Menu del sito', allGenres: 'Tutti i generi', genre: 'Genere', byScore: 'Voto più alto prima', dateFrom: 'Dal', dateTo: 'Al', playAlbumIn: 'Riproduci l’album in %s', kasetNone: 'Non trovato', recordLabel: 'Etichetta', released: 'Uscita',
+      games: 'Giochi', allRead: 'Hai letto tutto qui.', showAllRead: 'Mostra letti', siteMenu: 'Menu del sito', allGenres: 'Tutti i generi', genre: 'Genere', byScore: 'Voto più alto prima', dateFrom: 'Dal', dateTo: 'Al', playAlbumIn: 'Riproduci l’album in %s', kasetNone: 'Non trovato', recordLabel: 'Etichetta', released: 'Uscita',
       keys: 'Frecce per scegliere · Enter apre · ← → precedente e successivo durante la lettura · L leggi dopo · B segnalibro · Esc chiude',
 
       pop: {
@@ -656,7 +668,9 @@
         privacyText: 'Le tue impostazioni, gli articoli salvati e ciò che hai letto restano in questo browser e arrivano sugli altri tuoi dispositivi tramite il tuo account del browser o iCloud. Non ci viene inviato nulla.',
         erase: 'Elimina tutto ciò che Web Detox ha salvato',
         eraseAsk: 'Questo elimina le tue impostazioni, Leggi dopo, Segnalibri e la cronologia di lettura qui e sugli altri tuoi dispositivi alla prossima sincronizzazione. Non si può annullare.',
-        bigPics: 'Immagini più grandi nell’elenco',
+        reportOpen: "Segnala un problema con questo sito", reportHint: "Un tocco invia l’indirizzo della pagina e cosa non va, niente su di te.", reportNote: "Altro da aggiungere? (facoltativo)", reportMissing: "Mancano articoli nella lista", reportReader: "Un articolo si vede male o è incompleto", reportMedia: "Mancano immagini o video", reportBroken: "La pagina sembra strana o non funziona", reportOther: "Altro", reportFailed: "Impossibile inviare ora. Riprova più tardi.", privacyReport: "L’unica eccezione è quando segnali un problema con un sito: vengono inviati l’indirizzo della pagina, cosa non andava, ciò che hai scritto e la versione di Web Detox. Niente su chi sei.", reportThanks: h => `Grazie! Inviato per ${h}.`,
+        setupOpen: "Configura Web Detox con qualche domanda", setupLevel: "Come vuoi vedere le prime pagine dei siti di notizie?", setupLevelHint: "Per tutti i siti di notizie dove non hai scelto altro.", setupBigPics: "Immagini più grandi nella lista?", setupGames: "I giochi del sito, come cruciverba e sudoku, in fondo alla lista?", setupSwipe: "L’articolo deve seguire il dito quando scorri al successivo?", setupAlbum: "Dove vuoi ascoltare gli album delle recensioni?", setupAlbumHint: "Aggiunge un pulsante ▶ a ogni recensione di un album.", setupGeneric: "Web Detox deve riordinare anche i siti di notizie che non conosce ancora?", yes: "Sì", no: "No", setupBack: "‹ Indietro", setupSkip: "Salta", setupDone: "Fatto. Puoi cambiare tutto questo più tardi qui nel menu.", setupClose: "Chiudi",
+        gamesRow: 'I giochi del sito in fondo alla lista', bigPics: 'Immagini più grandi nell’elenco',
         gift: 'Sostieni Web Detox',
         eraseYes: 'Elimina tutto', eraseNo: 'Annulla', erased: 'Tutto è stato eliminato.',
       },
@@ -707,7 +721,7 @@
       later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
       myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
       mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
-      allRead: 'すべて読みました。', showAllRead: '既読を表示', siteMenu: 'サイトのメニュー', allGenres: 'すべてのジャンル', genre: 'ジャンル', byScore: '評価の高い順', dateFrom: '開始', dateTo: '終了', playAlbumIn: '%s でアルバムを再生', kasetNone: '見つかりません', recordLabel: 'レーベル', released: 'リリース',
+      games: 'ゲーム', allRead: 'すべて読みました。', showAllRead: '既読を表示', siteMenu: 'サイトのメニュー', allGenres: 'すべてのジャンル', genre: 'ジャンル', byScore: '評価の高い順', dateFrom: '開始', dateTo: '終了', playAlbumIn: '%s でアルバムを再生', kasetNone: '見つかりません', recordLabel: 'レーベル', released: 'リリース',
       keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
 
       // The toolbar popup, in the browser's language.
@@ -743,7 +757,9 @@
         privacyText: '設定、保存した記事、既読履歴はこのブラウザに保存され、ブラウザのアカウントまたはiCloudを通じてほかのデバイスに同期されます。私たちには何も送信されません。',
         erase: 'Web Detoxが保存したデータをすべて削除',
         eraseAsk: '設定、「あとで読む」、「ブックマーク」、既読履歴を、このブラウザと、次回の同期時にほかのデバイスからも削除します。元に戻すことはできません。',
-        bigPics: 'リストの画像を大きく',
+        reportOpen: "このサイトの問題を報告", reportHint: "1回タップするとページのアドレスと問題の内容を送ります。あなたについての情報は送りません。", reportNote: "ほかに伝えたいこと（任意）", reportMissing: "リストに記事が足りない", reportReader: "記事の表示がおかしい、または内容が欠けている", reportMedia: "画像や動画がない", reportBroken: "ページの見た目がおかしい、または動かない", reportOther: "その他", reportFailed: "今は送信できませんでした。あとでもう一度お試しください。", privacyReport: "唯一の例外はサイトの問題を報告したときで、ページのアドレス、問題の内容、書いた文章、Web Detox のバージョンが送られます。あなたが誰かについては何も送りません。", reportThanks: h => `ありがとうございます。${h} について送信しました。`,
+        setupOpen: "いくつかの質問で Web Detox を設定", setupLevel: "ニュースサイトのトップページをどう表示しますか？", setupLevelHint: "ほかの設定を選んでいないすべてのニュースサイトに適用されます。", setupBigPics: "リストの画像を大きくしますか？", setupGames: "クロスワードや数独などサイトのゲームをリストの最後に表示しますか？", setupSwipe: "次の記事へスワイプするとき、記事を指に追従させますか？", setupAlbum: "レビューのアルバムをどこで再生しますか？", setupAlbumHint: "アルバムレビューごとに ▶ ボタンを付けます。", setupGeneric: "まだ知らないニュースサイトも Web Detox で整理しますか？", yes: "はい", no: "いいえ", setupBack: "‹ 戻る", setupSkip: "スキップ", setupDone: "完了しました。これらはあとでこのメニューから変更できます。", setupClose: "閉じる",
+        gamesRow: 'リストの最後にサイトのゲーム', bigPics: 'リストの画像を大きく',
         gift: 'Web Detoxを支援',
         eraseYes: 'すべて削除', eraseNo: 'キャンセル', erased: 'すべて削除しました。',
       },
@@ -796,7 +812,7 @@
       later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
       myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
       mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
-      allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker', siteMenu: 'Nettstedets meny', allGenres: 'Alle sjangre', genre: 'Sjanger', byScore: 'Høyest karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Spill albumet i %s', kasetNone: 'Ikke funnet', recordLabel: 'Plateselskap', released: 'Utgitt',
+      games: 'Spill', allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker', siteMenu: 'Nettstedets meny', allGenres: 'Alle sjangre', genre: 'Sjanger', byScore: 'Høyest karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Spill albumet i %s', kasetNone: 'Ikke funnet', recordLabel: 'Plateselskap', released: 'Utgitt',
       keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
 
       pop: {
@@ -832,7 +848,9 @@
         privacyText: 'Innstillingene, de lagrede sakene og det du har lest, blir i denne nettleseren, og følger deg til de andre enhetene dine via nettleserkontoen eller iCloud. Ingenting sendes til oss.',
         erase: 'Slett alt Web Detox har lagret',
         eraseAsk: 'Dette sletter innstillingene, Les senere, Bokmerker og lesehistorikken her, og på de andre enhetene dine neste gang de synkroniserer. Det kan ikke angres.',
-        bigPics: 'Større bilder i listen',
+        reportOpen: "Meld fra om et problem med dette nettstedet", reportHint: "Ett trykk sender adressen til siden og hva som er galt, ikke noe om deg.", reportNote: "Noe mer å si? (valgfritt)", reportMissing: "Saker mangler i listen", reportReader: "En sak vises feil eller mangler innhold", reportMedia: "Bilder eller video mangler", reportBroken: "Siden ser rar ut eller virker ikke", reportOther: "Noe annet", reportFailed: "Fikk ikke sendt nå. Prøv igjen senere.", privacyReport: "Unntaket er når du melder fra om et problem med et nettsted: da sendes adressen til siden, hva som var galt, det du skrev, og versjonen av Web Detox. Ikke noe om hvem du er.", reportThanks: h => `Takk! Sendt for ${h}.`,
+        setupOpen: "Tilpass Web Detox med noen spørsmål", setupLevel: "Hvordan vil du se forsidene til nyhetsnettsteder?", setupLevelHint: "Gjelder alle nyhetsnettsteder der du ikke har valgt noe annet.", setupBigPics: "Større bilder i listen?", setupGames: "Nettstedets spill, som kryssord og sudoku, nederst i listen?", setupSwipe: "Skal saken følge fingeren når du sveiper til neste sak?", setupAlbum: "Hvor vil du spille album fra anmeldelser?", setupAlbumHint: "Gir en ▶-knapp ved hver albumanmeldelse.", setupGeneric: "Skal Web Detox også rydde på nyhetsnettsteder den ikke kjenner fra før?", yes: "Ja", no: "Nei", setupBack: "‹ Tilbake", setupSkip: "Hopp over", setupDone: "Ferdig. Du kan endre alt dette senere her i menyen.", setupClose: "Lukk",
+        gamesRow: 'Nettstedets spill nederst i listen', bigPics: 'Større bilder i listen',
         gift: 'Støtt Web Detox',
         eraseYes: 'Slett alt', eraseNo: 'Avbryt', erased: 'Alt er slettet.',
       },
@@ -884,7 +902,7 @@
       later: 'Later lezen', marks: 'Bladwijzers', mark: 'Bladwijzer maken', unLater: 'Verwijderen uit “Later lezen”', unMark: 'Bladwijzer verwijderen',
       myNews: 'Mijn nieuws', mixEmpty: 'Mijn nieuws verzamelt de nieuwssites die je het vaakst bezoekt. Bezoek er een paar, dan verschijnen ze hier.',
       mixLoading: (n, of) => `Voorpagina’s worden gelezen… ${n} van ${of}`,
-      allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen', siteMenu: 'Menu van de site', allGenres: 'Alle genres', genre: 'Genre', byScore: 'Hoogste score eerst', dateFrom: 'Van', dateTo: 'Tot', playAlbumIn: 'Album afspelen in %s', kasetNone: 'Niet gevonden', recordLabel: 'Label', released: 'Verschenen',
+      games: 'Spellen', allRead: 'Je hebt hier alles gelezen.', showAllRead: 'Gelezen tonen', siteMenu: 'Menu van de site', allGenres: 'Alle genres', genre: 'Genre', byScore: 'Hoogste score eerst', dateFrom: 'Van', dateTo: 'Tot', playAlbumIn: 'Album afspelen in %s', kasetNone: 'Niet gevonden', recordLabel: 'Label', released: 'Verschenen',
       keys: 'Pijltjestoetsen kiezen · Enter opent · ← → vorige en volgende tijdens het lezen · L later lezen · B bladwijzer · Esc sluit',
 
       pop: {
@@ -918,7 +936,9 @@
         privacyText: 'Je instellingen, opgeslagen artikelen en wat je hebt gelezen blijven in deze browser en gaan via je browseraccount of iCloud naar je andere apparaten. Er wordt niets naar ons gestuurd.',
         erase: 'Alles wissen wat Web Detox heeft opgeslagen',
         eraseAsk: 'Hiermee worden je instellingen, “Later lezen”, “Bladwijzers” en je leesgeschiedenis hier gewist, en op je andere apparaten zodra ze weer synchroniseren. Dit kan niet ongedaan worden gemaakt.',
-        bigPics: 'Grotere foto’s in de lijst',
+        reportOpen: "Meld een probleem met deze site", reportHint: "Eén tik stuurt het adres van de pagina en wat er mis is, niets over jou.", reportNote: "Nog iets te zeggen? (optioneel)", reportMissing: "Er ontbreken artikelen in de lijst", reportReader: "Een artikel wordt verkeerd getoond of is onvolledig", reportMedia: "Afbeeldingen of video ontbreken", reportBroken: "De pagina ziet er raar uit of werkt niet", reportOther: "Iets anders", reportFailed: "Versturen lukte nu niet. Probeer het later opnieuw.", privacyReport: "De enige uitzondering is als je een probleem met een site meldt: dan worden het adres van de pagina, wat er mis was, wat je schreef en de versie van Web Detox verstuurd. Niets over wie je bent.", reportThanks: h => `Bedankt! Verstuurd voor ${h}.`,
+        setupOpen: "Stel Web Detox in met een paar vragen", setupLevel: "Hoe wil je de voorpagina’s van nieuwssites zien?", setupLevelHint: "Voor elke nieuwssite waar je niets anders hebt gekozen.", setupBigPics: "Grotere afbeeldingen in de lijst?", setupGames: "De spellen van de site, zoals kruiswoordpuzzels en sudoku, onderaan de lijst?", setupSwipe: "Moet het artikel je vinger volgen als je naar het volgende veegt?", setupAlbum: "Waar wil je albums uit recensies afspelen?", setupAlbumHint: "Zet een ▶-knop bij elke albumrecensie.", setupGeneric: "Moet Web Detox ook nieuwssites opruimen die het nog niet kent?", yes: "Ja", no: "Nee", setupBack: "‹ Terug", setupSkip: "Overslaan", setupDone: "Klaar. Je kunt dit allemaal later hier in het menu veranderen.", setupClose: "Sluiten",
+        gamesRow: 'De spellen van de site onderaan de lijst', bigPics: 'Grotere foto’s in de lijst',
         gift: 'Steun Web Detox',
         eraseYes: 'Alles wissen', eraseNo: 'Annuleren', erased: 'Alles is gewist.',
       },
@@ -972,7 +992,7 @@
       later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
       myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
       mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
-      allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane', siteMenu: 'Menu witryny', allGenres: 'Wszystkie gatunki', genre: 'Gatunek', byScore: 'Najwyższa ocena najpierw', dateFrom: 'Od', dateTo: 'Do', playAlbumIn: 'Odtwórz album w %s', kasetNone: 'Nie znaleziono', recordLabel: 'Wytwórnia', released: 'Wydano',
+      games: 'Gry', allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane', siteMenu: 'Menu witryny', allGenres: 'Wszystkie gatunki', genre: 'Gatunek', byScore: 'Najwyższa ocena najpierw', dateFrom: 'Od', dateTo: 'Do', playAlbumIn: 'Odtwórz album w %s', kasetNone: 'Nie znaleziono', recordLabel: 'Wytwórnia', released: 'Wydano',
       keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
 
       pop: {
@@ -1006,7 +1026,9 @@
         privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
         erase: 'Usuń wszystko, co zapisał Web Detox',
         eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
-        bigPics: 'Większe zdjęcia na liście',
+        reportOpen: "Zgłoś problem z tą witryną", reportHint: "Jedno dotknięcie wysyła adres strony i opis problemu, nic o tobie.", reportNote: "Coś jeszcze? (opcjonalnie)", reportMissing: "Na liście brakuje artykułów", reportReader: "Artykuł wyświetla się źle lub jest niepełny", reportMedia: "Brakuje zdjęć lub wideo", reportBroken: "Strona wygląda dziwnie lub nie działa", reportOther: "Coś innego", reportFailed: "Nie udało się teraz wysłać. Spróbuj później.", privacyReport: "Jedynym wyjątkiem jest zgłoszenie problemu z witryną: wtedy wysyłany jest adres strony, opis problemu, to, co napisano, oraz wersja Web Detox. Nic o tym, kim jesteś.", reportThanks: h => `Dziękujemy! Wysłano dla ${h}.`,
+        setupOpen: "Skonfiguruj Web Detox kilkoma pytaniami", setupLevel: "Jak chcesz widzieć strony główne serwisów informacyjnych?", setupLevelHint: "Dotyczy każdego serwisu, w którym nie wybrano niczego innego.", setupBigPics: "Większe zdjęcia na liście?", setupGames: "Gry serwisu, takie jak krzyżówki i sudoku, na końcu listy?", setupSwipe: "Czy artykuł ma podążać za palcem, gdy przesuwasz do następnego?", setupAlbum: "Gdzie chcesz odtwarzać albumy z recenzji?", setupAlbumHint: "Dodaje przycisk ▶ przy każdej recenzji albumu.", setupGeneric: "Czy Web Detox ma porządkować także serwisy, których jeszcze nie zna?", yes: "Tak", no: "Nie", setupBack: "‹ Wstecz", setupSkip: "Pomiń", setupDone: "Gotowe. Wszystko to możesz później zmienić tutaj, w menu.", setupClose: "Zamknij",
+        gamesRow: 'Gry witryny na końcu listy', bigPics: 'Większe zdjęcia na liście',
         gift: 'Wesprzyj Web Detox',
         eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
       },
@@ -1056,7 +1078,7 @@
       later: 'Ler depois', marks: 'Favoritos', mark: 'Favorito', unLater: 'Remover de Ler depois', unMark: 'Remover favorito',
       myNews: 'Minhas notícias', mixEmpty: 'Minhas notícias reúne os sites de notícias que você mais visita. Visite alguns e eles aparecem aqui.',
       mixLoading: (n, of) => `Lendo as páginas iniciais … ${n} de ${of}`,
-      allRead: 'Você leu tudo aqui.', showAllRead: 'Mostrar lidas', siteMenu: 'Menu do site', allGenres: 'Todos os gêneros', genre: 'Gênero', byScore: 'Maior nota primeiro', dateFrom: 'De', dateTo: 'Até', playAlbumIn: 'Reproduzir o álbum no %s', kasetNone: 'Não encontrado', recordLabel: 'Gravadora', released: 'Lançamento',
+      games: 'Jogos', allRead: 'Você leu tudo aqui.', showAllRead: 'Mostrar lidas', siteMenu: 'Menu do site', allGenres: 'Todos os gêneros', genre: 'Gênero', byScore: 'Maior nota primeiro', dateFrom: 'De', dateTo: 'Até', playAlbumIn: 'Reproduzir o álbum no %s', kasetNone: 'Não encontrado', recordLabel: 'Gravadora', released: 'Lançamento',
       keys: 'Setas escolhem · Enter abre · ← → anterior e próxima durante a leitura · L ler depois · B favorito · Esc fecha',
 
       pop: {
@@ -1090,7 +1112,9 @@
         privacyText: 'Seus ajustes, as notícias salvas e o que você leu ficam neste navegador e vão para seus outros dispositivos pela sua conta do navegador ou pelo iCloud. Nada é enviado para nós.',
         erase: 'Apagar tudo o que o Web Detox salvou',
         eraseAsk: 'Isso apaga seus ajustes, Ler depois, Favoritos e o histórico de leitura aqui e nos seus outros dispositivos na próxima sincronização. Não dá para desfazer.',
-        bigPics: 'Imagens maiores na lista',
+        reportOpen: "Informar um problema com este site", reportHint: "Um toque envia o endereço da página e o que está errado, nada sobre você.", reportNote: "Algo mais a dizer? (opcional)", reportMissing: "Faltam artigos na lista", reportReader: "Um artigo aparece errado ou incompleto", reportMedia: "Faltam imagens ou vídeos", reportBroken: "A página parece estranha ou não funciona", reportOther: "Outra coisa", reportFailed: "Não foi possível enviar agora. Tente mais tarde.", privacyReport: "A única exceção é quando você informa um problema com um site: são enviados o endereço da página, o que estava errado, o que você escreveu e a versão do Web Detox. Nada sobre quem você é.", reportThanks: h => `Obrigado! Enviado para ${h}.`,
+        setupOpen: "Configure o Web Detox com algumas perguntas", setupLevel: "Como você quer ver as capas dos sites de notícias?", setupLevelHint: "Vale para todos os sites de notícias onde você não escolheu outra coisa.", setupBigPics: "Imagens maiores na lista?", setupGames: "Os jogos do site, como palavras cruzadas e sudoku, no fim da lista?", setupSwipe: "O artigo deve acompanhar o dedo quando você desliza para o próximo?", setupAlbum: "Onde você quer ouvir os álbuns das críticas?", setupAlbumHint: "Adiciona um botão ▶ a cada crítica de álbum.", setupGeneric: "O Web Detox deve arrumar também sites de notícias que ainda não conhece?", yes: "Sim", no: "Não", setupBack: "‹ Voltar", setupSkip: "Pular", setupDone: "Pronto. Você pode mudar tudo isso depois aqui no menu.", setupClose: "Fechar",
+        gamesRow: 'Os jogos do site no fim da lista', bigPics: 'Imagens maiores na lista',
         gift: 'Apoiar o Web Detox',
         eraseYes: 'Apagar tudo', eraseNo: 'Cancelar', erased: 'Tudo foi apagado.',
       },
@@ -1140,7 +1164,7 @@
       later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
       myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
       mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
-      allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar', siteMenu: 'Webbplatsens meny', allGenres: 'Alla genrer', genre: 'Genre', byScore: 'Högst betyg först', dateFrom: 'Från', dateTo: 'Till', playAlbumIn: 'Spela albumet i %s', kasetNone: 'Hittades inte', recordLabel: 'Skivbolag', released: 'Utgiven',
+      games: 'Spel', allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar', siteMenu: 'Webbplatsens meny', allGenres: 'Alla genrer', genre: 'Genre', byScore: 'Högst betyg först', dateFrom: 'Från', dateTo: 'Till', playAlbumIn: 'Spela albumet i %s', kasetNone: 'Hittades inte', recordLabel: 'Skivbolag', released: 'Utgiven',
       keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
 
       pop: {
@@ -1174,7 +1198,9 @@
         privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
         erase: 'Radera allt som Web Detox har sparat',
         eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
-        bigPics: 'Större bilder i listan',
+        reportOpen: "Rapportera ett problem med den här webbplatsen", reportHint: "Ett tryck skickar sidans adress och vad som är fel, inget om dig.", reportNote: "Något mer att säga? (valfritt)", reportMissing: "Artiklar saknas i listan", reportReader: "En artikel visas fel eller saknar innehåll", reportMedia: "Bilder eller video saknas", reportBroken: "Sidan ser konstig ut eller fungerar inte", reportOther: "Något annat", reportFailed: "Kunde inte skicka nu. Försök igen senare.", privacyReport: "Undantaget är när du rapporterar ett problem med en webbplats: då skickas sidans adress, vad som var fel, det du skrev och versionen av Web Detox. Inget om vem du är.", reportThanks: h => `Tack! Skickat för ${h}.`,
+        setupOpen: "Anpassa Web Detox med några frågor", setupLevel: "Hur vill du se nyhetssajternas förstasidor?", setupLevelHint: "Gäller alla nyhetssajter där du inte har valt något annat.", setupBigPics: "Större bilder i listan?", setupGames: "Webbplatsens spel, som korsord och sudoku, längst ned i listan?", setupSwipe: "Ska artikeln följa fingret när du sveper till nästa?", setupAlbum: "Var vill du spela album från recensioner?", setupAlbumHint: "Ger en ▶-knapp vid varje albumrecension.", setupGeneric: "Ska Web Detox också städa nyhetssajter den inte känner till än?", yes: "Ja", no: "Nej", setupBack: "‹ Tillbaka", setupSkip: "Hoppa över", setupDone: "Klart. Du kan ändra allt detta senare här i menyn.", setupClose: "Stäng",
+        gamesRow: 'Webbplatsens spel längst ned i listan', bigPics: 'Större bilder i listan',
         gift: 'Stöd Web Detox',
         eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
       },
@@ -1225,7 +1251,7 @@
       later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
       myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
       mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
-      allRead: '这里的内容已全部读完。', showAllRead: '显示已读', siteMenu: '网站菜单', allGenres: '所有类型', genre: '类型', byScore: '评分最高优先', dateFrom: '从', dateTo: '到', playAlbumIn: '在 %s 中播放专辑', kasetNone: '未找到', recordLabel: '厂牌', released: '发行',
+      games: '游戏', allRead: '这里的内容已全部读完。', showAllRead: '显示已读', siteMenu: '网站菜单', allGenres: '所有类型', genre: '类型', byScore: '评分最高优先', dateFrom: '从', dateTo: '到', playAlbumIn: '在 %s 中播放专辑', kasetNone: '未找到', recordLabel: '厂牌', released: '发行',
       keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
 
       // The toolbar popup, in the browser's language.
@@ -1261,7 +1287,9 @@
         privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
         erase: '删除 Web Detox 存储的所有内容',
         eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
-        bigPics: '列表中显示更大的图片',
+        reportOpen: "报告此网站的问题", reportHint: "轻点一下即可发送页面地址和问题，不含你的任何信息。", reportNote: "还有要补充的吗？（可选）", reportMissing: "列表中缺少文章", reportReader: "文章显示错误或内容缺失", reportMedia: "缺少图片或视频", reportBroken: "页面显示异常或无法使用", reportOther: "其他", reportFailed: "暂时无法发送，请稍后再试。", privacyReport: "唯一的例外是你报告网站问题时：会发送页面地址、问题、你写的内容以及 Web Detox 的版本，不含任何关于你身份的信息。", reportThanks: h => `谢谢！已发送 ${h} 的报告。`,
+        setupOpen: "通过几个问题设置 Web Detox", setupLevel: "你想如何查看新闻网站的首页？", setupLevelHint: "适用于你没有另作选择的所有新闻网站。", setupBigPics: "列表中使用更大的图片？", setupGames: "在列表末尾显示网站的游戏，如填字和数独？", setupSwipe: "滑动到下一篇时，文章是否跟随手指移动？", setupAlbum: "你想在哪里播放评论中的专辑？", setupAlbumHint: "在每篇专辑评论旁添加 ▶ 按钮。", setupGeneric: "Web Detox 是否也整理它还不认识的新闻网站？", yes: "是", no: "否", setupBack: "‹ 返回", setupSkip: "跳过", setupDone: "完成。之后可以在此菜单中更改这些设置。", setupClose: "关闭",
+        gamesRow: '在列表末尾显示网站的游戏', bigPics: '列表中显示更大的图片',
         gift: '支持 Web Detox',
         eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
       },
@@ -2437,14 +2465,56 @@
       } catch {}
       return found;
     }
+    // A poll in the story (BT's "Er det greit å svare «kanskje»?": a picture, the question, twice for phone and computer, and
+    // the answers as radio buttons): its picture, the question once, and the answers as a list, each with its share of the
+    // votes when the page has the count (in the page's data, by the answers' text). Voting stays on the site.
+    function readerPoll(box, html, url, withImages, blocks) {
+      const radios = box.querySelectorAll('label input[type="radio"]');
+      if (radios.length < 2 || radios.length > 12) return false;
+      const all = readerText(box);
+      if (all.length > 1500) return false;
+      const answers = [...radios].map(r => readerText(r.closest('label'))).filter(Boolean);
+      if (answers.length !== radios.length) return false;
+      const question = [...box.querySelectorAll('p, h2, h3, h4, legend')].filter(e => !e.closest('label')).map(readerText).filter(t => t.length > 10 && !answers.includes(t)).sort((a, b) => b.length - a.length)[0] || '';
+      const img = withImages && box.querySelector('img'), src = img ? readerImage(img, url) : '';
+      let shares = null;
+      try {
+        // The page's data (its scripts, which the reader reads as text only): the first answer, then the count after it.
+        const key = JSON.stringify(answers[0]);
+        for (let i = html.indexOf(key); i >= 0 && !shares; i = html.indexOf(key, i + 1)) {
+          const m = html.slice(i, i + 4000).match(/^[^<]*?"statistics":\{([^{}]*)\}/);
+          if (!m) continue;
+          const n = answers.map((_, k) => +(m[1].match(new RegExp(`"${k}":"?(\\d+)`))?.[1] || 0)), sum = n.reduce((a, b) => a + b, 0);
+          if (sum > 0) shares = n.map(x => Math.round(100 * x / sum));
+        }
+      } catch {}
+      if (src) blocks.push({ t: 'img', src, caption: '' });
+      if (question) blocks.push({ t: 'h', text: question });
+      blocks.push({ t: 'list', items: answers.map((a, k) => shares ? `${a} – ${shares[k]} %` : a), ordered: false });
+      return true;
+    }
+    function readerVideoPage(doc) {
+      for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
+        let all; try { all = [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent)); } catch { continue; }
+        for (const it of all) {
+          if (!it || String(it['@type']) !== 'VideoObject') continue;
+          const src = String(it.contentUrl || '');
+          if (!/^https:\/\/[^\s]+\.(?:mp4|m3u8)(?:\?|$)/i.test(src)) continue;
+          const thumb = [].concat(it.thumbnailUrl || [])[0], poster = typeof thumb === 'string' ? thumb : thumb?.url || '';
+          const r = (doc.querySelector('[aspectRatio], [aspectratio]')?.getAttribute('aspectratio') || '').match(/^(\d+):(\d+)$/);
+          return { src, poster: /^https:/.test(poster) ? poster : '', title: norm(it.name), caption: norm(it.description), ratio: r ? `${r[1]}/${r[2]}` : '', date: it.uploadDate || '' };
+        }
+      }
+      return null;
+    }
     function readArticle(html, url, withImages) {
-      const doc = parseHtml(html), art = readArticleIn(doc, url, withImages);
+      const doc = parseHtml(html), art = readArticleIn(doc, url, withImages, html);
       if (art) try { art.rating = pageRating(html, doc); const rv = reviewedAlbum(doc); art.album = rv?.name || ''; art.albumPair = !!(rv?.album && rv.artist); art.facts = reviewFacts(html); } catch {}
       return art;
     }
     // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'video'|'embed', text, items, src, poster, caption }], date, byline, paid, partial } or null
     // partial: a paid article that arrived with only its start. short: an article with little text.
-    function readArticleIn(doc, url, withImages) {
+    function readArticleIn(doc, url, withImages, html = '') {
       let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
       for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
         try {
@@ -2470,6 +2540,12 @@
       if (entry) article = true;
       if (feed) date = ''; // the feed's own date is when it was started
       const quizzes = [...doc.querySelectorAll('article iframe, main iframe')].filter(f => readerEmbed(f, url));
+      // A page that is one video and nothing else (BA's /v/ pages: a clip in Amedia's player, no text): the clip, from the
+      // page's own description of it (schema.org VideoObject, its file in contentUrl).
+      if (!root && !entry && !quizzes.length && withImages) {
+        const vo = readerVideoPage(doc);
+        if (vo) return { blocks: [{ t: 'video', ...vo }], date: date || vo.date, byline, paid, partial: false };
+      }
       if (!root && !entry && !quizzes.length) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
       const blocks = [];
       const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
@@ -2523,7 +2599,7 @@
               const t = name && rest ? `${name}: ${rest}` : all;
               if (t.length >= 20) blocks.push({ t: 'p', text: t });
             }
-          } else walk(c);
+          } else if (!readerPoll(c, html, url, withImages, blocks)) walk(c);
         }
       };
       if (entry) walk(entry); else if (feed) feed.forEach(walk);
@@ -3432,6 +3508,36 @@
     const GAME_URL = /(?:^|[/_-])(?:hjernetrim|kryssord|minikryss|helgekryss|sudoku|k-doku|ordjakten|quiz|quizzes|horoskop|horoscopes?|crosswords?|wordle|puzzles?|raetsel|kreuzwortraetsel|korsord|krydsord|tankenott)(?:[/_.-]|$)/i;
     const GAME_TEASER = /^(?:hjernetrim|dagens (?:kryssord|quiz|sudoku|horoskop)|kryssord|sudoku|quiz|horoskop|horoscope|crossword|wordle|rätsel|kreuzworträtsel|korsord|krydsord|tankenøtt)\b/i;
     const isGame = (url, teaser) => CFG.plainSkipGames && (GAME_URL.test(new URL(url).pathname) || GAME_TEASER.test(teaser || ''));
+    // The site's games, for a row of their own at the end of the list, opened on the site: BT's game box ("Kryssord",
+    // "Minikryss", "Sudoku enkel" …) and menus that only the site's scripts draw (Sunnhordland's "Spel": /spill/sudoku …).
+    // Horoscopes are left out. [{ href, text }], at most 12.
+    const GAME_PATH = /\/(?:spill|spel|games|puzzles)(?:\/|$)/i;
+    function gameLinks(root = document) {
+      const out = new Map(), texts = new Set();
+      const add = (href, text) => {
+        let u; try { u = new URL(href, location.href); } catch { return; }
+        text = norm(text).replace(/\s*[→›»]+$/, '');
+        const path = menuPath(u), low = text.toLowerCase();
+        if (!/^https?:$/.test(u.protocol) || registrable(u.hostname) !== registrable(host) || !path || out.has(path) || texts.has(low)) return;
+        if (text.length < 2 || text.length > 32 || /horosk|horoscop/i.test(path + ' ' + text) || !(GAME_URL.test(u.pathname) || GAME_PATH.test(u.pathname))) return;
+        out.set(path, { href: u.origin + u.pathname, text }); texts.add(low);
+      };
+      // The game boxes first, then the menus: BT's menu sends both "Kryssord" and "Sudoku" to the day's puzzle page.
+      const links = [...root.querySelectorAll('a[href]')].filter(a => !a.closest('footer, [role="contentinfo"]'));
+      const inMenu = a => !!a.closest('nav, header, [role="navigation"]');
+      for (const a of [...links.filter(a => !inMenu(a)), ...links.filter(inMenu)]) {
+        if (inMenu(a) && out.size >= 3) break;
+        const named = a.querySelector('h2, h3, h4, h5')?.textContent || a.getAttribute('aria-label')?.replace(/^til\s+/i, '') || a.textContent;
+        add(a.getAttribute('href'), named);
+      }
+      for (const s of root.querySelectorAll('script:not([src])')) {
+        const js = s.textContent; if (!/spill|spel|games/i.test(js)) continue;
+        for (const m of js.replace(/\\u002F/gi, '/').matchAll(/\{"?text"?:"([^"\\]{2,32})","?url"?:"(\/(?:spill|spel|games)\/[^"\\]*)"/g)) add(m[2], m[1]);
+      }
+      // The page of all games last (BT's "Alle spill →").
+      const all = g => /^(?:alle|all|alla)\b/i.test(g.text);
+      return [...out.values()].sort((a, b) => all(a) - all(b)).slice(0, 12);
+    }
 
     // The teaser's own picture: the first real image in the link, or in its card when the card
     // holds just this teaser. Icons, badges and logos (narrower than 80px) and SVGs don't count.
@@ -3798,6 +3904,9 @@
       .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
       .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
       .all-read{padding:48px 0;text-align:center;color:var(--muted)}
+      .games .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+      .games .row a{color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:15px}
+      .games .row a:hover{border-color:var(--accent);color:var(--accent)}
       .all-read p{margin:0 0 12px;font-size:18px;color:var(--fg)}
       .edit-hint,.mix-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
       h2 a.site-link{color:inherit;text-decoration:none}
@@ -3809,6 +3918,8 @@
 
 
     let plainHost = null, plainCount = 0;
+    // The article open in plain view's reader, for a report about it from the menu (settings.js). '' when none.
+    let plainReading = '';
     // A picture from the reader, over the whole page: first as large as fits, a tap enlarges it two and a half times around
     // the place tapped (scroll or drag to move), another tap brings it back. Close, Esc or Back takes it away.
     function zoomImage(im) {
@@ -4031,7 +4142,8 @@
     }
     async function articleView(withImages) {
       const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => s.textContent).join('');
-      if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"(?:\w*Article|Review)"/.test(ld)) return false; // Pitchfork's reviews: a Review
+      // Pitchfork's reviews: a Review. BA's video pages: a VideoObject.
+      if (!/article|^video/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"(?:\w*Article|Review|VideoObject)"/.test(ld)) return false;
       const url = location.href.split('#')[0], h1 = document.querySelector('h1');
       let title = norm(h1?.textContent) || document.title;
       // A review headed by the artist, with the album as the heading under it (Headphone Commute): both, and the album for
@@ -4089,7 +4201,7 @@
       const listUrl = location.href, listTitle = document.title;
       // The logo is the first thing here that needs the page laid out, so it pays for the first layout: on nytimes.com in
       // Safari 1.2 s. It counts towards the first pass, which decides whether the page is heavy (the end of plainView).
-      let logo = null, menu = null, items = [], toLinks = 0, giveBack = () => {}, known = new Map();
+      let logo = null, menu = null, games = [], items = [], toLinks = 0, giveBack = () => {}, known = new Map();
       if (!mix) {
         const t0 = performance.now();
         if (stopped) {
@@ -4103,6 +4215,7 @@
         toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
         timeMark('links');
         try { menu = siteMenu(src); } catch {}
+        try { games = gameLinks(src); } catch {}
         giveBack = swallowSite();
         known = new Map(items.map(it => [it.key, it]));
         if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
@@ -4529,7 +4642,7 @@
       // replace: moving to the previous/next article, which shouldn't stack up in the history.
       function openArticle(it, replace, fromHistory) {
         const li = rows.get(it.key);
-        current = it; li?.classList.add('read');
+        current = it; plainReading = it.url || ''; li?.classList.add('read');
         if (isIn('later', it.key)) doneLater.add(it.key);
         if (!readKeys.has(it.key)) { readKeys.add(it.key); saveRead(it.key); }
         view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
@@ -4667,7 +4780,7 @@
       function closeArticle(fromHistory) {
         if (!current) return;
         const key = current.key;
-        current = null; view.hidden = true; reader.replaceChildren(); sh.querySelector('.wrap').inert = false;
+        current = null; plainReading = ''; view.hidden = true; reader.replaceChildren(); sh.querySelector('.wrap').inert = false;
         document.title = listTitle;
         if (!fromHistory) history.back();
         let back = key;
@@ -4765,6 +4878,13 @@
           box.className = 'all-read'; b.dataset.act = 'show-read'; b.textContent = T.showAllRead;
           box.append(Object.assign(document.createElement('p'), { textContent: T.allRead }), b);
           main.append(box);
+        }
+        // The site's games last, opened on the site: they don't work in the list.
+        if (games.length && startup.plainGames !== false) {
+          const sec = document.createElement('section'), h2 = document.createElement('h2'), row = document.createElement('div');
+          sec.className = 'games'; h2.textContent = T.games; row.className = 'row';
+          row.append(...games.map(g => Object.assign(document.createElement('a'), { href: onSiteUrl(g.href), textContent: g.text })));
+          sec.append(h2, row); main.append(sec);
         }
         plainCount = rows.size;
         updateFooter();
@@ -5568,6 +5688,7 @@
       else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
       else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
       else if (act === 'bigPics') { await gm.set('plainBigPics', !!arg); location.reload(); }
+      else if (act === 'games') { await gm.set('plainGames', !!arg); location.reload(); }
       else if (act === 'albumApp') { CFG.albumApp = ALBUM_APPS[arg] ? arg : ''; await gm.set('albumApp', CFG.albumApp); await gm.set('kasetLinks', false); location.reload(); }
       else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
       else if (act === 'calmPart') {
@@ -5580,8 +5701,8 @@
 
     async function settingsState() {
       const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
-      return { host, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
-        genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, bigPics: !!startup.plainBigPics, showOriginal, mutedTopics: [...muted],
+      return { host, page: plainReading || location.origin + location.pathname, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
+        genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, bigPics: !!startup.plainBigPics, games: startup.plainGames !== false, showOriginal, mutedTopics: [...muted],
         calmParts: (webCalm ? WEB_PARTS.filter(p => !p.shop || shopPage()) : calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label || p.id, show: !calmPartsOff.includes(p.id) })),
         fetchPausedUntil: fetchPausedUntil > Date.now() ? fetchPausedUntil : 0, topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
         disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };
@@ -5732,7 +5853,7 @@
       // Every setting the start needs, in one read (plain view's too: startup below).
       startup = await gm.getAll({ disabledHosts: [], enabledHosts: [], genericSites: CFG.genericSites, includeLead: null, level: null,
         siteLevels: {}, mutedTopics: [], display: CFG.display, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, kasetLinks: false, pausedHosts: {}, calmParts: {},
-        plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {}, plainBigPics: false });
+        plainSort: 'site', plainLayout: {}, plainHideRead: false, plainRead: {}, plainReadSync: {}, plainSaved: {}, newsVisits: {}, plainBigPics: false, plainGames: true });
       const disabled = startup.disabledHosts || [];
       const enabled = startup.enabledHosts || [];
       CFG.genericSites = startup.genericSites ?? CFG.genericSites;

@@ -13,6 +13,15 @@
     <span id="host"></span>
   </header>
   <button id="my-news" type="button" class="my-news"></button>
+  <button id="setup-open" type="button" class="link setup-open" data-i18n="setupOpen">Set up Web Detox with a few questions</button>
+
+  <main id="setup" hidden>
+    <p class="hint" id="setup-step"></p>
+    <h3 id="setup-q"></h3>
+    <p class="hint" id="setup-hint"></p>
+    <div id="setup-options" class="modes" role="group"></div>
+    <div class="setup-nav"><button id="setup-back" type="button" class="link" data-i18n="setupBack">‹ Back</button><button id="setup-skip" type="button" class="link" data-i18n="setupSkip">Skip</button></div>
+  </main>
 
   <main id="settings" hidden>
     <p id="status"></p>
@@ -50,6 +59,7 @@
     <h2 data-i18n="plainHeading" class="everywhere">Plain view</h2>
     <label class="switch everywhere"><span data-i18n="swipe">Animate swiping between articles</span><input type="checkbox" id="swipe"></label>
     <label class="switch everywhere"><span data-i18n="bigPics">Larger pictures in the list</span><input type="checkbox" id="big-pics"></label>
+    <label class="switch everywhere"><span data-i18n="gamesRow">The site's games at the end of the list</span><input type="checkbox" id="games"></label>
     <label class="switch choice everywhere"><span data-i18n="albumApp">Play albums in</span><select id="album-app">
       <option value="" data-i18n="albumAppOff">Off</option><option value="ytm">YouTube Music</option><option value="apple">Apple Music</option><option value="spotify">Spotify</option><option value="kaset" id="kaset-opt">Kaset</option>
     </select></label>
@@ -66,9 +76,26 @@
     <button id="grant" type="button" hidden data-i18n="grant">Allow on all websites</button>
   </main>
 
+  <section id="report" hidden>
+    <button id="report-open" type="button" class="link" data-i18n="reportOpen">Report a problem with this site</button>
+    <div id="report-box" hidden>
+      <p class="hint" data-i18n="reportHint"></p>
+      <textarea id="report-note" rows="2" maxlength="500"></textarea>
+      <div class="report-choices">
+        <button type="button" data-problem="missing" data-i18n="reportMissing"></button>
+        <button type="button" data-problem="reader" data-i18n="reportReader"></button>
+        <button type="button" data-problem="media" data-i18n="reportMedia"></button>
+        <button type="button" data-problem="broken" data-i18n="reportBroken"></button>
+        <button type="button" data-problem="other" data-i18n="reportOther"></button>
+      </div>
+    </div>
+    <p id="report-done" class="hint" role="status" hidden></p>
+  </section>
+
   <section id="privacy">
     <h2 data-i18n="privacyHeading">Your data</h2>
     <p class="hint" data-i18n="privacyText"></p>
+    <p class="hint" data-i18n="privacyReport"></p>
     <button id="erase" type="button" class="link" data-i18n="erase"></button>
     <div id="erase-ask" hidden>
       <p class="hint" data-i18n="eraseAsk"></p>

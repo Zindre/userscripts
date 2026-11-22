@@ -70,11 +70,22 @@ button.link:disabled { color: var(--muted); opacity: 1; }
 .segmented label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 .segmented label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+#report { margin-top: 14px; }
+#report-box .hint { margin: 6px 0; }
+#report-note { width: 100%; font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; resize: vertical; }
+.report-choices { display: grid; gap: 4px; margin-top: 6px; }
 #privacy { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line, rgba(127,127,127,.3)); }
 #privacy .hint { margin: 4px 0 8px; }
 #erase-ask button { margin: 0 6px 6px 0; }
 button.danger { background: #c0392b; border-color: #c0392b; color: #fff; }
 
+.setup-open { display: block; margin: -6px 0 10px; }
+#setup h3 { font-size: 15px; margin: 4px 0 6px; }
+#setup .modes button { display: block; }
+#setup .modes button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+#setup .modes b { display: block; font-weight: 600; color: var(--fg); }
+#setup .modes span { color: var(--muted); }
+.setup-nav { display: flex; justify-content: space-between; margin-top: 8px; }
 .my-news { margin: 0 0 12px; font-weight: 600; text-align: center; background: var(--accent-soft, var(--soft)); border-color: var(--accent, var(--line)); }
 
 #gift { margin-left: 8px; color: var(--muted); text-decoration: none; }

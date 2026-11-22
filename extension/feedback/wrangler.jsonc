@@ -1,0 +1,15 @@
+// Web Detox's feedback receiver (worker.js). Deploy: npx wrangler deploy
+{
+  "name": "webdetox-feedback",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  "d1_databases": [
+    { "binding": "DB", "database_name": "webdetox-feedback", "database_id": "21bb4fdb-14ae-4fe2-8c9f-d9bf3e06f8a4" }
+  ],
+  // Five reports a minute from one address.
+  "ratelimits": [
+    { "name": "LIMIT", "namespace_id": "4711", "simple": { "limit": 5, "period": 60 } }
+  ],
+  "observability": { "enabled": false }
+}

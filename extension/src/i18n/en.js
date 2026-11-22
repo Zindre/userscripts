@@ -15,7 +15,7 @@ STRINGS.en = {
   later: 'Read later', marks: 'Bookmarks', mark: 'Bookmark', unLater: 'Remove from Read later', unMark: 'Remove bookmark',
   myNews: 'My news', mixEmpty: 'My news gathers the news sites you visit most. Visit a few, and they turn up here.',
   mixLoading: (n, of) => `Reading the front pages … ${n} of ${of}`,
-  allRead: 'You have read everything here.', showAllRead: 'Show read articles', siteMenu: 'The site’s menu', allGenres: 'All genres', genre: 'Genre', byScore: 'Highest score first', dateFrom: 'From', dateTo: 'To', playAlbumIn: 'Play the album in %s', kasetNone: 'Not found', recordLabel: 'Label', released: 'Released',
+  games: 'Games', allRead: 'You have read everything here.', showAllRead: 'Show read articles', siteMenu: 'The site’s menu', allGenres: 'All genres', genre: 'Genre', byScore: 'Highest score first', dateFrom: 'From', dateTo: 'To', playAlbumIn: 'Play the album in %s', kasetNone: 'Not found', recordLabel: 'Label', released: 'Released',
   keys: 'Arrow keys choose · Enter opens · ← → previous and next while reading · L read later · B bookmark · Esc closes',
 
   // The toolbar popup, in the browser's language.
@@ -55,7 +55,9 @@ STRINGS.en = {
     privacyText: 'Your settings, saved articles and what you have read stay in this browser, and go to your other devices through your browser account or iCloud. Nothing is sent to us.',
     erase: 'Delete everything Web Detox has stored',
     eraseAsk: 'This deletes your settings, Read later, Bookmarks and reading history here, and on your other devices when they next sync. It can’t be undone.',
-    bigPics: 'Larger pictures in the list',
+    reportOpen: "Report a problem with this site", reportHint: "One tap sends the page’s address and what is wrong, nothing about you.", reportNote: "Anything to add? (optional)", reportMissing: "Articles are missing from the list", reportReader: "An article shows wrongly or lacks content", reportMedia: "Pictures or video are missing", reportBroken: "The page looks odd or doesn’t work", reportOther: "Something else", reportFailed: "Couldn’t send just now. Try again later.", privacyReport: "The one exception is when you report a problem with a site: then the page’s address, what was wrong, anything you wrote, and the version of Web Detox are sent. Nothing about who you are.", reportThanks: h => `Thanks! Sent for ${h}.`,
+    setupOpen: "Set up Web Detox with a few questions", setupLevel: "How do you want to see news front pages?", setupLevelHint: "For every news site where you haven’t chosen something else.", setupBigPics: "Larger pictures in the list?", setupGames: "The site’s games, like crosswords and sudoku, at the end of the list?", setupSwipe: "Should the article follow your finger when you swipe to the next one?", setupAlbum: "Where do you want to play albums from reviews?", setupAlbumHint: "Adds a ▶ button by each album review.", setupGeneric: "Should Web Detox also tidy news sites it doesn’t know yet?", yes: "Yes", no: "No", setupBack: "‹ Back", setupSkip: "Skip", setupDone: "Done. You can change all of this later here in the menu.", setupClose: "Close",
+    gamesRow: 'The site’s games at the end of the list', bigPics: 'Larger pictures in the list',
     gift: 'Support Web Detox',
     eraseYes: 'Delete everything', eraseNo: 'Cancel', erased: 'Everything is deleted.',
   },

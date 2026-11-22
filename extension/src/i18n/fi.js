@@ -14,7 +14,7 @@ STRINGS.fi = {
   later: 'Lue myöhemmin', marks: 'Kirjanmerkit', mark: 'Kirjanmerkki', unLater: 'Poista Lue myöhemmin -listalta', unMark: 'Poista kirjanmerkki',
   myNews: 'Omat uutiset', mixEmpty: 'Omat uutiset kokoaa yhteen uutissivustot, joilla käydään useimmin. Kun muutamalla on käyty, ne näkyvät tässä.',
   mixLoading: (n, of) => `Luetaan etusivuja … ${n}/${of}`,
-  allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut', siteMenu: 'Sivuston valikko', allGenres: 'Kaikki tyylilajit', genre: 'Tyylilaji', byScore: 'Paras arvosana ensin', dateFrom: 'Alkaen', dateTo: 'Asti', playAlbumIn: 'Soita albumi: %s', kasetNone: 'Ei löytynyt', recordLabel: 'Levy-yhtiö', released: 'Julkaistu',
+  games: 'Pelit', allRead: 'Kaikki on luettu.', showAllRead: 'Näytä luetut', siteMenu: 'Sivuston valikko', allGenres: 'Kaikki tyylilajit', genre: 'Tyylilaji', byScore: 'Paras arvosana ensin', dateFrom: 'Alkaen', dateTo: 'Asti', playAlbumIn: 'Soita albumi: %s', kasetNone: 'Ei löytynyt', recordLabel: 'Levy-yhtiö', released: 'Julkaistu',
   keys: 'Nuolinäppäimet valitsevat · Enter avaa · ← → edellinen ja seuraava lukiessa · L lue myöhemmin · B kirjanmerkki · Esc sulkee',
 
   // The toolbar popup, in the browser's language.
@@ -50,7 +50,9 @@ STRINGS.fi = {
     privacyText: 'Asetukset, tallennetut artikkelit ja lukuhistoria pysyvät tässä selaimessa ja siirtyvät muille laitteille selaintilin tai iCloudin kautta. Mitään ei lähetetä meille.',
     erase: 'Poista kaikki, mitä Web Detox on tallentanut',
     eraseAsk: 'Tämä poistaa asetukset, Lue myöhemmin -listan, Kirjanmerkit ja lukuhistorian täältä sekä muilta laitteilta, kun ne seuraavan kerran synkronoituvat. Tätä ei voi perua.',
-    bigPics: 'Suuremmat kuvat listassa',
+    reportOpen: "Ilmoita ongelmasta tällä sivustolla", reportHint: "Yksi napautus lähettää sivun osoitteen ja vian, ei mitään sinusta.", reportNote: "Muuta lisättävää? (valinnainen)", reportMissing: "Listasta puuttuu artikkeleita", reportReader: "Artikkeli näkyy väärin tai siitä puuttuu sisältöä", reportMedia: "Kuvia tai videoita puuttuu", reportBroken: "Sivu näyttää oudolta tai ei toimi", reportOther: "Jotain muuta", reportFailed: "Lähetys ei onnistunut nyt. Yritä myöhemmin uudelleen.", privacyReport: "Ainoa poikkeus on, kun ilmoitat sivuston ongelmasta: silloin lähetetään sivun osoite, vika, kirjoittamasi teksti ja Web Detoxin versio. Ei mitään siitä, kuka olet.", reportThanks: h => `Kiitos! Lähetetty: ${h}.`,
+    setupOpen: "Määritä Web Detox muutamalla kysymyksellä", setupLevel: "Miten haluat nähdä uutissivustojen etusivut?", setupLevelHint: "Koskee kaikkia uutissivustoja, joilla et ole valinnut muuta.", setupBigPics: "Isommat kuvat listassa?", setupGames: "Sivuston pelit, kuten ristikot ja sudoku, listan lopussa?", setupSwipe: "Seuraako artikkeli sormea, kun pyyhkäiset seuraavaan?", setupAlbum: "Missä haluat kuunnella arvosteluiden albumeja?", setupAlbumHint: "Lisää ▶-painikkeen jokaiseen albumiarvosteluun.", setupGeneric: "Siistiikö Web Detox myös uutissivustot, joita se ei vielä tunne?", yes: "Kyllä", no: "Ei", setupBack: "‹ Takaisin", setupSkip: "Ohita", setupDone: "Valmis. Voit muuttaa näitä myöhemmin täällä valikossa.", setupClose: "Sulje",
+    gamesRow: 'Sivuston pelit listan lopussa', bigPics: 'Suuremmat kuvat listassa',
     gift: 'Tue Web Detoxia',
     eraseYes: 'Poista kaikki', eraseNo: 'Peruuta', erased: 'Kaikki on poistettu.',
   },

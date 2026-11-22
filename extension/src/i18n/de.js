@@ -13,7 +13,7 @@ STRINGS.de = {
   later: 'Später lesen', marks: 'Lesezeichen', mark: 'Lesezeichen setzen', unLater: 'Aus „Später lesen“ entfernen', unMark: 'Lesezeichen entfernen',
   myNews: 'Meine Nachrichten', mixEmpty: 'Meine Nachrichten sammelt die Nachrichtenseiten, die du am häufigsten besuchst. Besuche ein paar, dann erscheinen sie hier.',
   mixLoading: (n, of) => `Die Titelseiten werden gelesen … ${n} von ${of}`,
-  allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen', siteMenu: 'Menü der Website', allGenres: 'Alle Genres', genre: 'Genre', byScore: 'Beste Wertung zuerst', dateFrom: 'Von', dateTo: 'Bis', playAlbumIn: 'Album in %s abspielen', kasetNone: 'Nicht gefunden', recordLabel: 'Label', released: 'Erschienen',
+  games: 'Spiele', allRead: 'Du hast hier alles gelesen.', showAllRead: 'Gelesene anzeigen', siteMenu: 'Menü der Website', allGenres: 'Alle Genres', genre: 'Genre', byScore: 'Beste Wertung zuerst', dateFrom: 'Von', dateTo: 'Bis', playAlbumIn: 'Album in %s abspielen', kasetNone: 'Nicht gefunden', recordLabel: 'Label', released: 'Erschienen',
   keys: 'Pfeiltasten wählen · Enter öffnet · ← → voriger und nächster beim Lesen · L später lesen · B Lesezeichen · Esc schließt',
 
   pop: {
@@ -47,7 +47,9 @@ STRINGS.de = {
     privacyText: 'Deine Einstellungen, gespeicherten Artikel und was du gelesen hast, bleiben in diesem Browser und gelangen über dein Browserkonto oder iCloud auf deine anderen Geräte. Nichts wird an uns gesendet.',
     erase: 'Alles löschen, was Web Detox gespeichert hat',
     eraseAsk: 'Dies löscht deine Einstellungen, „Später lesen“, „Lesezeichen“ und den Leseverlauf hier und auf deinen anderen Geräten, sobald sie das nächste Mal synchronisieren. Das lässt sich nicht rückgängig machen.',
-    bigPics: 'Größere Bilder in der Liste',
+    reportOpen: "Ein Problem mit dieser Website melden", reportHint: "Ein Tippen sendet die Adresse der Seite und was nicht stimmt, nichts über dich.", reportNote: "Noch etwas? (optional)", reportMissing: "In der Liste fehlen Artikel", reportReader: "Ein Artikel wird falsch angezeigt oder ist unvollständig", reportMedia: "Bilder oder Videos fehlen", reportBroken: "Die Seite sieht seltsam aus oder funktioniert nicht", reportOther: "Etwas anderes", reportFailed: "Konnte gerade nicht senden. Versuch es später noch einmal.", privacyReport: "Die einzige Ausnahme: Wenn du ein Problem mit einer Website meldest, werden die Adresse der Seite, was nicht stimmte, was du geschrieben hast, und die Version von Web Detox gesendet. Nichts darüber, wer du bist.", reportThanks: h => `Danke! Für ${h} gesendet.`,
+    setupOpen: "Web Detox mit ein paar Fragen einrichten", setupLevel: "Wie möchtest du die Startseiten von Nachrichtenseiten sehen?", setupLevelHint: "Gilt für jede Nachrichtenseite, auf der du nichts anderes gewählt hast.", setupBigPics: "Größere Bilder in der Liste?", setupGames: "Die Spiele der Website, etwa Kreuzworträtsel und Sudoku, am Ende der Liste?", setupSwipe: "Soll der Artikel deinem Finger folgen, wenn du zum nächsten wischst?", setupAlbum: "Wo möchtest du Alben aus Rezensionen abspielen?", setupAlbumHint: "Fügt bei jeder Albumrezension eine ▶-Taste hinzu.", setupGeneric: "Soll Web Detox auch Nachrichtenseiten aufräumen, die es noch nicht kennt?", yes: "Ja", no: "Nein", setupBack: "‹ Zurück", setupSkip: "Überspringen", setupDone: "Fertig. Du kannst all das später hier im Menü ändern.", setupClose: "Schließen",
+    gamesRow: 'Die Spiele der Website am Ende der Liste', bigPics: 'Größere Bilder in der Liste',
     gift: 'Web Detox unterstützen',
     eraseYes: 'Alles löschen', eraseNo: 'Abbrechen', erased: 'Alles ist gelöscht.',
   },

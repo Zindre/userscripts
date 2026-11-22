@@ -14,7 +14,7 @@ STRINGS.zh = {
   later: '稍后阅读', marks: '书签', mark: '书签', unLater: '从“稍后阅读”中移除', unMark: '移除书签',
   myNews: '我的新闻', mixEmpty: '我的新闻汇集最常访问的新闻网站。访问几个之后，它们就会显示在这里。',
   mixLoading: (n, of) => `正在读取首页… ${n}/${of}`,
-  allRead: '这里的内容已全部读完。', showAllRead: '显示已读', siteMenu: '网站菜单', allGenres: '所有类型', genre: '类型', byScore: '评分最高优先', dateFrom: '从', dateTo: '到', playAlbumIn: '在 %s 中播放专辑', kasetNone: '未找到', recordLabel: '厂牌', released: '发行',
+  games: '游戏', allRead: '这里的内容已全部读完。', showAllRead: '显示已读', siteMenu: '网站菜单', allGenres: '所有类型', genre: '类型', byScore: '评分最高优先', dateFrom: '从', dateTo: '到', playAlbumIn: '在 %s 中播放专辑', kasetNone: '未找到', recordLabel: '厂牌', released: '发行',
   keys: '方向键选择 · Enter 打开 · 阅读时 ← → 切换上一篇和下一篇 · L 稍后阅读 · B 书签 · Esc 关闭',
 
   // The toolbar popup, in the browser's language.
@@ -50,7 +50,9 @@ STRINGS.zh = {
     privacyText: '设置、保存的文章和阅读记录都保存在此浏览器中，并通过浏览器账户或 iCloud 同步到其他设备。不会向我们发送任何内容。',
     erase: '删除 Web Detox 存储的所有内容',
     eraseAsk: '这将删除此处的设置、“稍后阅读”、“书签”和阅读记录，其他设备也会在下次同步时删除。此操作无法撤销。',
-    bigPics: '列表中显示更大的图片',
+    reportOpen: "报告此网站的问题", reportHint: "轻点一下即可发送页面地址和问题，不含你的任何信息。", reportNote: "还有要补充的吗？（可选）", reportMissing: "列表中缺少文章", reportReader: "文章显示错误或内容缺失", reportMedia: "缺少图片或视频", reportBroken: "页面显示异常或无法使用", reportOther: "其他", reportFailed: "暂时无法发送，请稍后再试。", privacyReport: "唯一的例外是你报告网站问题时：会发送页面地址、问题、你写的内容以及 Web Detox 的版本，不含任何关于你身份的信息。", reportThanks: h => `谢谢！已发送 ${h} 的报告。`,
+    setupOpen: "通过几个问题设置 Web Detox", setupLevel: "你想如何查看新闻网站的首页？", setupLevelHint: "适用于你没有另作选择的所有新闻网站。", setupBigPics: "列表中使用更大的图片？", setupGames: "在列表末尾显示网站的游戏，如填字和数独？", setupSwipe: "滑动到下一篇时，文章是否跟随手指移动？", setupAlbum: "你想在哪里播放评论中的专辑？", setupAlbumHint: "在每篇专辑评论旁添加 ▶ 按钮。", setupGeneric: "Web Detox 是否也整理它还不认识的新闻网站？", yes: "是", no: "否", setupBack: "‹ 返回", setupSkip: "跳过", setupDone: "完成。之后可以在此菜单中更改这些设置。", setupClose: "关闭",
+    gamesRow: '在列表末尾显示网站的游戏', bigPics: '列表中显示更大的图片',
     gift: '支持 Web Detox',
     eraseYes: '全部删除', eraseNo: '取消', erased: '已全部删除。',
   },

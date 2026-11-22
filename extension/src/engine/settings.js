@@ -28,6 +28,7 @@ async function settingsAction(act, arg) {
   else if (act === 'defaultLevel') { defaultLevel = arg; await gm.set('level', arg); }
   else if (act === 'topics') { await gm.set('mutedTopics', arg.filter(id => TOPICS[id])); location.reload(); }
   else if (act === 'bigPics') { await gm.set('plainBigPics', !!arg); location.reload(); }
+  else if (act === 'games') { await gm.set('plainGames', !!arg); location.reload(); }
   else if (act === 'albumApp') { CFG.albumApp = ALBUM_APPS[arg] ? arg : ''; await gm.set('albumApp', CFG.albumApp); await gm.set('kasetLinks', false); location.reload(); }
   else if (act === 'swipeAnim') { CFG.swipeAnimation = !!arg; await gm.set('swipeAnimation', CFG.swipeAnimation); }
   else if (act === 'calmPart') {
@@ -40,8 +41,8 @@ async function settingsAction(act, arg) {
 
 async function settingsState() {
   const others = async list => ((await gm.get(list, [])) || []).filter(h => h !== host);
-  return { host, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
-    genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, bigPics: !!startup.plainBigPics, showOriginal, mutedTopics: [...muted],
+  return { host, page: plainReading || location.origin + location.pathname, off: hostOff, level, calm: calmSite?.name || (webCalm ? host : null), web: webSite, defaultLevel, onArticle: onArticlePage(), plain: !!plainHost, display: CFG.display,
+    genericSites: CFG.genericSites, swipeAnimation: CFG.swipeAnimation, albumApp: CFG.albumApp, bigPics: !!startup.plainBigPics, games: startup.plainGames !== false, showOriginal, mutedTopics: [...muted],
     calmParts: (webCalm ? WEB_PARTS.filter(p => !p.shop || shopPage()) : calmSite?.parts || []).filter(p => p.id).map(p => ({ id: p.id, label: p.label || p.id, show: !calmPartsOff.includes(p.id) })),
     fetchPausedUntil: fetchPausedUntil > Date.now() ? fetchPausedUntil : 0, topics: TOPIC_TREE, rewritten: calmSite ? calmCount : plainHost ? plainCount : rewritten.size,
     disabledHosts: await others('disabledHosts'), enabledHosts: await others('enabledHosts') };

@@ -14,7 +14,7 @@ STRINGS.da = {
   later: 'Læs senere', marks: 'Bogmærker', mark: 'Bogmærke', unLater: 'Fjern fra Læs senere', unMark: 'Fjern bogmærke',
   myNews: 'Mine nyheder', mixEmpty: 'Mine nyheder samler de nyhedssider, du besøger mest. Besøg et par stykker, så dukker de op her.',
   mixLoading: (n, of) => `Læser forsiderne … ${n} af ${of}`,
-  allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler', siteMenu: 'Webstedets menu', allGenres: 'Alle genrer', genre: 'Genre', byScore: 'Højeste karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Afspil albummet i %s', kasetNone: 'Ikke fundet', recordLabel: 'Pladeselskab', released: 'Udgivet',
+  games: 'Spil', allRead: 'Du har læst alt her.', showAllRead: 'Vis læste artikler', siteMenu: 'Webstedets menu', allGenres: 'Alle genrer', genre: 'Genre', byScore: 'Højeste karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Afspil albummet i %s', kasetNone: 'Ikke fundet', recordLabel: 'Pladeselskab', released: 'Udgivet',
   keys: 'Piletaster vælger · Enter åbner · ← → forrige og næste under læsning · L læs senere · B bogmærke · Esc lukker',
 
   // The toolbar popup, in the browser's language.
@@ -50,7 +50,9 @@ STRINGS.da = {
     privacyText: 'Dine indstillinger, gemte artikler og det, du har læst, bliver i denne browser og følger med til dine andre enheder via din browserkonto eller iCloud. Intet sendes til os.',
     erase: 'Slet alt, hvad Web Detox har gemt',
     eraseAsk: 'Dette sletter dine indstillinger, Læs senere, Bogmærker og læsehistorik her og på dine andre enheder, næste gang de synkroniserer. Det kan ikke fortrydes.',
-    bigPics: 'Større billeder i listen',
+    reportOpen: "Meld et problem med dette websted", reportHint: "Ét tryk sender sidens adresse og hvad der er galt, intet om dig.", reportNote: "Noget at tilføje? (valgfrit)", reportMissing: "Artikler mangler i listen", reportReader: "En artikel vises forkert eller mangler indhold", reportMedia: "Billeder eller video mangler", reportBroken: "Siden ser mærkelig ud eller virker ikke", reportOther: "Noget andet", reportFailed: "Kunne ikke sende lige nu. Prøv igen senere.", privacyReport: "Undtagelsen er, når du melder et problem med et websted: så sendes sidens adresse, hvad der var galt, det du skrev, og versionen af Web Detox. Intet om, hvem du er.", reportThanks: h => `Tak! Sendt for ${h}.`,
+    setupOpen: "Tilpas Web Detox med nogle få spørgsmål", setupLevel: "Hvordan vil du se nyhedssiders forsider?", setupLevelHint: "Gælder alle nyhedssider, hvor du ikke har valgt noget andet.", setupBigPics: "Større billeder i listen?", setupGames: "Webstedets spil, som krydsord og sudoku, nederst i listen?", setupSwipe: "Skal artiklen følge fingeren, når du swiper til den næste?", setupAlbum: "Hvor vil du afspille album fra anmeldelser?", setupAlbumHint: "Giver en ▶-knap ved hver albumanmeldelse.", setupGeneric: "Skal Web Detox også rydde op på nyhedssider, den ikke kender endnu?", yes: "Ja", no: "Nej", setupBack: "‹ Tilbage", setupSkip: "Spring over", setupDone: "Færdig. Du kan ændre alt dette senere her i menuen.", setupClose: "Luk",
+    gamesRow: 'Webstedets spil nederst i listen', bigPics: 'Større billeder i listen',
     gift: 'Støt Web Detox',
     eraseYes: 'Slet alt', eraseNo: 'Annuller', erased: 'Alt er slettet.',
   },

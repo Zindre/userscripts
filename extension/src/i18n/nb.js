@@ -13,7 +13,7 @@ STRINGS.nb = {
   later: 'Les senere', marks: 'Bokmerker', mark: 'Bokmerke', unLater: 'Fjern fra Les senere', unMark: 'Fjern bokmerke',
   myNews: 'Mine nyheter', mixEmpty: 'Mine nyheter samler nyhetsnettstedene du besøker mest. Besøk noen, så dukker de opp her.',
   mixLoading: (n, of) => `Leser forsidene … ${n} av ${of}`,
-  allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker', siteMenu: 'Nettstedets meny', allGenres: 'Alle sjangre', genre: 'Sjanger', byScore: 'Høyest karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Spill albumet i %s', kasetNone: 'Ikke funnet', recordLabel: 'Plateselskap', released: 'Utgitt',
+  games: 'Spill', allRead: 'Du har lest alt her.', showAllRead: 'Vis leste saker', siteMenu: 'Nettstedets meny', allGenres: 'Alle sjangre', genre: 'Sjanger', byScore: 'Høyest karakter først', dateFrom: 'Fra', dateTo: 'Til', playAlbumIn: 'Spill albumet i %s', kasetNone: 'Ikke funnet', recordLabel: 'Plateselskap', released: 'Utgitt',
   keys: 'Piltastene velger sak · Enter åpner · ← → forrige og neste i saken · L les senere · B bokmerke · Esc lukker',
 
   pop: {
@@ -49,7 +49,9 @@ STRINGS.nb = {
     privacyText: 'Innstillingene, de lagrede sakene og det du har lest, blir i denne nettleseren, og følger deg til de andre enhetene dine via nettleserkontoen eller iCloud. Ingenting sendes til oss.',
     erase: 'Slett alt Web Detox har lagret',
     eraseAsk: 'Dette sletter innstillingene, Les senere, Bokmerker og lesehistorikken her, og på de andre enhetene dine neste gang de synkroniserer. Det kan ikke angres.',
-    bigPics: 'Større bilder i listen',
+    reportOpen: "Meld fra om et problem med dette nettstedet", reportHint: "Ett trykk sender adressen til siden og hva som er galt, ikke noe om deg.", reportNote: "Noe mer å si? (valgfritt)", reportMissing: "Saker mangler i listen", reportReader: "En sak vises feil eller mangler innhold", reportMedia: "Bilder eller video mangler", reportBroken: "Siden ser rar ut eller virker ikke", reportOther: "Noe annet", reportFailed: "Fikk ikke sendt nå. Prøv igjen senere.", privacyReport: "Unntaket er når du melder fra om et problem med et nettsted: da sendes adressen til siden, hva som var galt, det du skrev, og versjonen av Web Detox. Ikke noe om hvem du er.", reportThanks: h => `Takk! Sendt for ${h}.`,
+    setupOpen: "Tilpass Web Detox med noen spørsmål", setupLevel: "Hvordan vil du se forsidene til nyhetsnettsteder?", setupLevelHint: "Gjelder alle nyhetsnettsteder der du ikke har valgt noe annet.", setupBigPics: "Større bilder i listen?", setupGames: "Nettstedets spill, som kryssord og sudoku, nederst i listen?", setupSwipe: "Skal saken følge fingeren når du sveiper til neste sak?", setupAlbum: "Hvor vil du spille album fra anmeldelser?", setupAlbumHint: "Gir en ▶-knapp ved hver albumanmeldelse.", setupGeneric: "Skal Web Detox også rydde på nyhetsnettsteder den ikke kjenner fra før?", yes: "Ja", no: "Nei", setupBack: "‹ Tilbake", setupSkip: "Hopp over", setupDone: "Ferdig. Du kan endre alt dette senere her i menyen.", setupClose: "Lukk",
+    gamesRow: 'Nettstedets spill nederst i listen', bigPics: 'Større bilder i listen',
     gift: 'Støtt Web Detox',
     eraseYes: 'Slett alt', eraseNo: 'Avbryt', erased: 'Alt er slettet.',
   },

@@ -13,7 +13,7 @@ STRINGS.fr = {
   later: 'À lire plus tard', marks: 'Signets', mark: 'Ajouter un signet', unLater: 'Retirer de « À lire plus tard »', unMark: 'Retirer le signet',
   myNews: 'Mes infos', mixEmpty: 'Mes infos rassemble les sites d’info que vous consultez le plus. Consultez-en quelques-uns, et ils apparaîtront ici.',
   mixLoading: (n, of) => `Lecture des pages d’accueil… ${n} sur ${of}`,
-  allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus', siteMenu: 'Menu du site', allGenres: 'Tous les genres', genre: 'Genre', byScore: 'Meilleure note d’abord', dateFrom: 'Du', dateTo: 'Au', playAlbumIn: 'Écouter l’album dans %s', kasetNone: 'Introuvable', recordLabel: 'Label', released: 'Sortie',
+  games: 'Jeux', allRead: 'Vous avez tout lu ici.', showAllRead: 'Afficher les articles lus', siteMenu: 'Menu du site', allGenres: 'Tous les genres', genre: 'Genre', byScore: 'Meilleure note d’abord', dateFrom: 'Du', dateTo: 'Au', playAlbumIn: 'Écouter l’album dans %s', kasetNone: 'Introuvable', recordLabel: 'Label', released: 'Sortie',
   keys: 'Les flèches choisissent · Enter ouvre · ← → précédent et suivant en lecture · L à lire plus tard · B signet · Esc ferme',
 
   pop: {
@@ -47,7 +47,9 @@ STRINGS.fr = {
     privacyText: 'Vos réglages, vos articles enregistrés et ce que vous avez lu restent dans ce navigateur et passent sur vos autres appareils via votre compte de navigateur ou iCloud. Rien ne nous est envoyé.',
     erase: 'Effacer tout ce que Web Detox a enregistré',
     eraseAsk: 'Cela efface vos réglages, « À lire plus tard », « Signets » et l’historique de lecture ici, ainsi que sur vos autres appareils lors de leur prochaine synchronisation. Cette action est irréversible.',
-    bigPics: 'Images plus grandes dans la liste',
+    reportOpen: "Signaler un problème avec ce site", reportHint: "Un toucher envoie l’adresse de la page et ce qui ne va pas, rien sur vous.", reportNote: "Autre chose à dire ? (facultatif)", reportMissing: "Des articles manquent dans la liste", reportReader: "Un article s’affiche mal ou est incomplet", reportMedia: "Des images ou vidéos manquent", reportBroken: "La page a l’air bizarre ou ne marche pas", reportOther: "Autre chose", reportFailed: "Envoi impossible pour le moment. Réessayez plus tard.", privacyReport: "La seule exception : quand vous signalez un problème avec un site, l’adresse de la page, ce qui n’allait pas, ce que vous avez écrit et la version de Web Detox sont envoyés. Rien sur qui vous êtes.", reportThanks: h => `Merci ! Envoyé pour ${h}.`,
+    setupOpen: "Configurer Web Detox en quelques questions", setupLevel: "Comment voulez-vous voir les unes des sites d’info ?", setupLevelHint: "Pour tous les sites d’info où vous n’avez rien choisi d’autre.", setupBigPics: "Des images plus grandes dans la liste ?", setupGames: "Les jeux du site, comme les mots croisés et le sudoku, en bas de la liste ?", setupSwipe: "L’article doit-il suivre votre doigt quand vous passez au suivant ?", setupAlbum: "Où voulez-vous écouter les albums des critiques ?", setupAlbumHint: "Ajoute un bouton ▶ à chaque critique d’album.", setupGeneric: "Web Detox doit-il aussi ranger les sites d’info qu’il ne connaît pas encore ?", yes: "Oui", no: "Non", setupBack: "‹ Retour", setupSkip: "Passer", setupDone: "Terminé. Vous pourrez tout changer plus tard ici, dans le menu.", setupClose: "Fermer",
+    gamesRow: 'Les jeux du site en bas de la liste', bigPics: 'Images plus grandes dans la liste',
     gift: 'Soutenir Web Detox',
     eraseYes: 'Tout effacer', eraseNo: 'Annuler', erased: 'Tout est effacé.',
   },

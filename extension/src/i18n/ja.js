@@ -14,7 +14,7 @@ STRINGS.ja = {
   later: 'あとで読む', marks: 'ブックマーク', mark: 'ブックマーク', unLater: '「あとで読む」から削除', unMark: 'ブックマークを削除',
   myNews: 'マイニュース', mixEmpty: 'マイニュースには、よく訪れるニュースサイトが集まります。いくつか訪れると、ここに表示されます。',
   mixLoading: (n, of) => `トップページを読み込み中… ${n}/${of}`,
-  allRead: 'すべて読みました。', showAllRead: '既読を表示', siteMenu: 'サイトのメニュー', allGenres: 'すべてのジャンル', genre: 'ジャンル', byScore: '評価の高い順', dateFrom: '開始', dateTo: '終了', playAlbumIn: '%s でアルバムを再生', kasetNone: '見つかりません', recordLabel: 'レーベル', released: 'リリース',
+  games: 'ゲーム', allRead: 'すべて読みました。', showAllRead: '既読を表示', siteMenu: 'サイトのメニュー', allGenres: 'すべてのジャンル', genre: 'ジャンル', byScore: '評価の高い順', dateFrom: '開始', dateTo: '終了', playAlbumIn: '%s でアルバムを再生', kasetNone: '見つかりません', recordLabel: 'レーベル', released: 'リリース',
   keys: '矢印キーで選択 · Enterで開く · 読んでいるときは← →で前後の記事 · Lであとで読む · Bでブックマーク · Escで閉じる',
 
   // The toolbar popup, in the browser's language.
@@ -50,7 +50,9 @@ STRINGS.ja = {
     privacyText: '設定、保存した記事、既読履歴はこのブラウザに保存され、ブラウザのアカウントまたはiCloudを通じてほかのデバイスに同期されます。私たちには何も送信されません。',
     erase: 'Web Detoxが保存したデータをすべて削除',
     eraseAsk: '設定、「あとで読む」、「ブックマーク」、既読履歴を、このブラウザと、次回の同期時にほかのデバイスからも削除します。元に戻すことはできません。',
-    bigPics: 'リストの画像を大きく',
+    reportOpen: "このサイトの問題を報告", reportHint: "1回タップするとページのアドレスと問題の内容を送ります。あなたについての情報は送りません。", reportNote: "ほかに伝えたいこと（任意）", reportMissing: "リストに記事が足りない", reportReader: "記事の表示がおかしい、または内容が欠けている", reportMedia: "画像や動画がない", reportBroken: "ページの見た目がおかしい、または動かない", reportOther: "その他", reportFailed: "今は送信できませんでした。あとでもう一度お試しください。", privacyReport: "唯一の例外はサイトの問題を報告したときで、ページのアドレス、問題の内容、書いた文章、Web Detox のバージョンが送られます。あなたが誰かについては何も送りません。", reportThanks: h => `ありがとうございます。${h} について送信しました。`,
+    setupOpen: "いくつかの質問で Web Detox を設定", setupLevel: "ニュースサイトのトップページをどう表示しますか？", setupLevelHint: "ほかの設定を選んでいないすべてのニュースサイトに適用されます。", setupBigPics: "リストの画像を大きくしますか？", setupGames: "クロスワードや数独などサイトのゲームをリストの最後に表示しますか？", setupSwipe: "次の記事へスワイプするとき、記事を指に追従させますか？", setupAlbum: "レビューのアルバムをどこで再生しますか？", setupAlbumHint: "アルバムレビューごとに ▶ ボタンを付けます。", setupGeneric: "まだ知らないニュースサイトも Web Detox で整理しますか？", yes: "はい", no: "いいえ", setupBack: "‹ 戻る", setupSkip: "スキップ", setupDone: "完了しました。これらはあとでこのメニューから変更できます。", setupClose: "閉じる",
+    gamesRow: 'リストの最後にサイトのゲーム', bigPics: 'リストの画像を大きく',
     gift: 'Web Detoxを支援',
     eraseYes: 'すべて削除', eraseNo: 'キャンセル', erased: 'すべて削除しました。',
   },

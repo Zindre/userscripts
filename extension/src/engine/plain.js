@@ -348,6 +348,36 @@ function isPaid(a) {
 const GAME_URL = /(?:^|[/_-])(?:hjernetrim|kryssord|minikryss|helgekryss|sudoku|k-doku|ordjakten|quiz|quizzes|horoskop|horoscopes?|crosswords?|wordle|puzzles?|raetsel|kreuzwortraetsel|korsord|krydsord|tankenott)(?:[/_.-]|$)/i;
 const GAME_TEASER = /^(?:hjernetrim|dagens (?:kryssord|quiz|sudoku|horoskop)|kryssord|sudoku|quiz|horoskop|horoscope|crossword|wordle|rätsel|kreuzworträtsel|korsord|krydsord|tankenøtt)\b/i;
 const isGame = (url, teaser) => CFG.plainSkipGames && (GAME_URL.test(new URL(url).pathname) || GAME_TEASER.test(teaser || ''));
+// The site's games, for a row of their own at the end of the list, opened on the site: BT's game box ("Kryssord",
+// "Minikryss", "Sudoku enkel" …) and menus that only the site's scripts draw (Sunnhordland's "Spel": /spill/sudoku …).
+// Horoscopes are left out. [{ href, text }], at most 12.
+const GAME_PATH = /\/(?:spill|spel|games|puzzles)(?:\/|$)/i;
+function gameLinks(root = document) {
+  const out = new Map(), texts = new Set();
+  const add = (href, text) => {
+    let u; try { u = new URL(href, location.href); } catch { return; }
+    text = norm(text).replace(/\s*[→›»]+$/, '');
+    const path = menuPath(u), low = text.toLowerCase();
+    if (!/^https?:$/.test(u.protocol) || registrable(u.hostname) !== registrable(host) || !path || out.has(path) || texts.has(low)) return;
+    if (text.length < 2 || text.length > 32 || /horosk|horoscop/i.test(path + ' ' + text) || !(GAME_URL.test(u.pathname) || GAME_PATH.test(u.pathname))) return;
+    out.set(path, { href: u.origin + u.pathname, text }); texts.add(low);
+  };
+  // The game boxes first, then the menus: BT's menu sends both "Kryssord" and "Sudoku" to the day's puzzle page.
+  const links = [...root.querySelectorAll('a[href]')].filter(a => !a.closest('footer, [role="contentinfo"]'));
+  const inMenu = a => !!a.closest('nav, header, [role="navigation"]');
+  for (const a of [...links.filter(a => !inMenu(a)), ...links.filter(inMenu)]) {
+    if (inMenu(a) && out.size >= 3) break;
+    const named = a.querySelector('h2, h3, h4, h5')?.textContent || a.getAttribute('aria-label')?.replace(/^til\s+/i, '') || a.textContent;
+    add(a.getAttribute('href'), named);
+  }
+  for (const s of root.querySelectorAll('script:not([src])')) {
+    const js = s.textContent; if (!/spill|spel|games/i.test(js)) continue;
+    for (const m of js.replace(/\\u002F/gi, '/').matchAll(/\{"?text"?:"([^"\\]{2,32})","?url"?:"(\/(?:spill|spel|games)\/[^"\\]*)"/g)) add(m[2], m[1]);
+  }
+  // The page of all games last (BT's "Alle spill →").
+  const all = g => /^(?:alle|all|alla)\b/i.test(g.text);
+  return [...out.values()].sort((a, b) => all(a) - all(b)).slice(0, 12);
+}
 
 // The teaser's own picture: the first real image in the link, or in its card when the card
 // holds just this teaser. Icons, badges and logos (narrower than 80px) and SVGs don't count.
@@ -714,6 +744,9 @@ const PLAIN_CSS = `
   .filters.editing nav{flex-wrap:wrap;overflow:visible;flex-basis:100%;order:2}
   .filters.editing .edit-secs{order:1;margin-left:auto;font-size:14px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--accent);color:#fff}
   .all-read{padding:48px 0;text-align:center;color:var(--muted)}
+  .games .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .games .row a{color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:15px}
+  .games .row a:hover{border-color:var(--accent);color:var(--accent)}
   .all-read p{margin:0 0 12px;font-size:18px;color:var(--fg)}
   .edit-hint,.mix-note{margin:6px 0 0;font-size:13px;color:var(--muted)}
   h2 a.site-link{color:inherit;text-decoration:none}
@@ -725,6 +758,8 @@ const PLAIN_CSS = `
 
 
 let plainHost = null, plainCount = 0;
+// The article open in plain view's reader, for a report about it from the menu (settings.js). '' when none.
+let plainReading = '';
 // A picture from the reader, over the whole page: first as large as fits, a tap enlarges it two and a half times around
 // the place tapped (scroll or drag to move), another tap brings it back. Close, Esc or Back takes it away.
 function zoomImage(im) {
@@ -947,7 +982,8 @@ function onlyList() {
 }
 async function articleView(withImages) {
   const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => s.textContent).join('');
-  if (!/article/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"(?:\w*Article|Review)"/.test(ld)) return false; // Pitchfork's reviews: a Review
+  // Pitchfork's reviews: a Review. BA's video pages: a VideoObject.
+  if (!/article|^video/i.test(document.querySelector('meta[property="og:type"]')?.getAttribute('content') || '') && !/"@type"\s*:\s*\[?\s*"(?:\w*Article|Review|VideoObject)"/.test(ld)) return false;
   const url = location.href.split('#')[0], h1 = document.querySelector('h1');
   let title = norm(h1?.textContent) || document.title;
   // A review headed by the artist, with the album as the heading under it (Headphone Commute): both, and the album for
@@ -1005,7 +1041,7 @@ async function plainView(withImages, mix) {
   const listUrl = location.href, listTitle = document.title;
   // The logo is the first thing here that needs the page laid out, so it pays for the first layout: on nytimes.com in
   // Safari 1.2 s. It counts towards the first pass, which decides whether the page is heavy (the end of plainView).
-  let logo = null, menu = null, items = [], toLinks = 0, giveBack = () => {}, known = new Map();
+  let logo = null, menu = null, games = [], items = [], toLinks = 0, giveBack = () => {}, known = new Map();
   if (!mix) {
     const t0 = performance.now();
     if (stopped) {
@@ -1019,6 +1055,7 @@ async function plainView(withImages, mix) {
     toLinks = performance.now() - t0; // laying out, reading and waiting for enough links: heavy if long (see the end)
     timeMark('links');
     try { menu = siteMenu(src); } catch {}
+    try { games = gameLinks(src); } catch {}
     giveBack = swallowSite();
     known = new Map(items.map(it => [it.key, it]));
     if (items.length < 8 && !stopped) await harvest(known, fresh => items.push(...fresh), () => items.length >= 8);
@@ -1445,7 +1482,7 @@ async function plainView(withImages, mix) {
   // replace: moving to the previous/next article, which shouldn't stack up in the history.
   function openArticle(it, replace, fromHistory) {
     const li = rows.get(it.key);
-    current = it; li?.classList.add('read');
+    current = it; plainReading = it.url || ''; li?.classList.add('read');
     if (isIn('later', it.key)) doneLater.add(it.key);
     if (!readKeys.has(it.key)) { readKeys.add(it.key); saveRead(it.key); }
     view.querySelector('.bar span').textContent = li?.querySelector('a.h').textContent || it.teaser;
@@ -1583,7 +1620,7 @@ async function plainView(withImages, mix) {
   function closeArticle(fromHistory) {
     if (!current) return;
     const key = current.key;
-    current = null; view.hidden = true; reader.replaceChildren(); sh.querySelector('.wrap').inert = false;
+    current = null; plainReading = ''; view.hidden = true; reader.replaceChildren(); sh.querySelector('.wrap').inert = false;
     document.title = listTitle;
     if (!fromHistory) history.back();
     let back = key;
@@ -1681,6 +1718,13 @@ async function plainView(withImages, mix) {
       box.className = 'all-read'; b.dataset.act = 'show-read'; b.textContent = T.showAllRead;
       box.append(Object.assign(document.createElement('p'), { textContent: T.allRead }), b);
       main.append(box);
+    }
+    // The site's games last, opened on the site: they don't work in the list.
+    if (games.length && startup.plainGames !== false) {
+      const sec = document.createElement('section'), h2 = document.createElement('h2'), row = document.createElement('div');
+      sec.className = 'games'; h2.textContent = T.games; row.className = 'row';
+      row.append(...games.map(g => Object.assign(document.createElement('a'), { href: onSiteUrl(g.href), textContent: g.text })));
+      sec.append(h2, row); main.append(sec);
     }
     plainCount = rows.size;
     updateFooter();

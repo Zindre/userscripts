@@ -240,14 +240,56 @@ function reviewedAlbum(doc) {
   } catch {}
   return found;
 }
+// A poll in the story (BT's "Er det greit å svare «kanskje»?": a picture, the question, twice for phone and computer, and
+// the answers as radio buttons): its picture, the question once, and the answers as a list, each with its share of the
+// votes when the page has the count (in the page's data, by the answers' text). Voting stays on the site.
+function readerPoll(box, html, url, withImages, blocks) {
+  const radios = box.querySelectorAll('label input[type="radio"]');
+  if (radios.length < 2 || radios.length > 12) return false;
+  const all = readerText(box);
+  if (all.length > 1500) return false;
+  const answers = [...radios].map(r => readerText(r.closest('label'))).filter(Boolean);
+  if (answers.length !== radios.length) return false;
+  const question = [...box.querySelectorAll('p, h2, h3, h4, legend')].filter(e => !e.closest('label')).map(readerText).filter(t => t.length > 10 && !answers.includes(t)).sort((a, b) => b.length - a.length)[0] || '';
+  const img = withImages && box.querySelector('img'), src = img ? readerImage(img, url) : '';
+  let shares = null;
+  try {
+    // The page's data (its scripts, which the reader reads as text only): the first answer, then the count after it.
+    const key = JSON.stringify(answers[0]);
+    for (let i = html.indexOf(key); i >= 0 && !shares; i = html.indexOf(key, i + 1)) {
+      const m = html.slice(i, i + 4000).match(/^[^<]*?"statistics":\{([^{}]*)\}/);
+      if (!m) continue;
+      const n = answers.map((_, k) => +(m[1].match(new RegExp(`"${k}":"?(\\d+)`))?.[1] || 0)), sum = n.reduce((a, b) => a + b, 0);
+      if (sum > 0) shares = n.map(x => Math.round(100 * x / sum));
+    }
+  } catch {}
+  if (src) blocks.push({ t: 'img', src, caption: '' });
+  if (question) blocks.push({ t: 'h', text: question });
+  blocks.push({ t: 'list', items: answers.map((a, k) => shares ? `${a} – ${shares[k]} %` : a), ordered: false });
+  return true;
+}
+function readerVideoPage(doc) {
+  for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
+    let all; try { all = [].concat(JSON.parse(s.textContent)['@graph'] || JSON.parse(s.textContent)); } catch { continue; }
+    for (const it of all) {
+      if (!it || String(it['@type']) !== 'VideoObject') continue;
+      const src = String(it.contentUrl || '');
+      if (!/^https:\/\/[^\s]+\.(?:mp4|m3u8)(?:\?|$)/i.test(src)) continue;
+      const thumb = [].concat(it.thumbnailUrl || [])[0], poster = typeof thumb === 'string' ? thumb : thumb?.url || '';
+      const r = (doc.querySelector('[aspectRatio], [aspectratio]')?.getAttribute('aspectratio') || '').match(/^(\d+):(\d+)$/);
+      return { src, poster: /^https:/.test(poster) ? poster : '', title: norm(it.name), caption: norm(it.description), ratio: r ? `${r[1]}/${r[2]}` : '', date: it.uploadDate || '' };
+    }
+  }
+  return null;
+}
 function readArticle(html, url, withImages) {
-  const doc = parseHtml(html), art = readArticleIn(doc, url, withImages);
+  const doc = parseHtml(html), art = readArticleIn(doc, url, withImages, html);
   if (art) try { art.rating = pageRating(html, doc); const rv = reviewedAlbum(doc); art.album = rv?.name || ''; art.albumPair = !!(rv?.album && rv.artist); art.facts = reviewFacts(html); } catch {}
   return art;
 }
 // → { blocks: [{ t: 'p'|'h'|'quote'|'list'|'img'|'video'|'embed', text, items, src, poster, caption }], date, byline, paid, partial } or null
 // partial: a paid article that arrived with only its start. short: an article with little text.
-function readArticleIn(doc, url, withImages) {
+function readArticleIn(doc, url, withImages, html = '') {
   let paid = false, date = '', byline = '', article = /article/i.test(doc.querySelector('meta[property="og:type"]')?.getAttribute('content') || '');
   for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
     try {
@@ -273,6 +315,12 @@ function readArticleIn(doc, url, withImages) {
   if (entry) article = true;
   if (feed) date = ''; // the feed's own date is when it was started
   const quizzes = [...doc.querySelectorAll('article iframe, main iframe')].filter(f => readerEmbed(f, url));
+  // A page that is one video and nothing else (BA's /v/ pages: a clip in Amedia's player, no text): the clip, from the
+  // page's own description of it (schema.org VideoObject, its file in contentUrl).
+  if (!root && !entry && !quizzes.length && withImages) {
+    const vo = readerVideoPage(doc);
+    if (vo) return { blocks: [{ t: 'video', ...vo }], date: date || vo.date, byline, paid, partial: false };
+  }
   if (!root && !entry && !quizzes.length) return paid ? { blocks: [], date, byline, paid, partial: true } : article ? { blocks: [], date, byline, paid, partial: false, short: true } : null;
   const blocks = [];
   const lead = norm(doc.querySelector('meta[property="og:description"]')?.getAttribute('content'));
@@ -326,7 +374,7 @@ function readArticleIn(doc, url, withImages) {
           const t = name && rest ? `${name}: ${rest}` : all;
           if (t.length >= 20) blocks.push({ t: 'p', text: t });
         }
-      } else walk(c);
+      } else if (!readerPoll(c, html, url, withImages, blocks)) walk(c);
     }
   };
   if (entry) walk(entry); else if (feed) feed.forEach(walk);

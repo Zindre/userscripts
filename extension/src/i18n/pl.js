@@ -17,7 +17,7 @@ STRINGS.pl = {
   later: 'Na później', marks: 'Zakładki', mark: 'Zakładka', unLater: 'Usuń z Na później', unMark: 'Usuń zakładkę',
   myNews: 'Moje wiadomości', mixEmpty: 'Moje wiadomości zbierają najczęściej odwiedzane serwisy informacyjne. Po odwiedzeniu kilku z nich pojawią się tutaj.',
   mixLoading: (n, of) => `Wczytywanie stron głównych … ${n} z ${of}`,
-  allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane', siteMenu: 'Menu witryny', allGenres: 'Wszystkie gatunki', genre: 'Gatunek', byScore: 'Najwyższa ocena najpierw', dateFrom: 'Od', dateTo: 'Do', playAlbumIn: 'Odtwórz album w %s', kasetNone: 'Nie znaleziono', recordLabel: 'Wytwórnia', released: 'Wydano',
+  games: 'Gry', allRead: 'Wszystko tutaj przeczytane.', showAllRead: 'Pokaż przeczytane', siteMenu: 'Menu witryny', allGenres: 'Wszystkie gatunki', genre: 'Gatunek', byScore: 'Najwyższa ocena najpierw', dateFrom: 'Od', dateTo: 'Do', playAlbumIn: 'Odtwórz album w %s', kasetNone: 'Nie znaleziono', recordLabel: 'Wytwórnia', released: 'Wydano',
   keys: 'Strzałki wybierają · Enter otwiera · ← → poprzedni i następny podczas czytania · L na później · B zakładka · Esc zamyka',
 
   pop: {
@@ -51,7 +51,9 @@ STRINGS.pl = {
     privacyText: 'Ustawienia, zapisane artykuły i historia czytania zostają w tej przeglądarce, a na inne urządzenia trafiają przez konto przeglądarki lub iCloud. Nic nie jest do nas wysyłane.',
     erase: 'Usuń wszystko, co zapisał Web Detox',
     eraseAsk: 'To usunie ustawienia, Na później, Zakładki i historię czytania tutaj oraz na innych urządzeniach przy najbliższej synchronizacji. Nie da się tego cofnąć.',
-    bigPics: 'Większe zdjęcia na liście',
+    reportOpen: "Zgłoś problem z tą witryną", reportHint: "Jedno dotknięcie wysyła adres strony i opis problemu, nic o tobie.", reportNote: "Coś jeszcze? (opcjonalnie)", reportMissing: "Na liście brakuje artykułów", reportReader: "Artykuł wyświetla się źle lub jest niepełny", reportMedia: "Brakuje zdjęć lub wideo", reportBroken: "Strona wygląda dziwnie lub nie działa", reportOther: "Coś innego", reportFailed: "Nie udało się teraz wysłać. Spróbuj później.", privacyReport: "Jedynym wyjątkiem jest zgłoszenie problemu z witryną: wtedy wysyłany jest adres strony, opis problemu, to, co napisano, oraz wersja Web Detox. Nic o tym, kim jesteś.", reportThanks: h => `Dziękujemy! Wysłano dla ${h}.`,
+    setupOpen: "Skonfiguruj Web Detox kilkoma pytaniami", setupLevel: "Jak chcesz widzieć strony główne serwisów informacyjnych?", setupLevelHint: "Dotyczy każdego serwisu, w którym nie wybrano niczego innego.", setupBigPics: "Większe zdjęcia na liście?", setupGames: "Gry serwisu, takie jak krzyżówki i sudoku, na końcu listy?", setupSwipe: "Czy artykuł ma podążać za palcem, gdy przesuwasz do następnego?", setupAlbum: "Gdzie chcesz odtwarzać albumy z recenzji?", setupAlbumHint: "Dodaje przycisk ▶ przy każdej recenzji albumu.", setupGeneric: "Czy Web Detox ma porządkować także serwisy, których jeszcze nie zna?", yes: "Tak", no: "Nie", setupBack: "‹ Wstecz", setupSkip: "Pomiń", setupDone: "Gotowe. Wszystko to możesz później zmienić tutaj, w menu.", setupClose: "Zamknij",
+    gamesRow: 'Gry witryny na końcu listy', bigPics: 'Większe zdjęcia na liście',
     gift: 'Wesprzyj Web Detox',
     eraseYes: 'Usuń wszystko', eraseNo: 'Anuluj', erased: 'Wszystko zostało usunięte.',
   },

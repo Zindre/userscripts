@@ -13,7 +13,7 @@ STRINGS.sv = {
   later: 'Läs senare', marks: 'Bokmärken', mark: 'Bokmärk', unLater: 'Ta bort från Läs senare', unMark: 'Ta bort bokmärke',
   myNews: 'Mina nyheter', mixEmpty: 'Mina nyheter samlar nyhetssajterna du besöker mest. Besök några, så dyker de upp här.',
   mixLoading: (n, of) => `Läser förstasidorna … ${n} av ${of}`,
-  allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar', siteMenu: 'Webbplatsens meny', allGenres: 'Alla genrer', genre: 'Genre', byScore: 'Högst betyg först', dateFrom: 'Från', dateTo: 'Till', playAlbumIn: 'Spela albumet i %s', kasetNone: 'Hittades inte', recordLabel: 'Skivbolag', released: 'Utgiven',
+  games: 'Spel', allRead: 'Du har läst allt här.', showAllRead: 'Visa lästa artiklar', siteMenu: 'Webbplatsens meny', allGenres: 'Alla genrer', genre: 'Genre', byScore: 'Högst betyg först', dateFrom: 'Från', dateTo: 'Till', playAlbumIn: 'Spela albumet i %s', kasetNone: 'Hittades inte', recordLabel: 'Skivbolag', released: 'Utgiven',
   keys: 'Piltangenterna väljer · Enter öppnar · ← → föregående och nästa vid läsning · L läs senare · B bokmärk · Esc stänger',
 
   pop: {
@@ -47,7 +47,9 @@ STRINGS.sv = {
     privacyText: 'Dina inställningar, sparade artiklar och det du har läst stannar i den här webbläsaren och följer med till dina andra enheter via ditt webbläsarkonto eller iCloud. Inget skickas till oss.',
     erase: 'Radera allt som Web Detox har sparat',
     eraseAsk: 'Det här raderar dina inställningar, Läs senare, Bokmärken och läshistorik här och på dina andra enheter nästa gång de synkroniseras. Det går inte att ångra.',
-    bigPics: 'Större bilder i listan',
+    reportOpen: "Rapportera ett problem med den här webbplatsen", reportHint: "Ett tryck skickar sidans adress och vad som är fel, inget om dig.", reportNote: "Något mer att säga? (valfritt)", reportMissing: "Artiklar saknas i listan", reportReader: "En artikel visas fel eller saknar innehåll", reportMedia: "Bilder eller video saknas", reportBroken: "Sidan ser konstig ut eller fungerar inte", reportOther: "Något annat", reportFailed: "Kunde inte skicka nu. Försök igen senare.", privacyReport: "Undantaget är när du rapporterar ett problem med en webbplats: då skickas sidans adress, vad som var fel, det du skrev och versionen av Web Detox. Inget om vem du är.", reportThanks: h => `Tack! Skickat för ${h}.`,
+    setupOpen: "Anpassa Web Detox med några frågor", setupLevel: "Hur vill du se nyhetssajternas förstasidor?", setupLevelHint: "Gäller alla nyhetssajter där du inte har valt något annat.", setupBigPics: "Större bilder i listan?", setupGames: "Webbplatsens spel, som korsord och sudoku, längst ned i listan?", setupSwipe: "Ska artikeln följa fingret när du sveper till nästa?", setupAlbum: "Var vill du spela album från recensioner?", setupAlbumHint: "Ger en ▶-knapp vid varje albumrecension.", setupGeneric: "Ska Web Detox också städa nyhetssajter den inte känner till än?", yes: "Ja", no: "Nej", setupBack: "‹ Tillbaka", setupSkip: "Hoppa över", setupDone: "Klart. Du kan ändra allt detta senare här i menyn.", setupClose: "Stäng",
+    gamesRow: 'Webbplatsens spel längst ned i listan', bigPics: 'Större bilder i listan',
     gift: 'Stöd Web Detox',
     eraseYes: 'Radera allt', eraseNo: 'Avbryt', erased: 'Allt är raderat.',
   },
