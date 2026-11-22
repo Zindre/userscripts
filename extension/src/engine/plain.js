@@ -827,6 +827,13 @@ function readerVideoBox(b) {
     // NRK: the clip's stream, looked up now (a few lines from NRK, not the video), so a tap starts it in Safari's own
     // player while the tap still counts as yours. Without it, or where the browser can't play the stream, NRK's player.
     let stream = '';
+    // NRK's new pages give no picture for the clip: NRK's own, from the clip's details.
+    if (b.nrk && !b.poster)
+      fetch(`https://psapi.nrk.no/playback/metadata/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
+        const im = (j?.preplay?.poster?.images || []).filter(x => /^https:\/\//.test(x.url || '') && x.pixelWidth <= 1280).sort((x, y) => y.pixelWidth - x.pixelWidth)[0];
+        if (!im || b.poster) return;
+        b.poster = im.url; play.style.backgroundImage = `url("${im.url.replace(/["\\]/g, encodeURIComponent)}")`;
+      }).catch(() => {});
     if (b.nrk && el('video').canPlayType('application/vnd.apple.mpegurl'))
       fetch(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
         const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));

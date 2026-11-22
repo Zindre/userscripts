@@ -2243,11 +2243,25 @@
     }
     const ALSO = /^(?:les også|les mer|se også|se video|hør også|mer om|read more|see also|related|lesen sie auch|mehr zum thema|auch interessant|les hele saken|kjøp abonnement|bli abonnent|allerede abonnent|subscribe to)\b/i;
 
+    // A srcset's candidates, [{ u, w }], read the way the browser reads it: an address runs to the first space, so it may hold
+    // commas itself (NRK's new pages: "…?im=Crop,rect=((…));Resize,width=640 640w"), and a comma only ends a candidate after it.
+    function readerSrcset(set) {
+      const out = [];
+      for (let i = 0; i < set.length;) {
+        while (i < set.length && /[\s,]/.test(set[i])) i++;
+        let j = i; while (j < set.length && !/\s/.test(set[j])) j++;
+        let u = set.slice(i, j), d = '';
+        if (/,$/.test(u)) { u = u.replace(/,+$/, ''); i = j; }
+        else { let k = set.indexOf(',', j); if (k < 0) k = set.length; d = set.slice(j, k); i = k + 1; }
+        if (u) out.push({ u, w: parseFloat(d) || 0 });
+      }
+      return out;
+    }
     function readerImage(img, base) {
       const src = img.getAttribute('src'), lazy = img.dataset.src || img.dataset.lazySrc || img.dataset.original;
       const set = img.getAttribute('srcset') || img.dataset.srcset || img.closest('picture')?.querySelector('source[srcset]')?.getAttribute('srcset') || '';
       // The largest candidate in a srcset ("a.jpg 320w, b.jpg 1024w"), else src.
-      const best = set.split(',').map(s => s.trim().split(/\s+/)).filter(p => p[0]).sort((a, b) => (parseFloat(b[1]) || 0) - (parseFloat(a[1]) || 0))[0]?.[0];
+      const best = readerSrcset(set).sort((a, b) => b.w - a.w)[0]?.u;
       for (const u of [best, lazy, src && !src.startsWith('data:') ? src : '']) {
         if (!u || /\.svg(?:[?#]|$)|placeholder|spacer|blank\.|1x1/i.test(u)) continue;
         const w = +img.getAttribute('width') || 0;
@@ -2286,7 +2300,7 @@
       [/^https:\/\/static\.nrk\.no\/ludo\/[^#]*#id=([\w.-]+)/, id => ({ embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${id}` })],
       [/^https:\/\/(?:streamable\.com\/[eo]|cdn\.jwplayer\.com\/players|players\.brightcove\.net|embed\.ted\.com\/talks|www\.svtplay\.se\/video|play\.tv2\.no\/embed)\//, (m, src) => ({ embed: src })],
     ];
-    const PLAYER_BOX = 'figure[data-video-source], lite-youtube, iframe, [data-videoid], [data-video-id], astro-island[props*="streamUrls"]';
+    const PLAYER_BOX = 'figure[data-video-source], astro-island[component-url*="NrknoPlayer"], nrkno-player[src^="nrk:"], lite-youtube, iframe, [data-videoid], [data-video-id], astro-island[props*="streamUrls"]';
     const LEAD_VIDEO = PLAYER_BOX + ', video';
     // The first player inside a box (a figure around Dinside's JW Player).
     function readerPlayerIn(box, base) {
@@ -2311,6 +2325,21 @@
         // Its data-aspect-ratio is the clip's on a phone; NRK's player shows every clip 16:9. nrk: the clip's id, for its
         // stream, which Safari plays itself (NRK's player in a frame shows only the picture on the iPhone).
         return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${el.getAttribute('data-video-id')}`, nrk: el.getAttribute('data-video-id'), poster: poster(), title: norm(el.getAttribute('data-title')) };
+      // NRK's new pages (www.nrk.no/artikkel/…): the player is built in the browser from Astro's props (the clip's id, title and
+      // caption, no picture: the reader looks that up with the stream), and is <nrkno-player src="nrk:{id}"> once built.
+      if (el.tagName === 'ASTRO-ISLAND' && /NrknoPlayer/.test(el.getAttribute('component-url') || '')) {
+        let p = {}; try { p = JSON.parse(el.getAttribute('props') || '{}'); } catch {}
+        const val = x => Array.isArray(x) ? x[1] : undefined, id = val(p.id);
+        if (typeof id !== 'string' || !/^[\w-]{8,}$/.test(id)) return null;
+        const head = val(p.posterData), str = x => typeof x === 'string' ? norm(x) : '';
+        return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${id}`, nrk: id, poster: '', title: str(head && val(head.heading)), caption: str(val(p.caption)) };
+      }
+      const nrk = el.tagName === 'NRKNO-PLAYER' && (el.getAttribute('src') || '').match(/^nrk:([\w-]{8,})$/)?.[1];
+      if (nrk) {
+        const ps = el.querySelector('nrkno-player-poster');
+        const still = (ps && readerSrcset(ps.getAttribute('srcset') || '').filter(c => c.w <= 1280 && /^https:/.test(c.u)).sort((a, b) => b.w - a.w)[0]?.u) || poster();
+        return { embed: `https://static.nrk.no/ludo/latest/video-embed.html#id=${nrk}`, nrk, poster: still, title: norm(ps?.getAttribute('heading') || '') };
+      }
       if (el.tagName === 'LITE-YOUTUBE' && /^[\w-]{11}$/.test(el.getAttribute('videoid') || ''))
         return { ...PLAYER_FRAME[0][1](el.getAttribute('videoid')), title: norm(el.getAttribute('playlabel') || el.getAttribute('title')) };
       for (const a of el.attributes) {
@@ -2443,7 +2472,7 @@
           }
           if (c.matches(skip)) continue;
           const pv = withImages && (readerPlayer(c, url) || (tag === 'FIGURE' ? readerPlayerIn(c, url) : null));
-          if (pv) { addVideo({ ...pv, caption: (f => f ? readerText(f) : '')(c.querySelector('figcaption')) }); continue; }
+          if (pv) { addVideo({ ...pv, caption: (f => f ? readerText(f) : '')(c.querySelector('figcaption')) || pv.caption || '' }); continue; }
           // A link around a picture and text is a card for another story (BT's live entries end with one).
           if (tag === 'A' && c.querySelector('img') && !/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(c.getAttribute('href') || '')) continue;
           if (tag === 'P') {
@@ -2490,11 +2519,24 @@
         // The story's video above its text, where a lead picture would be: the first in the article before the text, outside
         // anything left out (Dinside, NRK's clips at the top).
         if (withImages && root) {
+          let lead = false;
           const box = root.parentElement?.closest('article, main') || doc.querySelector('article, main');
           for (const c of box?.querySelectorAll(LEAD_VIDEO) || []) {
             if (c.contains(root) || !(root.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_PRECEDING) || c.closest(skip)) continue;
             const v = c.tagName === 'IFRAME' ? readerPlayerFrame(c, url) : readerPlayer(c, url) || (c.tagName === 'VIDEO' ? readerVideo(c, url) : null);
-            if (v && !blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) { blocks.unshift({ t: 'video', ...v }); break; }
+            if (v && !blocks.some(b => b.t === 'video' && (b.src || b.embed) === (v.src || v.embed))) { blocks.unshift({ t: 'video', ...v }); lead = true; break; }
+          }
+          // Else its picture there, in a figure of the article's own (NRK's new pages put it in the header, apart from the text).
+          const art = root.parentElement?.closest('article');
+          for (const img of lead || !art ? [] : art.querySelectorAll('figure img')) {
+            if (!(root.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_PRECEDING) || img.closest(skip) || img.closest('a[href]')) continue;
+            const src = readerImage(img, url);
+            if (!src) continue;
+            if (!blocks.some(b => b.t === 'img' && b.src === src)) {
+              const cap = img.closest('figure').querySelector('figcaption');
+              blocks.unshift({ t: 'img', src, caption: cap ? readerText(cap) : '' });
+            }
+            break;
           }
         }
       }
@@ -3847,6 +3889,13 @@
         // NRK: the clip's stream, looked up now (a few lines from NRK, not the video), so a tap starts it in Safari's own
         // player while the tap still counts as yours. Without it, or where the browser can't play the stream, NRK's player.
         let stream = '';
+        // NRK's new pages give no picture for the clip: NRK's own, from the clip's details.
+        if (b.nrk && !b.poster)
+          fetch(`https://psapi.nrk.no/playback/metadata/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
+            const im = (j?.preplay?.poster?.images || []).filter(x => /^https:\/\//.test(x.url || '') && x.pixelWidth <= 1280).sort((x, y) => y.pixelWidth - x.pixelWidth)[0];
+            if (!im || b.poster) return;
+            b.poster = im.url; play.style.backgroundImage = `url("${im.url.replace(/["\\]/g, encodeURIComponent)}")`;
+          }).catch(() => {});
         if (b.nrk && el('video').canPlayType('application/vnd.apple.mpegurl'))
           fetch(`https://psapi.nrk.no/playback/manifest/clip/${encodeURIComponent(b.nrk)}`).then(r => r.ok ? r.json() : null).then(j => {
             const a = j?.playability === 'playable' && (j.playable?.assets || []).find(x => x.format === 'HLS' && !x.encrypted && /^https:\/\//.test(x.url || ''));
