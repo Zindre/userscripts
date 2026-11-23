@@ -5,12 +5,14 @@
 // @description  Replaces clickbait teaser headlines with the article's own headline and lead, plus local cleanup rules. No API keys, no tracking.
 // @author       Sindre Sørensen
 // @license      MIT
-// @homepageURL  https://github.com/Zindre/userscripts
-// @supportURL   https://github.com/Zindre/userscripts/issues
-// @updateURL    https://raw.githubusercontent.com/Zindre/userscripts/main/declickbait.user.js
-// @downloadURL  https://raw.githubusercontent.com/Zindre/userscripts/main/declickbait.user.js
+// @homepageURL  https://github.com/Zindre/web-detox
+// @supportURL   https://github.com/Zindre/web-detox/issues
+// @updateURL    https://raw.githubusercontent.com/Zindre/web-detox/main/declickbait.user.js
+// @downloadURL  https://raw.githubusercontent.com/Zindre/web-detox/main/declickbait.user.js
 // @mobile       true
 // @match        *://*/*
+// @exclude      *://tripletex.no/*
+// @exclude      *://*.tripletex.no/*
 // @noframes
 // @run-at       document-idle
 // @grant        GM.xmlHttpRequest
