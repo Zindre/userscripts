@@ -4,7 +4,7 @@ Browser userscripts by Sindre Sørensen. They run in [Userscripts](https://githu
 
 | Script | What it does |
 |---|---|
-| [declickbait.user.js](declickbait.user.js) | Replaces clickbait teaser headlines on news front pages with the article's own headline and lead. Norwegian, Swedish, Danish, German, UK and US sites are covered explicitly; other sites use a generic heuristic. Details in [declickbait.md](declickbait.md). |
+| [declickbait.user.js](declickbait.user.js) | Replaces clickbait teaser headlines on news front pages with the article's own headline and lead. Norwegian, Swedish, Danish, German, UK and US sites are covered explicitly; other sites use a generic heuristic. Details in [declickbait.md](declickbait.md). It is built from the engine of the Web Detox browser extension, which is developed in a separate repository; this is the published copy. |
 | [readable-fonts.user.js](readable-fonts.user.js) | Replaces body text fonts with Atkinson Hyperlegible Next on every site. Code stays monospace. |
 | [bandcamp-volume.user.js](bandcamp-volume.user.js) | Adds a volume slider and seek bar to Bandcamp, with the volume remembered per site. |
 | [google-yt-thumbs.user.js](google-yt-thumbs.user.js) | Sends clicks on YouTube thumbnails in Google results straight to the YouTube watch page instead of Google's inline player. |

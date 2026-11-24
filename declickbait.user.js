@@ -11,6 +11,8 @@
 // @downloadURL  https://raw.githubusercontent.com/Zindre/userscripts/main/declickbait.user.js
 // @mobile       true
 // @match        *://*/*
+// @exclude      *://tripletex.no/*
+// @exclude      *://*.tripletex.no/*
 // @noframes
 // @run-at       document-idle
 // @grant        GM.xmlHttpRequest

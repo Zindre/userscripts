@@ -1,9 +1,0 @@
-Music reviews: a ▶ button by each album review opens the album in your music app, in the list and on the review itself: choose YouTube Music, Apple Music or Spotify under "Play albums in" in the Web Detox menu. On the iPhone it opens in the app when you have it installed. It works on music review sites in general: the Guardian, NME, musicOMH, Clash, Kerrang, The Line of Best Fit, laut.de, Plattentests, musikknyheter.no and many more. More music magazines now open in the plain list. On Pitchfork the reviews also show scores, genres and dates, and you can sort by score and go back to older pages.
-
-Pictures: larger pictures in the list (a switch in the menu), whole pictures without cut-off heads, and a tap on a picture zooms it. Picture series show as a series in the reader.
-
-Calm on the rest of the web: on shops and other sites that are not news, Web Detox removes buying pressure (countdowns, "only 2 left", "23 people are looking"), sponsored rows, and pop-ups that ask for your e-mail or notifications by themselves. Each part can be switched back on in the menu. Login, cart and checkout are never touched.
-
-Also new: the byline names the site an article is from. When you have read everything, the list says so. A site's list shows only the articles saved from that site; My news shows them all. Better with screen readers: the reader is a named dialog, and the list behind it is out of the way.
-
-Fixed: bt.no articles that showed only the headline and the lead in the reader. Safari is quicker on large front pages.
